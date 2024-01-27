@@ -22,5 +22,19 @@ namespace DedicatedServer.Utils
             set { InvisibleBehaviorLink.InvisibleOverwrite = value; }
         }
 
+        /// <summary><inheritdoc cref = "InvisibleBehaviorLink.SetInvisibleDisplayOnChanges"/></summary>
+        /// <returns><inheritdoc cref = "InvisibleBehaviorLink.SetInvisibleDisplayOnChanges"/></returns>
+        public static new bool SetInvisibleDisplayOnChanges()
+        {
+            return InvisibleBehaviorLink.SetInvisibleDisplayOnChanges();
+        }
+
+        /// <summary><inheritdoc cref = "InvisibleBehaviorLink.SetVisibleDisplayOnChanges"/></summary>
+        /// <returns><inheritdoc cref = "InvisibleBehaviorLink.SetVisibleDisplayOnChanges"/></returns>
+        public static new bool SetVisibleDisplayOnChanges()
+        {
+            return InvisibleBehaviorLink.SetVisibleDisplayOnChanges();
+        }
+
     }
 }

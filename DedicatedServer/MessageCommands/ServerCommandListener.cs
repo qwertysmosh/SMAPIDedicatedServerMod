@@ -131,7 +131,7 @@ namespace DedicatedServer.MessageCommands
 
                 case "invisible": // /message ServerBot Invisible
                     Invisible.InvisibleOverwrite = !Invisible.InvisibleOverwrite;
-                    chatBox.textBoxEnter($"The host is invisible {Invisible.InvisibleOverwrite}");
+                    chatBox.textBoxEnter($"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
                     break;
 
                 case "sleep": // /message ServerBot Sleep

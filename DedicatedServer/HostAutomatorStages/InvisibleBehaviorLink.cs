@@ -30,9 +30,8 @@ namespace DedicatedServer.HostAutomatorStages
             switch (InvisibleOverwrite)
             {
                 case true:
-                    if (Game1.displayFarmer)
+                    if (SetInvisibleDisplayOnChanges())
                     {
-                        Game1.displayFarmer = false;
                         state.SetWaitTicks(60);
                     }
                     else
@@ -42,15 +41,8 @@ namespace DedicatedServer.HostAutomatorStages
                     break;
 
                 case false:
-                    if (false == Game1.displayFarmer)
+                    if (SetVisibleDisplayOnChanges())
                     {
-                        Game1.displayFarmer = true;
-                        // Refresh to make bot back to visible
-                        Game1.player.warpFarmer( new Warp( 
-                            Game1.player.getTileX(), Game1.player.getTileY(), 
-                            Game1.player.currentLocation.Name, 
-                            Game1.player.getTileX(), Game1.player.getTileY(),
-                            false, false));
                         state.SetWaitTicks(60);
                     }
                     else
@@ -60,5 +52,50 @@ namespace DedicatedServer.HostAutomatorStages
                     break;
             }
         }
+
+        /// <summary>
+        ///         Makes the host invisible
+        /// </summary>
+        /// <returns>
+        ///         true : Visibility has been changed.
+        /// <br/>   false: Visibility has not been changed.</returns>
+        protected static bool SetInvisibleDisplayOnChanges()
+        {
+            bool changed = false;
+
+            if (Game1.displayFarmer)
+            {
+                Game1.displayFarmer = false;
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        /// <summary>
+        ///         Makes the host visible
+        /// </summary>
+        /// <returns>
+        ///         true : Visibility has been changed.
+        /// <br/>   false: Visibility has not been changed.</returns>
+        protected static bool SetVisibleDisplayOnChanges()
+        {
+            bool changed = false;
+
+            if (false == Game1.displayFarmer)
+            {
+                Game1.displayFarmer = true;
+                // Refresh to make bot back to visible
+                Game1.player.warpFarmer(new Warp(
+                    Game1.player.getTileX(), Game1.player.getTileY(),
+                    Game1.player.currentLocation.Name,
+                    Game1.player.getTileX(), Game1.player.getTileY(),
+                    false, false));
+                changed = true;
+            }
+
+            return changed;
+        }
+
     }
 }

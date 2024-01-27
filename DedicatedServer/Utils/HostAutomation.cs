@@ -48,6 +48,8 @@ namespace DedicatedServer.Utils
             PreventPause = true;
             Invincible.InvincibilityOverwrite = false;
             Sleeping.ShouldSleepOverwrite = false;
+            Invisible.InvisibleOverwrite = false;
+            Invisible.SetVisibleDisplayOnChanges();
         }
 
         /// <summary>
@@ -58,6 +60,7 @@ namespace DedicatedServer.Utils
             EnableHostAutomation = true;
             PreventPause = false;
             Invincible.InvincibilityOverwrite = null;
+            Invisible.InvisibleOverwrite = true;
         }
 
         /// <summary>
