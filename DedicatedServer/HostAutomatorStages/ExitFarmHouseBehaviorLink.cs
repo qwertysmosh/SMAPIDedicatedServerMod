@@ -18,6 +18,8 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static Farm farmLocation = Game1.getLocationFromName("Farm") as Farm;
 
+        private static Point farmEnryLocation = farmLocation.GetMainFarmHouseEntry();
+
         private static FarmHouse farmHouseLocation = Game1.getLocationFromName("FarmHouse") as FarmHouse;
 
         private static Point farmHouseEnryLocation = farmHouseLocation.getEntryLocation();
@@ -25,12 +27,20 @@ namespace DedicatedServer.HostAutomatorStages
         /// <summary>
         ///         Warppoint on the farm
         /// <br/>
-        /// <br/>   Warping to 64, 10 warps just behind the farmhouse.
-        /// <br/>   It "hides" the bot, but still allows him to perform
-        /// <br/>   actions like talking to npcs.
+        /// <br/>   As the host is invisible and cannot be interacted with, the position
+        /// <br/>   does not matter. A visible position simply allows you to interact with
+        /// <br/>   the host when it has been made visible again with the `Invisible` command.
+        /// <br/>   +2 places the host on the veranda on the right
+        /// <br/>
+        /// <br/>   Warping to 64, 10 warps just behind the farmhouse. It "hides" the bot,
+        /// <br/>   but still allows him to perform actions like talking to npcs.
         /// <br/>   64, 15 coords are "magic numbers" pulled from Game1.cs, line 11282, warpFarmer()
         /// </summary>
-        private static Warp farmWarp = new Warp(64, 15, farmLocation.NameOrUniqueName, 64, 10, false, false);
+        private static Warp farmWarp = new Warp(
+            farmEnryLocation.X + 2, farmEnryLocation.Y,
+            farmLocation.NameOrUniqueName,
+            farmEnryLocation.X + 2, farmEnryLocation.Y,
+            false, false);
 
         /// <summary>
         ///         Warppoint into the farmhouse
