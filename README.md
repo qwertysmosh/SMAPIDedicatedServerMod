@@ -45,6 +45,8 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
 - `TakeOver`: The host player returns control to the host, all host functions are switched on. Cancels the `LetMePlay` command
 - `SafeInviteCode`: A file `invite_code.txt` with the invitation code is created in this mods folder. If there is no invitation code, an empty string is saved.
 - `InviteCode`: The invitation code is printed.
+- `Invisible`: (Toggle command) \
+  Toggle the visibility of the farm host.
 - `Sleep`: (Toggle command) \
   When it is sent, the host goes to bed. When all players leave the game or go to bed, the next day begins. On a second send, the host will get up and the mod's normal behavior will be restored.
 - `ResetDay`: Kicks all players and restarts the day.

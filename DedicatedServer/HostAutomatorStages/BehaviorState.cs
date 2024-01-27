@@ -105,6 +105,10 @@ namespace DedicatedServer.HostAutomatorStages
         {
             exitedFarmhouse = true;
         }
+        public void EnteredFarmhouse()
+        {
+            exitedFarmhouse = false;
+        }
 
         public bool HasBetweenTransitionSleepWaitTicks()
         {
