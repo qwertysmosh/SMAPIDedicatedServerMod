@@ -70,10 +70,15 @@ namespace DedicatedServer.MessageCommands
                         MultiplayerOptions.EnableServer = false;
                         break;
 
+                    case "farm":
+                        var farm = Game1.getLocationFromName("farm") as Farm;
+                        var mainFarmHouseEntry = farm.GetMainFarmHouseEntry();
+                        Game1.player.warpFarmer(new Warp(mainFarmHouseEntry.X, mainFarmHouseEntry.Y, farm.NameOrUniqueName, mainFarmHouseEntry.X, mainFarmHouseEntry.Y, false, false));
+                        break;
+
                     case "mine":
                         var mine = Game1.getLocationFromName("Mine") as Mine;
-                        var warp = new Warp(18, 13, mine.NameOrUniqueName, 18, 13, false);
-                        Game1.player.warpFarmer(warp);
+                        Game1.player.warpFarmer(new Warp(18, 13, mine.NameOrUniqueName, 18, 13, false));
                         break;
 
                     case "location":
@@ -122,6 +127,11 @@ namespace DedicatedServer.MessageCommands
 
                 case "invitecode": // /message ServerBot InviteCode
                     chatBox.textBoxEnter($"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green) );
+                    break;
+
+                case "invisible": // /message ServerBot Invisible
+                    Invisible.InvisibleOverwrite = !Invisible.InvisibleOverwrite;
+                    chatBox.textBoxEnter($"The host is invisible {Invisible.InvisibleOverwrite}");
                     break;
 
                 case "sleep": // /message ServerBot Sleep
