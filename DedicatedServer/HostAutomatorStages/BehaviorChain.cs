@@ -43,6 +43,7 @@ namespace DedicatedServer.HostAutomatorStages
                 new SkipShippingMenuBehaviorLink(),
                 new CheckForParsnipSeedsBehaviorLink(),
                 new ExitFarmHouseBehaviorLink(),
+                new InvisibleBehaviorLink(),
                 new GetFishingRodBehaviorLink(),
                 new UnlockCommunityCenterBehaviorLink(),
                 new PurchaseJojaMembershipBehaviorLink(config),
