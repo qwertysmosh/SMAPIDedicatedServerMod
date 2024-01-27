@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DedicatedServer.Utils
 {
+    /// <summary>
+    /// <inheritdoc cref = "InvisibleBehaviorLink"/>
+    /// </summary>
     internal abstract class Invisible : InvisibleBehaviorLink
     {
         private Invisible() : base(null)

@@ -9,6 +9,12 @@ using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
+    /// <summary>
+    ///         This class can make the host invisible
+    /// <br/>   
+    /// <br/>   - As long as someone is invisible, you cannot give them anything.
+    /// <br/>   - After someone has been warped/teleported, they will be visible again.
+    /// </summary>
     internal class InvisibleBehaviorLink : BehaviorLink
     {
         public InvisibleBehaviorLink(BehaviorLink next = null) : base(next)
