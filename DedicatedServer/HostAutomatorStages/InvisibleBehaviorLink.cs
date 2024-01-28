@@ -81,14 +81,17 @@ namespace DedicatedServer.HostAutomatorStages
         /// <summary>
         ///         Makes the host visible
         /// </summary>
+        /// <param name="forcedRefresh">
+        ///         true : Forces the change of visibility.
+        /// <br/>   false: Changes the visibility only when required.</param>
         /// <returns>
         ///         true : Visibility has been changed.
         /// <br/>   false: Visibility has not been changed.</returns>
-        protected static bool SetVisibleDisplayOnChanges()
+        protected static bool SetVisibleDisplayOnChanges(bool forcedRefresh = false)
         {
             bool changed = false;
 
-            if (false == Game1.displayFarmer)
+            if (false == Game1.displayFarmer || forcedRefresh)
             {
                 Game1.displayFarmer = true;
                 // Refresh to make bot back to visible
