@@ -1,4 +1,5 @@
 ﻿using DedicatedServer.Chat;
+using DedicatedServer.HostAutomatorStages;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Buildings;
@@ -131,6 +132,13 @@ namespace DedicatedServer.MessageCommands
             // Private message chatKind is 3
             if (e.ChatKind == 3 && tokens[0] == "demolish")
             {
+                
+                if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Demolish))
+                {
+                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    return;
+                }
+
                 // Find the farmer it came from and determine their location
                 foreach (var farmer in Game1.otherFarmers.Values)
                 {

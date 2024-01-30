@@ -1,4 +1,5 @@
 ﻿using DedicatedServer.Chat;
+using DedicatedServer.HostAutomatorStages;
 using StardewValley;
 
 namespace DedicatedServer.MessageCommands
@@ -32,6 +33,11 @@ namespace DedicatedServer.MessageCommands
             // Private message chatKind is 3
             if (e.ChatKind == 3 && tokens[0] == "pause")
             {
+                if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Pause))
+                {
+                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    return;
+                }
 
                 Game1.netWorldState.Value.IsPaused = !Game1.netWorldState.Value.IsPaused;
                 if (Game1.netWorldState.Value.IsPaused)
