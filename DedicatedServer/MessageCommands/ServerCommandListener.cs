@@ -222,8 +222,6 @@ namespace DedicatedServer.MessageCommands
             }
 
             chatBox.textBoxEnter("Host will go to bed." + TextColor.Jungle);
-#warning Debug
-            return;
 
             if (false == HostAutomation.EnableHostAutomation)
             {

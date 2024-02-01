@@ -70,6 +70,11 @@ namespace DedicatedServer.Config
         public PasswordProtectedCommands PasswordProtected { get; set; } = new PasswordProtectedCommands();
     }
 
+    /// <summary>
+    ///         The properties of the class, which are named exactly the same
+    /// <br/>   as the chat commands, allow the password protection of individual
+    /// <br/>   functions to be switched on (true) and off (false).
+    /// </summary>
     public class PasswordProtectedCommands
     {
         public bool Pause { get; set; } = true;
