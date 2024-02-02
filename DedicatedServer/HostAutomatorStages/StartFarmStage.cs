@@ -22,6 +22,7 @@ namespace DedicatedServer.HostAutomatorStages
         private IMonitor monitor;
         private ModConfig config;
         private CropSaver cropSaver = null;
+        private PasswordValidation passwordValidation = null;
         private AutomatedHost automatedHost = null;
         private InvincibleWorker invincibleWorker = null;
         private SleepWorker sleepWorker = null;
@@ -334,7 +335,8 @@ namespace DedicatedServer.HostAutomatorStages
 
             //We set bot mining lvl to 10 so he doesn't lvlup passively
             Game1.player.MiningLevel = 10;
-
+            passwordValidation = new PasswordValidation(helper, config, chatBox);
+            passwordValidation.Enable();
             automatedHost = new AutomatedHost(helper, monitor, config, chatBox);
             automatedHost.Enable();
             invincibleWorker = new InvincibleWorker(helper);

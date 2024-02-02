@@ -19,6 +19,8 @@ namespace DedicatedServer
 
         // TODO Remove player limit (if the existing attempts haven't already succeeded in doing that).
 
+        // TODO Make the host icon on the map invisible to everyone else
+
         // TODO Consider what the automated host should do when another player proposes to them.
 
         private WaitCondition titleMenuWaitCondition;

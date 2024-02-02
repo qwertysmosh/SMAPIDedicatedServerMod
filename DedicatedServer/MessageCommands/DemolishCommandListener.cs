@@ -1,11 +1,14 @@
 ﻿using DedicatedServer.Chat;
+using DedicatedServer.HostAutomatorStages;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Locations;
+using StardewValley.Menus;
 using StardewValley.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DedicatedServer.MessageCommands
 {
@@ -28,25 +31,25 @@ namespace DedicatedServer.MessageCommands
             chatBox.ChatReceived -= chatReceived;
         }
 
-        private void destroyCabin(string farmerName, Building building, Farm f)
+        private void destroyCabin(Farmer farmer, Building building, Farm f)
         {
             Action buildingLockFailed = delegate
             {
-                chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_LockFailed"));
+                WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_LockFailed")}");
             };
             Action continueDemolish = delegate
             {
                 if (building.daysOfConstructionLeft.Value > 0 || building.daysUntilUpgrade.Value > 0)
                 {
-                    chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_DuringConstruction"));
+                    WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_DuringConstruction")}");
                 }
                 else if (building.indoors.Value != null && building.indoors.Value is AnimalHouse && (building.indoors.Value as AnimalHouse).animalsThatLiveHere.Count > 0)
                 {
-                    chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_AnimalsHere"));
+                    WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_AnimalsHere")}");
                 }
                 else if (building.indoors.Value != null && building.indoors.Value.farmers.Any())
                 {
-                    chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_PlayerHere"));
+                    WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_PlayerHere")}");
                 }
                 else
                 {
@@ -56,7 +59,7 @@ namespace DedicatedServer.MessageCommands
                         {
                             if (allFarmer.currentLocation != null && allFarmer.currentLocation.Name == (building.indoors.Value as Cabin).GetCellarName())
                             {
-                                chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_PlayerHere"));
+                                WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_PlayerHere")}");
                                 return;
                             }
                         }
@@ -64,7 +67,7 @@ namespace DedicatedServer.MessageCommands
 
                     if (building.indoors.Value is Cabin && (building.indoors.Value as Cabin).farmhand.Value.isActive())
                     {
-                        chatBox.textBoxEnter("/message " + farmerName + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_FarmhandOnline"));
+                        WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_FarmhandOnline")}");
                     }
                     else
                     {
@@ -100,22 +103,22 @@ namespace DedicatedServer.MessageCommands
             Game1.player.team.demolishLock.RequestLock(continueDemolish, buildingLockFailed);
         }
 
-        private Action genDestroyCabinAction(string farmerName, Building building)
+        private Action genDestroyCabinAction(Farmer farmer, Building building)
         {
             void destroyCabinAction()
             {
                 Farm f = Game1.getFarm();
-                destroyCabin(farmerName, building, f);
+                destroyCabin(farmer, building, f);
             }
 
             return destroyCabinAction;
         }
 
-        private Action genCancelDestroyCabinAction(string farmerName)
+        private Action genCancelDestroyCabinAction(Farmer farmer)
         {
             void cancelDestroyCabinAction()
             {
-                chatBox.textBoxEnter("/message " + farmerName + " Action canceled.");
+                WriteToPlayer(farmer, "Action canceled.");
             }
 
             return cancelDestroyCabinAction;
@@ -128,105 +131,130 @@ namespace DedicatedServer.MessageCommands
             {
                 return;
             }
-            // Private message chatKind is 3
-            if (e.ChatKind == 3 && tokens[0] == "demolish")
+            
+            if (Game1.player.UniqueMultiplayerID != e.SourceFarmerId)
             {
-                // Find the farmer it came from and determine their location
-                foreach (var farmer in Game1.otherFarmers.Values)
+                if (ChatBox.privateMessage != e.ChatKind) { return; }
+            }
+
+            if (tokens[0] == "demolish")
+            {
+                
+                if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Demolish))
                 {
-                    if (farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    return;
+                }
+
+                var sourceFarmer = Game1.otherFarmers.Values
+                    .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                    .FirstOrDefault()
+                    ?? Game1.player;
+
+
+                if (tokens.Length != 1)
+                {
+                    WriteToPlayer(sourceFarmer, "Error: Invalid command usage.");
+                    WriteToPlayer(sourceFarmer, "Usage: demolish");
+                    return;
+                }
+
+                // Find the farmer it came from and determine their location
+                var location = sourceFarmer.currentLocation;
+
+                if (location is Farm f)
+                {
+                    var tileLocation = sourceFarmer.getTileLocation();
+                    switch (sourceFarmer.facingDirection.Value)
                     {
-                        if (tokens.Length != 1)
+                        case 1: // Right
+                            tileLocation.X++;
+                            break;
+                        case 2: // Down
+                            tileLocation.Y++;
+                            break;
+                        case 3: // Left
+                            tileLocation.X--;
+                            break;
+                        default: // 0 = up
+                            tileLocation.Y--;
+                            break;
+                    }
+                    foreach (var building in f.buildings)
+                    {
+                        if (building.occupiesTile(tileLocation))
                         {
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: Invalid command usage.");
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Usage: demolish");
-                            return;
-                        }
-                        var location = farmer.currentLocation;
-                        if (location is Farm f)
-                        {
-                            var tileLocation = farmer.getTileLocation();
-                            switch (farmer.facingDirection.Value)
+                            // Determine if the building can be demolished
+                            var demolishCheckBlueprint = new BluePrint(building.buildingType.Value);
+                            if (demolishCheckBlueprint.moneyRequired < 0)
                             {
-                                case 1: // Right
-                                    tileLocation.X++;
-                                    break;
-                                case 2: // Down
-                                    tileLocation.Y++;
-                                    break;
-                                case 3: // Left
-                                    tileLocation.X--;
-                                    break;
-                                default: // 0 = up
-                                    tileLocation.Y--;
-                                    break;
+                                // Hard-coded magic number (< 0) means it cannot be demolished
+                                WriteToPlayer(sourceFarmer, "Error: This building can't be demolished.");
+                                return;
                             }
-                            foreach (var building in f.buildings)
+                            else if (demolishCheckBlueprint.name == "Shipping Bin")
                             {
-                                if (building.occupiesTile(tileLocation))
+                                int num = 0;
+                                foreach (var b in Game1.getFarm().buildings)
                                 {
-                                    // Determine if the building can be demolished
-                                    var demolishCheckBlueprint = new BluePrint(building.buildingType.Value);
-                                    if (demolishCheckBlueprint.moneyRequired < 0)
+                                    if (b is ShippingBin)
                                     {
-                                        // Hard-coded magic number (< 0) means it cannot be demolished
-                                        chatBox.textBoxEnter("/message " + farmer.Name + " Error: This building can't be demolished.");
-                                        return;
-                                    }
-                                    else if (demolishCheckBlueprint.name == "Shipping Bin")
-                                    {
-                                        int num = 0;
-                                        foreach (var b in Game1.getFarm().buildings)
-                                        {
-                                            if (b is ShippingBin)
-                                            {
-                                                num++;
-                                            }
-
-                                            if (num > 1)
-                                            {
-                                                break;
-                                            }
-                                        }
-
-                                        if (num <= 1)
-                                        {
-                                            // Must have at least one shipping bin at all times.
-                                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: Can't demolish the last shipping bin.");
-                                            return;
-                                        }
+                                        num++;
                                     }
 
-                                    if (building.indoors.Value is Cabin)
+                                    if (num > 1)
                                     {
-                                        Cabin cabin = building.indoors.Value as Cabin;
-                                        if (cabin.farmhand.Value != null && cabin.farmhand.Value.isCustomized.Value)
-                                        {
-                                            // The cabin is owned by someone. Ask the player if they're certain; record in memory the action to destroy the building.
-                                            var responseActions = new Dictionary<string, Action>();
-                                            responseActions["yes"] = genDestroyCabinAction(farmer.Name, building);
-                                            responseActions["no"] = genCancelDestroyCabinAction(farmer.Name);
-                                            chatBox.RegisterFarmerResponseActionGroup(farmer.UniqueMultiplayerID, responseActions);
-                                            chatBox.textBoxEnter("/message " + farmer.Name + " This cabin belongs to a player. Are you sure you want to remove it? Message me \"yes\" or \"no\".");
-                                            return;
-                                        }
+                                        break;
                                     }
+                                }
 
-                                    // The cabin doesn't belong to anyone. Destroy it immediately without confirmation.
-                                    destroyCabin(farmer.Name, building, f);
+                                if (num <= 1)
+                                {
+                                    // Must have at least one shipping bin at all times.
+                                    WriteToPlayer(sourceFarmer, "Error: Can't demolish the last shipping bin.");
                                     return;
                                 }
                             }
 
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: No building found. You must be standing next to a building and facing it.");
+                            if (building.indoors.Value is Cabin)
+                            {
+                                Cabin cabin = building.indoors.Value as Cabin;
+                                if (cabin.farmhand.Value != null && cabin.farmhand.Value.isCustomized.Value)
+                                {
+                                    // The cabin is owned by someone. Ask the player if they're certain; record in memory the action to destroy the building.
+                                    var responseActions = new Dictionary<string, Action>();
+                                    responseActions["yes"] = genDestroyCabinAction(sourceFarmer, building);
+                                    responseActions["no"] = genCancelDestroyCabinAction(sourceFarmer);
+                                    chatBox.RegisterFarmerResponseActionGroup(sourceFarmer.UniqueMultiplayerID, responseActions);
+                                    WriteToPlayer(sourceFarmer, "This cabin belongs to a player. Are you sure you want to remove it? Message me \"yes\" or \"no\".");
+                                    return;
+                                }
+                            }
+
+                            // The cabin doesn't belong to anyone. Destroy it immediately without confirmation.
+                            destroyCabin(sourceFarmer, building, f);
+                            return;
                         }
-                        else
-                        {
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: You cannot demolish buildings outside of the farm.");
-                        }
-                        break;
                     }
+
+                    WriteToPlayer(sourceFarmer, "Error: No building found. You must be standing next to a building and facing it.");
                 }
+                else
+                {
+                    WriteToPlayer(sourceFarmer, "Error: You cannot demolish buildings outside of the farm.");
+                }
+            }
+        }
+
+        private void WriteToPlayer(Farmer farmer, string message)
+        {
+            if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
+            {
+                chatBox.textBoxEnter($" {message}");
+            }
+            else
+            {
+                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

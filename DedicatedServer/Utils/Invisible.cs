@@ -34,9 +34,9 @@ namespace DedicatedServer.Utils
 
         /// <summary><inheritdoc cref = "InvisibleBehaviorLink.SetVisibleDisplayOnChanges"/></summary>
         /// <returns><inheritdoc cref = "InvisibleBehaviorLink.SetVisibleDisplayOnChanges"/></returns>
-        public static new bool SetVisibleDisplayOnChanges()
+        public static bool SetVisibleDisplayOnChanges()
         {
-            return InvisibleBehaviorLink.SetVisibleDisplayOnChanges();
+            return InvisibleBehaviorLink.SetVisibleDisplayOnChanges(forcedRefresh: true);
         }
 
     }

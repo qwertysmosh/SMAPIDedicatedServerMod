@@ -60,5 +60,34 @@ namespace DedicatedServer.Config
         // "owned" to allow farmhands to move buildings that they purchased.
         // "on" to allow moving all buildings.
         public string MoveBuildPermission { get; set; } = "off";
+
+        /// <summary>
+        ///     Simple but not secure
+        /// </summary>
+        public string Password { get; set; } = "Admin";
+
+
+        public PasswordProtectedCommands PasswordProtected { get; set; } = new PasswordProtectedCommands();
+    }
+
+    /// <summary>
+    ///         The properties of the class, which are named exactly the same
+    /// <br/>   as the chat commands, allow the password protection of individual
+    /// <br/>   functions to be switched on (true) and off (false).
+    /// </summary>
+    public class PasswordProtectedCommands
+    {
+        public bool Pause { get; set; } = true;
+        public bool Build { get; set; } = true;
+        public bool Demolish { get; set; } = true;
+        public bool TakeOver { get; set; } = true;
+        public bool SafeInviteCode { get; set; } = true;
+        public bool InviteCode { get; set; } = true;
+        public bool Invisible { get; set; } = true;
+        public bool Sleep { get; set; } = true;
+        public bool ResetDay { get; set; } = true;
+        public bool Shutdown { get; set; } = true;
+        public bool SpawnMonster { get; set; } = true;
+        public bool MoveBuildPermission { get; set; } = true;
     }
 }
