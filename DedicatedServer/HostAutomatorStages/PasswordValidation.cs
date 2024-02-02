@@ -121,23 +121,23 @@ namespace DedicatedServer.HostAutomatorStages
             switch (command)
             {
                 case "login": // /message ServerBot LogIn xxxx
-                    LogIn(sourceFarmer, password: param);
+                    LogIn(sourceFarmer, password: param, id);
                     break;
 
                 case "logout": // /message ServerBot LogOut
-                    LogOut(sourceFarmer);
+                    LogOut(sourceFarmer, id);
                     break;
 
                 case "passwordprotectshow": // /message ServerBot PasswordProtectShow
-                    PasswordProtectShow(sourceFarmer);
+                    PasswordProtectShow(sourceFarmer, id);
                     break;
 
                 case "passwordprotectadd": // /message ServerBot PasswordProtectAdd xxxx
-                    PasswordProtectAdd(sourceFarmer, command: param);
+                    PasswordProtectAdd(sourceFarmer, command: param, id);
                     break;
 
                 case "passwordprotectremove": // /message ServerBot PasswordProtectRemove xxxx
-                    PasswordProtectRemove(sourceFarmer, command: param);
+                    PasswordProtectRemove(sourceFarmer, command: param, id);
                     break;
             }
         }
@@ -180,11 +180,11 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="password">Password set in the config file <see cref="config.Password"/></param>
-        private void LogIn(Farmer sourceFarmer, string password)
+        private void LogIn(Farmer sourceFarmer, string password, long id)
         {
             if (password == config.Password)
             {
-                if (AddId(sourceFarmer.UniqueMultiplayerID))
+                if (AddId(id))
                 {
                     WriteToPlayer(sourceFarmer, "Password correct." + TextColor.Green);
                 }
@@ -203,9 +203,9 @@ namespace DedicatedServer.HostAutomatorStages
         ///         Logs out a player
         /// </summary>
         /// <param name="sourceFarmer"></param>
-        private void LogOut(Farmer sourceFarmer)
+        private void LogOut(Farmer sourceFarmer, long id)
         {
-            if (RemoveId(sourceFarmer.UniqueMultiplayerID))
+            if (RemoveId(id))
             {
                 WriteToPlayer(sourceFarmer, "Successfully logged out." + TextColor.Green);
             }
@@ -219,9 +219,9 @@ namespace DedicatedServer.HostAutomatorStages
         ///         Shows an overview of the currently protected commands.
         /// </summary>
         /// <param name="sourceFarmer"></param>
-        private void PasswordProtectShow(Farmer sourceFarmer)
+        private void PasswordProtectShow(Farmer sourceFarmer, long id)
         {
-            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
+            if (false == PasswordValidation.IsAuthorized(id))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
@@ -245,9 +245,9 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="command">This is the name of a property of the class <see cref="PasswordProtectedCommands"/></param>
-        private void PasswordProtectAdd(Farmer sourceFarmer, string command)
+        private void PasswordProtectAdd(Farmer sourceFarmer, string command, long id)
         {
-            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
+            if (false == PasswordValidation.IsAuthorized(id))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
@@ -279,9 +279,9 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="command">This is the name of a property of the class <see cref="PasswordProtectedCommands"/></param>
-        private void PasswordProtectRemove(Farmer sourceFarmer, string command)
+        private void PasswordProtectRemove(Farmer sourceFarmer, string command, long id)
         {
-            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
+            if (false == PasswordValidation.IsAuthorized(id))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
