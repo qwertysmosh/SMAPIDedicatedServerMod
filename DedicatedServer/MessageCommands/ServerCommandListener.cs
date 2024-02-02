@@ -104,47 +104,47 @@ namespace DedicatedServer.MessageCommands
 
             var sourceFarmer = Game1.otherFarmers.Values
                 .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
-                .FirstOrDefault()?
-                .Name ?? Game1.player.Name;
+                .FirstOrDefault()
+                ?? Game1.player;
 
             switch (command)
             {
                 case "takeover": // /message ServerBot TakeOver
-                    TakeOver(e.SourceFarmerId);
+                    TakeOver(sourceFarmer);
                     break;
 
                 case "safeinvitecode": // /message ServerBot SafeInviteCode
-                    SafeInviteCode(e.SourceFarmerId);
+                    SafeInviteCode(sourceFarmer);
                     break;
 
                 case "invitecode": // /message ServerBot InviteCode
-                    InviteCode(e.SourceFarmerId);
+                    InviteCode(sourceFarmer);
                     break;
 
                 case "invisible": // /message ServerBot Invisible
-                    InvisibleSub(e.SourceFarmerId);
+                    InvisibleSub(sourceFarmer);
                     break;
 
                 case "sleep": // /message ServerBot Sleep
-                    Sleep(e.SourceFarmerId);
+                    Sleep(sourceFarmer);
                     break;
 
                 case "resetday": // /message ServerBot ResetDay
-                    ResetDay(e.SourceFarmerId);
+                    ResetDay(sourceFarmer);
                     break;
 
                 case "shutdown": // /message ServerBot Shutdown
-                    Shutdown(e.SourceFarmerId);
+                    Shutdown(sourceFarmer);
                     break;
 
                 case "spawnmonster": // /message ServerBot SpawnMonster
-                    SpawnMonster(e.SourceFarmerId);
+                    SpawnMonster(sourceFarmer);
                     break;
 
                 case "mbp": // /message ServerBot mbp on
                 case "movebuildpermission":
                 case "movepermissiong":
-                    MoveBuildPermission(e.SourceFarmerId, param);
+                    MoveBuildPermission(sourceFarmer, param);
                     break;
 
                 default:
@@ -152,58 +152,58 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void TakeOver(long id)
+        private void TakeOver(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.TakeOver))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.TakeOver))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
-            chatBox.textBoxEnter($"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
+            WriteToPlayer(null, $"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
             HostAutomation.TakeOver();
         }
         
-        private void SafeInviteCode(long id)
+        private void SafeInviteCode(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.SafeInviteCode))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SafeInviteCode))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
             MultiplayerOptions.SaveInviteCode();
             if (MultiplayerOptions.IsInviteCodeAvailable)
             {
-                chatBox.textBoxEnter($"Your invite code is saved in the mod folder in the file {MultiplayerOptions.inviteCodeSaveFile}." + TextColor.Green);
+                WriteToPlayer(farmer, $"Your invite code is saved in the mod folder in the file {MultiplayerOptions.inviteCodeSaveFile}." + TextColor.Green);
             }
             else
             {
-                chatBox.textBoxEnter($"The game has no invite code." + TextColor.Red);
+                WriteToPlayer(farmer, $"The game has no invite code." + TextColor.Red);
             }
         }
         
-        private void InviteCode(long id)
+        private void InviteCode(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.InviteCode))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.InviteCode))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
-            chatBox.textBoxEnter($"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
+            WriteToPlayer(farmer, $"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
         }
 
-        private void InvisibleSub(long id)
+        private void InvisibleSub(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.Invisible))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Invisible))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
             Invisible.InvisibleOverwrite = !Invisible.InvisibleOverwrite;
-            chatBox.textBoxEnter($"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
+            WriteToPlayer(farmer, $"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
         }
 
         /// <summary>
@@ -213,72 +213,70 @@ namespace DedicatedServer.MessageCommands
         /// <br/>   up and the mod's normal behavior will be restored.
         /// </summary>
         /// <param name="id">ID of the player who requested the command</param>
-        private void Sleep(long id)
+        private void Sleep(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.Sleep))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
-            chatBox.textBoxEnter("Host will go to bed." + TextColor.Jungle);
-
             if (false == HostAutomation.EnableHostAutomation)
             {
-                chatBox.textBoxEnter($"Cannot start sleep because the host is controlled by the player." + TextColor.Red);
+                WriteToPlayer(farmer, $"Cannot start sleep because the host is controlled by the player." + TextColor.Red);
                 return;
             }
 
             if (Sleeping.ShouldSleepOverwrite)
             {
                 Sleeping.ShouldSleepOverwrite = false;
-                chatBox.textBoxEnter($"The host is back on his feet." + TextColor.Aqua);
+                WriteToPlayer(null, $"The host is back on his feet." + TextColor.Aqua);
             }
             else
             {
-                chatBox.textBoxEnter($"The host will go to sleep." + TextColor.Green);
+                WriteToPlayer(null, $"The host will go to sleep." + TextColor.Green);
                 Sleeping.ShouldSleepOverwrite = true;
             }
         }
 
-        private void ResetDay(long id)
+        private void ResetDay(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.ResetDay))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ResetDay))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
-            RestartDay.ResetDay((seconds) => chatBox.textBoxEnter($"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
+            RestartDay.ResetDay((seconds) => WriteToPlayer(null, $"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void Shutdown(long id)
+        private void Shutdown(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.Shutdown))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Shutdown))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
-            RestartDay.ShutDown((seconds) => chatBox.textBoxEnter($"Attention: Server will shut down in {seconds} seconds" + TextColor.Orange));
+            RestartDay.ShutDown((seconds) => WriteToPlayer(null, $"Attention: Server will shut down in {seconds} seconds" + TextColor.Orange));
         }
         
-        private void SpawnMonster(long id)
+        private void SpawnMonster(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.SpawnMonster))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SpawnMonster))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
             if (MultiplayerOptions.SpawnMonstersAtNight)
             {
-                chatBox.textBoxEnter($"No more monsters will appear." + TextColor.Green);
+                WriteToPlayer(null, $"No more monsters will appear." + TextColor.Green);
                 MultiplayerOptions.SpawnMonstersAtNight = false;
             }
             else
             {
-                chatBox.textBoxEnter($"Monsters will appear." + TextColor.Red);
+                WriteToPlayer(null, $"Monsters will appear." + TextColor.Red);
                 MultiplayerOptions.SpawnMonstersAtNight = true;
             }
         }
@@ -295,11 +293,11 @@ namespace DedicatedServer.MessageCommands
         /// </summary>
         /// <param name="id"></param>
         /// <param name="param"></param>
-        private void MoveBuildPermission(long id, string param)
+        private void MoveBuildPermission(Farmer farmer, string param)
         {
-            if (false == PasswordValidation.IsAuthorized(id, p => p.MoveBuildPermission))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
             {
-                chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
 
@@ -309,20 +307,33 @@ namespace DedicatedServer.MessageCommands
             {
                 if (config.MoveBuildPermission == param)
                 {
-                    chatBox.textBoxEnter("Parameter for MoveBuildPermission is already " + config.MoveBuildPermission + TextColor.Orange);
+                    WriteToPlayer(farmer, "Parameter for MoveBuildPermission is already " + config.MoveBuildPermission + TextColor.Orange);
                 }
                 else
                 {
                     config.MoveBuildPermission = param;
-                    chatBox.textBoxEnter($"Changed MoveBuildPermission to {config.MoveBuildPermission}" + TextColor.Green);
+                    WriteToPlayer(null, $"Changed MoveBuildPermission to {config.MoveBuildPermission}" + TextColor.Green);
                     chatBox.textBoxEnter("/mbp " + config.MoveBuildPermission);
                     helper.WriteConfig(config);
                 }
             }
             else
             {
-                chatBox.textBoxEnter($"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", moveBuildPermissionParameter.ToArray())}" + TextColor.Red);
+                WriteToPlayer(farmer, $"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", moveBuildPermissionParameter.ToArray())}" + TextColor.Red);
             }
         }
+
+        private void WriteToPlayer(Farmer farmer, string message)
+        {
+            if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
+            {
+                chatBox.textBoxEnter($" {message}");
+            }
+            else
+            {
+                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+            }
+        }
+
     }
 }

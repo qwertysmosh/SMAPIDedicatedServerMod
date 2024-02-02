@@ -116,28 +116,29 @@ namespace DedicatedServer.HostAutomatorStages
 
             var sourceFarmer = Game1.getAllFarmhands() // Host is null
                 .Where(farmer => farmer.UniqueMultiplayerID == id)
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?? Game1.player;
 
             switch (command)
             {
                 case "login": // /message ServerBot LogIn xxxx
-                    LogIn(sourceFarmer, password: param, id);
+                    LogIn(sourceFarmer, password: param);
                     break;
 
                 case "logout": // /message ServerBot LogOut
-                    LogOut(sourceFarmer, id);
+                    LogOut(sourceFarmer);
                     break;
 
                 case "passwordprotectshow": // /message ServerBot PasswordProtectShow
-                    PasswordProtectShow(sourceFarmer, id);
+                    PasswordProtectShow(sourceFarmer);
                     break;
 
                 case "passwordprotectadd": // /message ServerBot PasswordProtectAdd xxxx
-                    PasswordProtectAdd(sourceFarmer, command: param, id);
+                    PasswordProtectAdd(sourceFarmer, command: param);
                     break;
 
                 case "passwordprotectremove": // /message ServerBot PasswordProtectRemove xxxx
-                    PasswordProtectRemove(sourceFarmer, command: param, id);
+                    PasswordProtectRemove(sourceFarmer, command: param);
                     break;
             }
         }
@@ -180,11 +181,11 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="password">Password set in the config file <see cref="config.Password"/></param>
-        private void LogIn(Farmer sourceFarmer, string password, long id)
+        private void LogIn(Farmer sourceFarmer, string password)
         {
             if (password == config.Password)
             {
-                if (AddId(id))
+                if (AddId(sourceFarmer.UniqueMultiplayerID))
                 {
                     WriteToPlayer(sourceFarmer, "Password correct." + TextColor.Green);
                 }
@@ -203,9 +204,9 @@ namespace DedicatedServer.HostAutomatorStages
         ///         Logs out a player
         /// </summary>
         /// <param name="sourceFarmer"></param>
-        private void LogOut(Farmer sourceFarmer, long id)
+        private void LogOut(Farmer sourceFarmer)
         {
-            if (RemoveId(id))
+            if (RemoveId(sourceFarmer.UniqueMultiplayerID))
             {
                 WriteToPlayer(sourceFarmer, "Successfully logged out." + TextColor.Green);
             }
@@ -219,9 +220,9 @@ namespace DedicatedServer.HostAutomatorStages
         ///         Shows an overview of the currently protected commands.
         /// </summary>
         /// <param name="sourceFarmer"></param>
-        private void PasswordProtectShow(Farmer sourceFarmer, long id)
+        private void PasswordProtectShow(Farmer sourceFarmer)
         {
-            if (false == PasswordValidation.IsAuthorized(id))
+            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
@@ -245,9 +246,9 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="command">This is the name of a property of the class <see cref="PasswordProtectedCommands"/></param>
-        private void PasswordProtectAdd(Farmer sourceFarmer, string command, long id)
+        private void PasswordProtectAdd(Farmer sourceFarmer, string command)
         {
-            if (false == PasswordValidation.IsAuthorized(id))
+            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
@@ -279,9 +280,9 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         /// <param name="sourceFarmer"></param>
         /// <param name="command">This is the name of a property of the class <see cref="PasswordProtectedCommands"/></param>
-        private void PasswordProtectRemove(Farmer sourceFarmer, string command, long id)
+        private void PasswordProtectRemove(Farmer sourceFarmer, string command)
         {
-            if (false == PasswordValidation.IsAuthorized(id))
+            if (false == PasswordValidation.IsAuthorized(sourceFarmer.UniqueMultiplayerID))
             {
                 chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                 return;
@@ -320,7 +321,14 @@ namespace DedicatedServer.HostAutomatorStages
 
         private void WriteToPlayer(Farmer farmer, string message)
         {
-            chatBox.textBoxEnter((null == farmer) ? $"{message}" : $"/message {farmer.Name} {message}");
+            if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
+            {
+                chatBox.textBoxEnter($" {message}");
+            }
+            else
+            {
+                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+            }
         }
 
         private bool AddId(long id)

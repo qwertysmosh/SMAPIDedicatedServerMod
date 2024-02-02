@@ -1,6 +1,7 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.HostAutomatorStages;
 using StardewValley;
+using StardewValley.Menus;
 
 namespace DedicatedServer.MessageCommands
 {
@@ -30,8 +31,13 @@ namespace DedicatedServer.MessageCommands
             {
                 return;
             }
-            // Private message chatKind is 3
-            if (e.ChatKind == 3 && tokens[0] == "pause")
+
+            if (Game1.player.UniqueMultiplayerID != e.SourceFarmerId)
+            {
+                if (ChatBox.privateMessage != e.ChatKind) { return; }
+            }
+
+            if (tokens[0] == "pause")
             {
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Pause))
                 {

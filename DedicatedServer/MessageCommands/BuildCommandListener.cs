@@ -2,6 +2,7 @@
 using DedicatedServer.HostAutomatorStages;
 using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,11 +60,11 @@ namespace DedicatedServer.MessageCommands
                         var res = ((Farm)Game1.getLocationFromName("Farm")).buildStructure(blueprint, new Vector2(point.X, point.Y), Game1.player, false);
                         if (res)
                         {
-                            chatBox.textBoxEnter(farmer.Name + " just built a " + cabinBlueprintName);
+                            WriteToPlayer(chatBox, null, $"{farmer.Name} just built a {cabinBlueprintName}");
                         }
                         else
                         {
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: " + Game1.content.LoadString("Strings\\UI:Carpenter_CantBuild"));
+                            WriteToPlayer(chatBox, farmer, $"Error {Game1.content.LoadString("Strings\\UI:Carpenter_CantBuild")}");
                         }
                     }
                     Game1.player.team.buildLock.ReleaseLock();
@@ -91,12 +92,6 @@ namespace DedicatedServer.MessageCommands
             return str;
         }
 
-        private void pmValidBuildingNames(Farmer farmer)
-        {
-            var str = "/message " + farmer.Name + " Valid building names include " + validBuildingNamesList;
-            chatBox.textBoxEnter(str);
-        }
-
         public void Enable()
         {
             chatBox.ChatReceived += chatReceived;
@@ -115,48 +110,70 @@ namespace DedicatedServer.MessageCommands
             {
                 return;
             }
-            if (e.ChatKind == 3 && tokens[0] == "build")
+
+            if (Game1.player.UniqueMultiplayerID != e.SourceFarmerId)
             {
-                
+                if (ChatBox.privateMessage != e.ChatKind) { return; }
+            }
+
+            var sourceFarmer = Game1.otherFarmers.Values
+                .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                .FirstOrDefault()
+                ?? Game1.player;
+
+            if (tokens[0] == "build") // /message ServerBot Build Stone_Cabin
+            {
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Build))
                 {
-                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    WriteToPlayer(sourceFarmer, PasswordValidation.notAuthorizedMessage);
                     return;
                 }
 
-                // Find the farmer it came from and determine their location
-                foreach (var farmer in Game1.otherFarmers.Values)
+                if (tokens.Length != 2)
                 {
-                    if (farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                    WriteToPlayer(sourceFarmer, "Error: Invalid command usage.");
+                    WriteToPlayer(sourceFarmer, "Usage: build [building_name]");
+                    WriteToPlayer(sourceFarmer, $"Valid building names include {validBuildingNamesList}");
+                    return;
+                }
+
+                var buildingName = tokens[1];
+                if (buildingActions.TryGetValue(buildingName, out var action))
+                {
+                    // Find the farmer it came from and determine their location
+                    var location = sourceFarmer.currentLocation;
+                     
+                    if (location is Farm f)
                     {
-                        if (tokens.Length != 2)
-                        {
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: Invalid command usage.");
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Usage: build [building_name]");
-                            pmValidBuildingNames(farmer);
-                            return;
-                        }
-                        var buildingName = tokens[1];
-                        if (buildingActions.TryGetValue(buildingName, out var action))
-                        {
-                            var location = farmer.currentLocation;
-                            if (location is Farm f)
-                            {
-                                action(chatBox, farmer);
-                            }
-                            else
-                            {
-                                chatBox.textBoxEnter("/message " + farmer.Name + " Error: You cannot place buildings outside of the farm!");
-                            }
-                        }
-                        else
-                        {
-                            chatBox.textBoxEnter("/message " + farmer.Name + " Error: Unrecognized building name \"" + buildingName + "\"");
-                            pmValidBuildingNames(farmer);
-                        }
-                        break;
+                        action(chatBox, sourceFarmer);
+                    }
+                    else
+                    {
+                        WriteToPlayer(sourceFarmer, "Error: You cannot place buildings outside of the farm!");
                     }
                 }
+                else
+                {
+                    WriteToPlayer(sourceFarmer, $"Error: Unrecognized building name \"{buildingName}\"");
+                    WriteToPlayer(sourceFarmer, $"Valid building names include {validBuildingNamesList}");
+                }
+            }
+        }
+
+        private void WriteToPlayer(Farmer farmer, string message)
+        {
+            WriteToPlayer(chatBox, farmer, message);
+        }
+
+        private static void WriteToPlayer(EventDrivenChatBox chatBox, Farmer farmer, string message)
+        {
+            if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
+            {
+                chatBox.textBoxEnter($" {message}");
+            }
+            else
+            {
+                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }
