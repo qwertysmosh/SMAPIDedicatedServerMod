@@ -29,8 +29,6 @@ namespace DedicatedServer.Config
         // Options are "normal" or "remixed".
         public string MineRewards { get; set; } = "normal";
 
-        public bool SpawnMonstersOnFarmAtNight { get; set; } = false;
-
         public ulong? RandomSeed { get; set; } = null;
 
         public bool AcceptPet = true; // By default, accept the pet (of course).
@@ -54,19 +52,36 @@ namespace DedicatedServer.Config
         // committing to the Joja route and removing the community center.
         public bool PurchaseJojaMembership = false;
 
-        // Changes farmhands permissions to move buildings from the Carpenter's Shop.
-        // Is set each time the server is started and can be changed in the game.
-        // "off" to entirely disable moving buildings.
-        // "owned" to allow farmhands to move buildings that they purchased.
-        // "on" to allow moving all buildings.
+        /// <summary>
+        ///         Setting whether monsters spawn on the farm
+        /// <br/>   
+        /// <br/>   true : The monsters will appear
+        /// <br/>   false: No monsters will appear
+        /// </summary>
+        public bool SpawnMonstersOnFarmAtNight { get; set; } = false;
+
+        /// <summary>
+        ///         Changes farmhands permissions to move buildings from the Carpenter's Shop.
+        /// <br/>   
+        /// <br/>   Is set each time the server is started and can be changed in the game.
+        /// <br/>   "off" to entirely disable moving buildings.
+        /// <br/>   "owned" to allow farmhands to move buildings that they purchased.
+        /// <br/>   "on" to allow moving all buildings.
+        /// </summary>
         public string MoveBuildPermission { get; set; } = "off";
 
         /// <summary>
-        ///     Simple but not secure
+        ///         Password used to log in
+        /// <br/>
+        /// <br/>   Must be changed to a secure password
+        /// <br/>   - An empty string means no password
+        /// <br/>   - Any check fails if the value is set to null
         /// </summary>
-        public string Password { get; set; } = "Admin";
+        public string Password { get; set; } = null;
 
-
+        /// <summary>
+        /// <inheritdoc cref = "PasswordProtectedCommands"/>
+        /// </summary>
         public PasswordProtectedCommands PasswordProtected { get; set; } = new PasswordProtectedCommands();
     }
 
@@ -77,17 +92,64 @@ namespace DedicatedServer.Config
     /// </summary>
     public class PasswordProtectedCommands
     {
+        /// <summary>
+        /// <see cref="MessageCommands.PauseCommandListener"/>
+        /// </summary>
         public bool Pause { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.BuildCommandListener"/>
+        /// </summary>
         public bool Build { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.DemolishCommandListener"/>
+        /// </summary>
         public bool Demolish { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool TakeOver { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool SafeInviteCode { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool InviteCode { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool Invisible { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool Sleep { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool ResetDay { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool Shutdown { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool SpawnMonster { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool MoveBuildPermission { get; set; } = true;
     }
 }
