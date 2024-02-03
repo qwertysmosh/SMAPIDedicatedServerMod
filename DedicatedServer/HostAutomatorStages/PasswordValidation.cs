@@ -50,7 +50,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public void Enable()
         {
-            if ("" == config.Password)
+            if (null != config.Password && "" == config.Password)
             {
                 passwordValidationDisabled = true;
                 return;
@@ -183,7 +183,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <param name="password">Password set in the config file <see cref="config.Password"/></param>
         private void LogIn(Farmer sourceFarmer, string password)
         {
-            if (password == config.Password)
+            if (null != config.Password && password == config.Password)
             {
                 if (AddId(sourceFarmer.UniqueMultiplayerID))
                 {
