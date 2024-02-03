@@ -66,7 +66,7 @@ namespace DedicatedServer.MessageCommands
                     case "multiplayer":
                         MultiplayerOptions.EnableServer = true;
                         break;
-
+                        
                     case "gold":
                         Game1.player.team.SetIndividualMoney(Game1.player, 1000);
                         break;
@@ -139,6 +139,14 @@ namespace DedicatedServer.MessageCommands
 
                 case "shutdown": // /message ServerBot Shutdown
                     Shutdown(sourceFarmer);
+                    break;
+
+                case "walletseparate": // /message ServerBot WalletSeparate
+                    WalletSeparate(sourceFarmer);
+                    break;
+
+                case "walletmerge": // /message ServerBot WalletMerge
+                    WalletMerge(sourceFarmer);
                     break;
 
                 case "spawnmonster": // /message ServerBot SpawnMonster
@@ -264,7 +272,29 @@ namespace DedicatedServer.MessageCommands
 
             RestartDay.ShutDown((seconds) => WriteToPlayer(null, $"Attention: Server will shut down in {seconds} seconds" + TextColor.Orange));
         }
+
+        private void WalletSeparate(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Wallet))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            Wallet.Separate(farmer);
+        }
         
+        private void WalletMerge(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Wallet))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            Wallet.Merge(farmer);
+        }
+
         private void SpawnMonster(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SpawnMonster))
