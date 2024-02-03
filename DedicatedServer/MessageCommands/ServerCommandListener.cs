@@ -62,9 +62,13 @@ namespace DedicatedServer.MessageCommands
                     case "letmecontrol":
                         HostAutomation.LetMeControl();
                         break;
-
+                        
                     case "multiplayer":
                         MultiplayerOptions.EnableServer = true;
+                        break;
+
+                    case "gold":
+                        Game1.player.team.SetIndividualMoney(Game1.player, 1000);
                         break;
 
                     case "singleplayer":
@@ -143,7 +147,7 @@ namespace DedicatedServer.MessageCommands
 
                 case "mbp": // /message ServerBot mbp on
                 case "movebuildpermission":
-                case "movepermissiong":
+                case "movepermission":
                     MoveBuildPermission(sourceFarmer, param);
                     break;
 
