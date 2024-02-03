@@ -33,16 +33,19 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 ### Additional Options
 
 - `EnableCropSaver`: Set to `true` or `false` to enable or disable the crop saver feature. When enabled, seasonal crops planted by players and fully grown before the season's end are guaranteed to give at least one more harvest before dying. For example, a spring crop planted by a player and fully grown before Summer 1 will not die immediately on Summer 1. Instead, it'll provide exactly one more harvest, even if it's a crop that ordinarily produces multiple harvests. Defaults to `true`.
-
-### Host Options
-
-- `MoveBuildPermission`: Changes farmhands permissions to move buildings from the Carpenter's shop. Is set each time the server is started and can be changed in the game. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
+- `MoveBuildPermission`: Change farmhands permissions to move buildings from the Carpenter's shop. Is set each time the server is started and can be changed in the game. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
+- `Password`: Password used to log in. It must be changed to a secure password. An empty string `""` means no password. Any check fails if the value is set to `null`.
+- `PasswordProtected`: The password protection of individual functions can be switched on (`true`) and off (`false`) in the group.
 
 ## In Game Command
 
-All commands in the game must be sent privately to the player `ServerBot`. For example, you must write the following `/message ServerBot MoveBuildPermission on`:
+All commands in the game must be sent privately to the player `ServerBot`. For example, you must write the following `/message ServerBot MoveBuildPermission on`. Depending on the setting of the [`Password`](#additional-options) option, the commands can only be executed after you have logged in.
 
-- `TakeOver`: The host player returns control to the host, all host functions are switched on. Cancels the `LetMePlay` command
+- `Build`: Builds a new cabin for more players at the place where the player is looking at. Allowed parameters are `Stone_Cabin`, `Plank_Cabin`, and `Log_Cabin`.
+- `Demolish`: Destroys any building the player is looking at, not only cabins.
+- `Pause`: (Toggle command) \
+  Pause the game
+- `TakeOver`: The host player returns control to the host, all host functions are switched on. Cancels the [`LetMePlay`](#host-in-game-command) command
 - `SafeInviteCode`: A file `invite_code.txt` with the invitation code is created in this mods folder. If there is no invitation code, an empty string is saved.
 - `InviteCode`: The invitation code is printed.
 - `Invisible`: (Toggle command) \
@@ -54,9 +57,19 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
 - `SpawnMonster`: (Toggle command, Saved in config) \
   Changes the settings so that monsters spawn on the farm or not. Spawned monsters are not reset.
 - `MoveBuildPermission` or
-- `MovePermissiong` or
+- `MovePermission` or
 - `MBP`: (Saved in config) \
-Changes farmhands permissions to move buildings from the Carpenter's shop. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
+  Changes farmhands permissions to move buildings from the Carpenter's shop. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
+
+Administration:
+
+- `LogIn`: This command is used to log in. The command is followed by the password that was defined in `config.json` under `Password`.
+- `LogOut`: This command is used to log out.
+- `PasswordProtectShow`: An overview of the commands is displayed. This shows which command is protected by a password and which can be executed by any player without restriction.
+- `PasswordProtectAdd`: (Saved in config) \
+  This command is followed by the name of a command which is now password-protected, so it can only be executed after logging in.
+- `PasswordProtectRemove`: (Saved in config) \
+  This removes a command from password protection. Every player can now use the command without restrictions.
 
 ## Host in Game Command
 
