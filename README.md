@@ -54,6 +54,8 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
   When it is sent, the host goes to bed. When all players leave the game or go to bed, the next day begins. On a second send, the host will get up and the mod's normal behavior will be restored.
 - `ResetDay`: Kicks all players and restarts the day.
 - `Shutdown`: Kicks all players and starts a new day.
+- `WalletSeparate`: Separate the wallets tonight.
+- `WalletMerge`: Connect the wallets tonight.
 - `SpawnMonster`: (Toggle command, Saved in config) \
   Changes the settings so that monsters spawn on the farm or not. Spawned monsters are not reset.
 - `MoveBuildPermission` or
