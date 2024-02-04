@@ -145,6 +145,11 @@ namespace DedicatedServer.Config
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
+        public bool Wallet { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool SpawnMonster { get; set; } = true;
 
         /// <summary>

@@ -32,6 +32,7 @@ namespace DedicatedServer.HostAutomatorStages
         private PauseCommandListener pauseCommandListener = null;
         private ServerCommandListener serverCommandListener = null;
         private MultiplayerOptions multiplayerOptions = null;
+        private Wallet wallet = null;
 
         public StartFarmStage(IModHelper helper, IMonitor monitor, ModConfig config) : base(helper)
         {
@@ -345,6 +346,7 @@ namespace DedicatedServer.HostAutomatorStages
             restartDayWorker = new RestartDayWorker(helper);
             multiplayerOptions = new MultiplayerOptions(helper, config, chatBox);
             multiplayerOptions.TryActivatingInviteCode();
+            wallet = new Wallet(chatBox);
 
             buildCommandListener = new BuildCommandListener(chatBox);
             buildCommandListener.Enable();
