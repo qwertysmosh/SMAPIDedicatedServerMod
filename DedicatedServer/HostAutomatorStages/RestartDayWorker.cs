@@ -100,7 +100,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.server.kick(farmer.UniqueMultiplayerID);
             }
 
-            WarpToFarmHouse();
+            Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
 
             Game1.player.isInBed.Value = true;
             Game1.currentLocation.answerDialogueAction("Sleep_Yes", null);
@@ -111,14 +111,6 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 AddOnSaved(OnSavedQuit);
             }
-        }
-
-        private static void WarpToFarmHouse()
-        {
-            var farmHouse = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-            var entryLocation = farmHouse.getEntryLocation();
-            var warp = new Warp(entryLocation.X, entryLocation.Y, farmHouse.NameOrUniqueName, entryLocation.X, entryLocation.Y, false);
-            Game1.player.warpFarmer(warp);
         }
 
         private static void AddOnSaved(EventHandler<SavedEventArgs> handler)

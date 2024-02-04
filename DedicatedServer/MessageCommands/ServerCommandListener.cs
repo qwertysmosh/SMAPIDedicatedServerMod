@@ -76,14 +76,23 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "farm":
-                        var farm = Game1.getLocationFromName("farm") as Farm;
-                        var mainFarmHouseEntry = farm.GetMainFarmHouseEntry();
-                        Game1.player.warpFarmer(new Warp(mainFarmHouseEntry.X, mainFarmHouseEntry.Y, farm.NameOrUniqueName, mainFarmHouseEntry.X, mainFarmHouseEntry.Y, false, false));
+                        Game1.player.warpFarmer(WarpPoints.farmWarp);
+                        break;
+
+                    case "house":
+                        Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                         break;
 
                     case "mine":
-                        var mine = Game1.getLocationFromName("Mine") as Mine;
-                        Game1.player.warpFarmer(new Warp(18, 13, mine.NameOrUniqueName, 18, 13, false));
+                        Game1.player.warpFarmer(WarpPoints.mineWarp);
+                        break;
+
+                    case "town":
+                        Game1.player.warpFarmer(WarpPoints.townWarp);
+                        break;
+
+                    case "beach":
+                        Game1.player.warpFarmer(WarpPoints.beachWarp);
                         break;
 
                     case "location":
