@@ -47,13 +47,17 @@ namespace DedicatedServer.MessageCommands
 
             string command = tokens[0].ToLower();
 
-            if(Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
+            var sourceFarmer = Game1.otherFarmers.Values
+                .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                .FirstOrDefault()
+                ?? Game1.player;
+
+            if (Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
             {
                 switch (command)
                 {
                     case "letmeplay":
-                        chatBox.textBoxEnter($"The host is now a player, all host functions are deactivated." + TextColor.Green);
-                        HostAutomation.LetMePlay();
+                        LetMePlay(sourceFarmer);
                         break;
 
                     #region DEBUG_COMMANDS
@@ -115,11 +119,6 @@ namespace DedicatedServer.MessageCommands
 
             string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
 
-            var sourceFarmer = Game1.otherFarmers.Values
-                .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
-                .FirstOrDefault()
-                ?? Game1.player;
-
             switch (command)
             {
                 case "takeover": // /message ServerBot TakeOver
@@ -171,6 +170,18 @@ namespace DedicatedServer.MessageCommands
                 default:
                     break;
             }
+        }
+
+        private void LetMePlay(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.LetMePlay))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            WriteToPlayer(null, $"The host is now a player, all host functions are deactivated." + TextColor.Green);
+            HostAutomation.LetMePlay();
         }
 
         private void TakeOver(Farmer farmer)

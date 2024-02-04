@@ -110,6 +110,11 @@ namespace DedicatedServer.Config
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
+        public bool LetMePlay { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool TakeOver { get; set; } = true;
 
         /// <summary>
