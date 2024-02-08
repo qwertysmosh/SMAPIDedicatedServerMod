@@ -126,6 +126,11 @@ namespace DedicatedServer.Config
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
         public bool InviteCode { get; set; } = true;
+        
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceInviteCode { get; set; } = true;
 
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>

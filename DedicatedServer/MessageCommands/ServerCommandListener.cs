@@ -133,6 +133,10 @@ namespace DedicatedServer.MessageCommands
                     InviteCode(sourceFarmer);
                     break;
 
+                case "forceinvitecode": // /message ServerBot ForceInviteCode
+                    ForceInviteCode(sourceFarmer);
+                    break;
+
                 case "invisible": // /message ServerBot Invisible
                     InvisibleSub(sourceFarmer);
                     break;
@@ -224,6 +228,17 @@ namespace DedicatedServer.MessageCommands
             }
 
             WriteToPlayer(farmer, $"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
+        }
+
+        private void ForceInviteCode(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceInviteCode))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            MultiplayerOptions.TryActivatingInviteCode();
         }
 
         private void InvisibleSub(Farmer farmer)
