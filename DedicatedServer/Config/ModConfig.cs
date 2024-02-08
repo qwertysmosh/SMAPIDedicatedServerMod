@@ -71,6 +71,12 @@ namespace DedicatedServer.Config
         public string MoveBuildPermission { get; set; } = "off";
 
         /// <summary>
+        ///         Sets whether an attempt should be made to generate an
+        /// <br/>   invitation code when the server is restarted.
+        /// </summary>
+        public bool TryActivatingInviteCode { get; set; } = true;
+
+        /// <summary>
         ///         Password used to log in
         /// <br/>
         /// <br/>   Must be changed to a secure password

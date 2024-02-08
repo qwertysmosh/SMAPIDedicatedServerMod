@@ -80,8 +80,6 @@ namespace DedicatedServer.Utils
             MultiplayerOptions.helper = helper;
             MultiplayerOptions.config = config;
             MultiplayerOptions.chatBox = chatBox;
-
-            TryActivatingInviteCode();
         }
 
         /// <summary>

@@ -345,7 +345,10 @@ namespace DedicatedServer.HostAutomatorStages
             sleepWorker = new SleepWorker(helper);
             restartDayWorker = new RestartDayWorker(helper);
             multiplayerOptions = new MultiplayerOptions(helper, config, chatBox);
-            MultiplayerOptions.TryActivatingInviteCode();
+            if (config.TryActivatingInviteCode)
+            {
+                MultiplayerOptions.TryActivatingInviteCode();
+            }
             wallet = new Wallet(chatBox);
 
             buildCommandListener = new BuildCommandListener(chatBox);
