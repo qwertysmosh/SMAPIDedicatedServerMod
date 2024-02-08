@@ -226,8 +226,10 @@ namespace DedicatedServer.MessageCommands
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
-
-            WriteToPlayer(farmer, $"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
+            
+            WriteToPlayer(farmer, 
+                String.Format(Game1.content.LoadString("Strings\\UI:Server_InviteCode"), MultiplayerOptions.InviteCode) + 
+                ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
         }
 
         private void ForceInviteCode(Farmer farmer)
@@ -281,7 +283,7 @@ namespace DedicatedServer.MessageCommands
             }
             else
             {
-                WriteToPlayer(null, $"The host will go to sleep." + TextColor.Green);
+                WriteToPlayer(null, $"The host will go to bed." + TextColor.Green);
                 Sleeping.ShouldSleepOverwrite = true;
             }
         }
