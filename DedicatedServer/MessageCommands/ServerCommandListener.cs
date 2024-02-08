@@ -168,7 +168,7 @@ namespace DedicatedServer.MessageCommands
                 case "mbp": // /message ServerBot mbp on
                 case "movebuildpermission":
                 case "movepermission":
-                    MoveBuildPermission(sourceFarmer, param);
+                    MoveBuildPermissionSub(sourceFarmer, param);
                     break;
 
                 default:
@@ -259,7 +259,7 @@ namespace DedicatedServer.MessageCommands
         /// <br/>   or go to bed, the next day begins.On a second send, the host will get
         /// <br/>   up and the mod's normal behavior will be restored.
         /// </summary>
-        /// <param name="id">ID of the player who requested the command</param>
+        /// <param name="farmer">The player who requested the command</param>
         private void Sleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
@@ -360,9 +360,9 @@ namespace DedicatedServer.MessageCommands
         /// <br/>   As the host you can run commands in the chat box, using a forward slash(/) before the command.
         /// <br/>   See: <seealso href="https://stardewcommunitywiki.com/Multiplayer"/>
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="farmer">The player who requested the command</param>
         /// <param name="param"></param>
-        private void MoveBuildPermission(Farmer farmer, string param)
+        private void MoveBuildPermissionSub(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
             {
@@ -370,9 +370,7 @@ namespace DedicatedServer.MessageCommands
                 return;
             }
 
-            var moveBuildPermissionParameter = new List<string>() { "off", "owned", "on" };
-
-            if (moveBuildPermissionParameter.Any(param.Equals))
+            if (MoveBuildPermission.parameter.Any(param.Equals))
             {
                 if (config.MoveBuildPermission == param)
                 {
@@ -381,14 +379,13 @@ namespace DedicatedServer.MessageCommands
                 else
                 {
                     config.MoveBuildPermission = param;
-                    WriteToPlayer(null, $"Changed MoveBuildPermission to {config.MoveBuildPermission}" + TextColor.Green);
-                    chatBox.textBoxEnter("/mbp " + config.MoveBuildPermission);
+                    MoveBuildPermission.Change(config.MoveBuildPermission);
                     helper.WriteConfig(config);
                 }
             }
             else
             {
-                WriteToPlayer(farmer, $"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", moveBuildPermissionParameter.ToArray())}" + TextColor.Red);
+                WriteToPlayer(farmer, $"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", MoveBuildPermission.parameter.ToArray())}" + TextColor.Red);
             }
         }
 

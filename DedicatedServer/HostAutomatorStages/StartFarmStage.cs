@@ -32,6 +32,7 @@ namespace DedicatedServer.HostAutomatorStages
         private PauseCommandListener pauseCommandListener = null;
         private ServerCommandListener serverCommandListener = null;
         private MultiplayerOptions multiplayerOptions = null;
+        private MoveBuildPermission moveBuildPermission = null;
         private Wallet wallet = null;
 
         public StartFarmStage(IModHelper helper, IMonitor monitor, ModConfig config) : base(helper)
@@ -285,6 +286,8 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.isCustomized.Value = true;
                 Game1.multiplayerMode = 2;
 
+                MoveBuildPermission.Change(config.MoveBuildPermission);
+
                 // Start game
                 menu.createdNewCharacter(true);
             }
@@ -330,10 +333,6 @@ namespace DedicatedServer.HostAutomatorStages
             // create a new one). This would require a lot of work, and the mailbox part might
             // be totally impossible.
 
-            // The command movebuildpermission is a standard command.
-            // The server must be started, the value is set accordingly after each start
-            chatBox.textBoxEnter("/mbp " + config.MoveBuildPermission);
-
             //We set bot mining lvl to 10 so he doesn't lvlup passively
             Game1.player.MiningLevel = 10;
             passwordValidation = new PasswordValidation(helper, config, chatBox);
@@ -349,6 +348,7 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 MultiplayerOptions.TryActivatingInviteCode();
             }
+            moveBuildPermission = new MoveBuildPermission(chatBox);
             wallet = new Wallet(chatBox);
 
             buildCommandListener = new BuildCommandListener(chatBox);
