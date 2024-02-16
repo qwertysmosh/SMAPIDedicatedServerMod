@@ -47,13 +47,17 @@ namespace DedicatedServer.MessageCommands
 
             string command = tokens[0].ToLower();
 
-            if(Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
+            var sourceFarmer = Game1.otherFarmers.Values
+                .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
+                .FirstOrDefault()
+                ?? Game1.player;
+
+            if (Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
             {
                 switch (command)
                 {
                     case "letmeplay":
-                        chatBox.textBoxEnter($"The host is now a player, all host functions are deactivated." + TextColor.Green);
-                        HostAutomation.LetMePlay();
+                        LetMePlay(sourceFarmer);
                         break;
 
                     #region DEBUG_COMMANDS
@@ -76,14 +80,23 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "farm":
-                        var farm = Game1.getLocationFromName("farm") as Farm;
-                        var mainFarmHouseEntry = farm.GetMainFarmHouseEntry();
-                        Game1.player.warpFarmer(new Warp(mainFarmHouseEntry.X, mainFarmHouseEntry.Y, farm.NameOrUniqueName, mainFarmHouseEntry.X, mainFarmHouseEntry.Y, false, false));
+                        Game1.player.warpFarmer(WarpPoints.farmWarp);
+                        break;
+
+                    case "house":
+                        Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                         break;
 
                     case "mine":
-                        var mine = Game1.getLocationFromName("Mine") as Mine;
-                        Game1.player.warpFarmer(new Warp(18, 13, mine.NameOrUniqueName, 18, 13, false));
+                        Game1.player.warpFarmer(WarpPoints.mineWarp);
+                        break;
+
+                    case "town":
+                        Game1.player.warpFarmer(WarpPoints.townWarp);
+                        break;
+
+                    case "beach":
+                        Game1.player.warpFarmer(WarpPoints.beachWarp);
                         break;
 
                     case "location":
@@ -106,11 +119,6 @@ namespace DedicatedServer.MessageCommands
 
             string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
 
-            var sourceFarmer = Game1.otherFarmers.Values
-                .Where(farmer => farmer.UniqueMultiplayerID == e.SourceFarmerId)
-                .FirstOrDefault()
-                ?? Game1.player;
-
             switch (command)
             {
                 case "takeover": // /message ServerBot TakeOver
@@ -123,6 +131,10 @@ namespace DedicatedServer.MessageCommands
 
                 case "invitecode": // /message ServerBot InviteCode
                     InviteCode(sourceFarmer);
+                    break;
+
+                case "forceinvitecode": // /message ServerBot ForceInviteCode
+                    ForceInviteCode(sourceFarmer);
                     break;
 
                 case "invisible": // /message ServerBot Invisible
@@ -156,12 +168,24 @@ namespace DedicatedServer.MessageCommands
                 case "mbp": // /message ServerBot mbp on
                 case "movebuildpermission":
                 case "movepermission":
-                    MoveBuildPermission(sourceFarmer, param);
+                    MoveBuildPermissionSub(sourceFarmer, param);
                     break;
 
                 default:
                     break;
             }
+        }
+
+        private void LetMePlay(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.LetMePlay))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            WriteToPlayer(null, $"The host is now a player, all host functions are deactivated." + TextColor.Green);
+            HostAutomation.LetMePlay();
         }
 
         private void TakeOver(Farmer farmer)
@@ -173,7 +197,7 @@ namespace DedicatedServer.MessageCommands
             }
 
             WriteToPlayer(null, $"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
-            HostAutomation.TakeOver();
+            HostAutomation.Reset();
         }
         
         private void SafeInviteCode(Farmer farmer)
@@ -202,8 +226,21 @@ namespace DedicatedServer.MessageCommands
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
             }
+            
+            WriteToPlayer(farmer, 
+                String.Format(Game1.content.LoadString("Strings\\UI:Server_InviteCode"), MultiplayerOptions.InviteCode) + 
+                ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
+        }
 
-            WriteToPlayer(farmer, $"Invite code: {MultiplayerOptions.InviteCode}" + ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
+        private void ForceInviteCode(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceInviteCode))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            MultiplayerOptions.TryActivatingInviteCode();
         }
 
         private void InvisibleSub(Farmer farmer)
@@ -224,7 +261,7 @@ namespace DedicatedServer.MessageCommands
         /// <br/>   or go to bed, the next day begins.On a second send, the host will get
         /// <br/>   up and the mod's normal behavior will be restored.
         /// </summary>
-        /// <param name="id">ID of the player who requested the command</param>
+        /// <param name="farmer">The player who requested the command</param>
         private void Sleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
@@ -246,7 +283,7 @@ namespace DedicatedServer.MessageCommands
             }
             else
             {
-                WriteToPlayer(null, $"The host will go to sleep." + TextColor.Green);
+                WriteToPlayer(null, $"The host will go to bed." + TextColor.Green);
                 Sleeping.ShouldSleepOverwrite = true;
             }
         }
@@ -325,9 +362,9 @@ namespace DedicatedServer.MessageCommands
         /// <br/>   As the host you can run commands in the chat box, using a forward slash(/) before the command.
         /// <br/>   See: <seealso href="https://stardewcommunitywiki.com/Multiplayer"/>
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="farmer">The player who requested the command</param>
         /// <param name="param"></param>
-        private void MoveBuildPermission(Farmer farmer, string param)
+        private void MoveBuildPermissionSub(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
             {
@@ -335,9 +372,7 @@ namespace DedicatedServer.MessageCommands
                 return;
             }
 
-            var moveBuildPermissionParameter = new List<string>() { "off", "owned", "on" };
-
-            if (moveBuildPermissionParameter.Any(param.Equals))
+            if (MoveBuildPermission.parameter.Any(param.Equals))
             {
                 if (config.MoveBuildPermission == param)
                 {
@@ -346,14 +381,13 @@ namespace DedicatedServer.MessageCommands
                 else
                 {
                     config.MoveBuildPermission = param;
-                    WriteToPlayer(null, $"Changed MoveBuildPermission to {config.MoveBuildPermission}" + TextColor.Green);
-                    chatBox.textBoxEnter("/mbp " + config.MoveBuildPermission);
+                    MoveBuildPermission.Change(config.MoveBuildPermission);
                     helper.WriteConfig(config);
                 }
             }
             else
             {
-                WriteToPlayer(farmer, $"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", moveBuildPermissionParameter.ToArray())}" + TextColor.Red);
+                WriteToPlayer(farmer, $"Only the following parameters are valid for MoveBuildPermission: {String.Join(", ", MoveBuildPermission.parameter.ToArray())}" + TextColor.Red);
             }
         }
 

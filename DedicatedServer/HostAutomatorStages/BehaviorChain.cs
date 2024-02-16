@@ -36,7 +36,7 @@ namespace DedicatedServer.HostAutomatorStages
 
             var chain = new BehaviorLink[] {
                 new UpdateStateBehaviorLink(),
-                new ProcessPauseBehaviorLink(),
+                new ProcessPauseBehaviorLink(helper),
                 new ProcessWaitTicksBehaviorLink(),
                 new SkipEventsBehaviorLink(),
                 new ProcessDialogueBehaviorLink(config),

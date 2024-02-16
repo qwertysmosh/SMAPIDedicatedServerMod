@@ -1,4 +1,5 @@
-﻿using StardewValley;
+﻿using DedicatedServer.Utils;
+using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
@@ -55,10 +56,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
-                    var farmHouse = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-                    var entryLocation = farmHouse.getEntryLocation();
-                    var warp = new Warp(entryLocation.X, entryLocation.Y, farmHouse.NameOrUniqueName, entryLocation.X, entryLocation.Y, false);
-                    Game1.player.warpFarmer(warp);
+                    Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                     state.WarpToSleep();
                 }
             } else if (!Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && Utils.Sleeping.IsSleeping())

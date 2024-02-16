@@ -48,6 +48,7 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
 - `TakeOver`: The host player returns control to the host, all host functions are switched on. Cancels the [`LetMePlay`](#host-in-game-command) command
 - `SafeInviteCode`: A file `invite_code.txt` with the invitation code is created in this mods folder. If there is no invitation code, an empty string is saved.
 - `InviteCode`: The invitation code is printed.
+- `ForceInviteCode`: Forces the invitation code by closing and reopening the multiplayer server. There is an 8 second warning before the server stops, after another 2 seconds it is restarted.
 - `Invisible`: (Toggle command) \
   Toggle the visibility of the farm host.
 - `Sleep`: (Toggle command) \
@@ -77,7 +78,8 @@ Administration:
 
 All these commands only work if you are the host. This allows you to take control of the server. The host sends the commands by entering them directly, without anything before or after:
 
-- `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller.
+- `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
+  Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
 ## Running the Server on Linux Without GUI
 

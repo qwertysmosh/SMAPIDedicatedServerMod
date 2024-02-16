@@ -71,6 +71,12 @@ namespace DedicatedServer.Config
         public string MoveBuildPermission { get; set; } = "off";
 
         /// <summary>
+        ///         Sets whether an attempt should be made to generate an
+        /// <br/>   invitation code when the server is restarted.
+        /// </summary>
+        public bool TryActivatingInviteCode { get; set; } = true;
+
+        /// <summary>
         ///         Password used to log in
         /// <br/>
         /// <br/>   Must be changed to a secure password
@@ -110,6 +116,11 @@ namespace DedicatedServer.Config
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
+        public bool LetMePlay { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
         public bool TakeOver { get; set; } = true;
 
         /// <summary>
@@ -121,6 +132,11 @@ namespace DedicatedServer.Config
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
         public bool InviteCode { get; set; } = true;
+        
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceInviteCode { get; set; } = true;
 
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>

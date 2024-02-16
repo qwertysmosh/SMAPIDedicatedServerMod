@@ -46,6 +46,7 @@ namespace DedicatedServer.MessageCommands
                 }
 
                 Game1.netWorldState.Value.IsPaused = !Game1.netWorldState.Value.IsPaused;
+
                 if (Game1.netWorldState.Value.IsPaused)
                 {
                     chatBox.globalInfoMessage("Paused");

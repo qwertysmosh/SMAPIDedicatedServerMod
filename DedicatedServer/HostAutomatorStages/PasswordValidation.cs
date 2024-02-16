@@ -58,8 +58,7 @@ namespace DedicatedServer.HostAutomatorStages
 
             chatBox.ChatReceived += chatReceived;
             helper.Events.Multiplayer.PeerDisconnected += PlayerHasLoggedOut;
-            //Host should not have access
-            //LogIn(Game1.player.UniqueMultiplayerID);
+            AddId(Game1.player.UniqueMultiplayerID);
             passwordValidationDisabled = false;
         }
 

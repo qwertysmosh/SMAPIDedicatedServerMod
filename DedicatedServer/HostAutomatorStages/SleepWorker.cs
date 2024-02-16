@@ -80,14 +80,13 @@ namespace DedicatedServer.HostAutomatorStages
                     if (HostAutomation.EnableHostAutomation)
                     {
                         AddOnDayStarted(OnDayStartedWorker);
-                        HostAutomation.PreventPause = true;
+                        HostAutomation.PreventPauseUntilNextDay();
                         _ShouldSleepOverwrite = true;
                     }
                 }
                 else
                 {
                     _ShouldSleepOverwrite = false;
-                    AddOneSecondUpdateTicked(OnOneSecondUpdateTicked);
                 }
             }
             get
@@ -106,38 +105,6 @@ namespace DedicatedServer.HostAutomatorStages
             helper.Events.GameLoop.DayStarted -= handler;
         }
 
-        private static void AddOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked += handler;
-        }
-
-        private static void RemoveOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked -= handler;
-        }
-
-        /// <summary>
-        ///         Waits until the host is back on his feet before the handler
-        /// <br/>   <see cref="OnDayStartedWorker"/> is removed.
-        /// <br/>   
-        /// <br/>   Deactivating Sleep restores the normal behavior of the mod,
-        /// <br/>   when the host is not controlled by a player.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void OnOneSecondUpdateTicked(object sender, OneSecondUpdateTickedEventArgs e)
-        {
-            if (false == IsSleeping())
-            {
-                RemoveOneSecondUpdateTicked(OnOneSecondUpdateTicked);
-                RemoveOnDayStarted(OnDayStartedWorker);
-                if (HostAutomation.EnableHostAutomation)
-                {
-                    HostAutomation.TakeOver();
-                }
-            }
-        }
-
         /// <summary>
         ///         Resets the variable <see cref="ShouldSleepOverwrite"/> at the beginning of the day.
         /// </summary>
@@ -146,6 +113,7 @@ namespace DedicatedServer.HostAutomatorStages
         private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)
         {
             ShouldSleepOverwrite = false;
+            RemoveOnDayStarted(OnDayStartedWorker);
         }
     }
 }
