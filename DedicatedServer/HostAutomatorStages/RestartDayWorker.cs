@@ -53,7 +53,7 @@ namespace DedicatedServer.HostAutomatorStages
         public static void SavesGameRestartsDay(int time = 0, bool keepsCurrentDay = true, bool quit = false, Action<int> action = null)
         {
             HostAutomation.EnableHostAutomation = true;
-            HostAutomation.PreventPause = true;
+            HostAutomation.PreventPauseUntilNextDay();
 
             if (0 < RestartDayWorker.time)
             {
@@ -105,8 +105,6 @@ namespace DedicatedServer.HostAutomatorStages
             Game1.player.isInBed.Value = true;
             Game1.currentLocation.answerDialogueAction("Sleep_Yes", null);
 
-            AddOnSaved(OnSavedActivateHostAutomation);
-
             if (quit)
             {
                 AddOnSaved(OnSavedQuit);
@@ -143,18 +141,6 @@ namespace DedicatedServer.HostAutomatorStages
             RemoveOnSaved(OnSavedQuit);
 
             Game1.quit = true;
-        }
-
-        /// <summary>
-        ///         After a new day has dawned, the host should take over control again
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public static void OnSavedActivateHostAutomation(object sender, SavedEventArgs e)
-        {
-            RemoveOnSaved(OnSavedActivateHostAutomation);
-
-            HostAutomation.TakeOver();
         }
     }
 }

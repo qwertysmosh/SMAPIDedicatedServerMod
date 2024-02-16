@@ -20,6 +20,7 @@ namespace DedicatedServer.HostAutomatorStages
     {
         public InvisibleBehaviorLink(BehaviorLink next = null) : base(next)
         {
+            HostAutomation.ResetAction += new EventHandler((d, e) => Reset() );
         }
 
         /// <summary>
@@ -29,6 +30,9 @@ namespace DedicatedServer.HostAutomatorStages
         /// <br/>   false: Host is visible
         /// <br/>   
         /// <br/>   Works only if <see cref="OnUpdateTicked"/> ticks
+        /// <br/>   Otherwise you have to use:
+        /// <br/>   - <see cref="SetVisibleDisplayOnChanges"/> or 
+        /// <br/>   - <see cref="Invisible.SetVisibleDisplayOnChanges()"/>
         /// </summary>
         protected static bool InvisibleOverwrite { set; get; } = true;
 
@@ -107,5 +111,12 @@ namespace DedicatedServer.HostAutomatorStages
             return changed;
         }
 
+        /// <summary>
+        ///         Resets this class to its initial state
+        /// </summary>
+        private static void Reset()
+        {
+            InvisibleOverwrite = true;
+        }
     }
 }

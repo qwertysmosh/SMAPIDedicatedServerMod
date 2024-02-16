@@ -197,7 +197,7 @@ namespace DedicatedServer.MessageCommands
             }
 
             WriteToPlayer(null, $"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
-            HostAutomation.TakeOver();
+            HostAutomation.Reset();
         }
         
         private void SafeInviteCode(Farmer farmer)

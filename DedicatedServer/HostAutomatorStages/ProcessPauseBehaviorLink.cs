@@ -1,18 +1,47 @@
-﻿using StardewModdingAPI;
+﻿using System;
+using System.ComponentModel;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.Locations;
-using StardewValley.Menus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
     internal class ProcessPauseBehaviorLink : BehaviorLink
     {
+        [DefaultValue(DisablePause)]
+        private enum internalStates
+        {
+            /// <summary> Transitional action, disables pause </summary>
+            DisablePause = 0,
+
+            /// <summary> The server runs as long as players are online </summary>
+            WaitingForPlayersToLeave,
+
+            /// <summary> Transitional action, enables pause </summary>
+            EnablePause,
+
+            /// <summary> The server is paused as long as no players are online </summary>
+            WaitingForUpcomingPlayers,
+
+
+            /// <summary> Prevents the pause state </summary>
+            PreventPause,
+
+            /// <summary> Disables the pause once </summary>
+            PauseDisabled,
+        }
+
+        private static IModHelper helper = null;
+
+        private static bool addedHandler = false;
+
+        private static internalStates internalState = default;
+
+        /// <summary>
+        ///         Event so that others can reset their own state.
+        /// </summary>
+        protected static event EventHandler ResetAction = null;
+
         /// <summary>
         ///         This allows you to deactivate the execution of host automation. Default is true
         /// <br/>   
@@ -24,99 +53,105 @@ namespace DedicatedServer.HostAutomatorStages
         protected static bool enableHostAutomation = true;
 
         /// <summary>
-        ///         Prevents the pause state. Default is false
-        /// <br/>   
-        /// <br/>   true : The server never switches to pause mode
-        /// <br/>   false: The normal behavior of this mod is running
+        /// Alias for <c>Game1.netWorldState.Value.IsPaused</c>
         /// </summary>
-        protected static bool preventPause = false;
-
-        private bool IsPaused
+        private static bool IsPaused
         {
             set { Game1.netWorldState.Value.IsPaused = value; }
             get { return Game1.netWorldState.Value.IsPaused; }
         }
 
-        public ProcessPauseBehaviorLink(BehaviorLink next = null) : base(next)
+        public ProcessPauseBehaviorLink(IModHelper helper, BehaviorLink next = null) : base(next)
         {
+            ProcessPauseBehaviorLink.helper = helper;
         }
 
-        private enum internalStates
+        /// <summary>
+        /// Prevents the pause state.
+        /// </summary>
+        protected static void PreventPauseUntilNextDay()
         {
-            /// <summary> The server runs as long as players are online </summary>
-            WaitingForPlayersToLeave = 0,
-
-            /// <summary> Transitional action, enables pause </summary>
-            EnablePause,
-
-            /// <summary> The server is paused as long as no players are online </summary>
-            WaitingForUpcomingPlayers,
-
-            /// <summary> Transitional action, disables pause </summary>
-            DisablePause,
-
-
-            /// <summary> Transitional action, disables pause </summary>
-            PreparePreventPause,
-
-            /// <summary>
-            ///         Prevents the pause state. You can switch to this state 
-            /// <br/>   from any state and switch back to the original state.
-            /// </summary>
-            PreventPause,
-
-
-            /// <summary>
-            ///         If the server is running, you can pause the game by setting
-            /// <br/>   <see cref="Game1.netWorldState.Value.IsPaused"/> to true.
-            /// <br/>   To go back, the same value must be set to false.
-            /// <br/>   
-            /// <br/>   So you can come from state <see cref="WaitingForPlayersToLeave"/>
-            /// <br/>   to this one and go back.
-            /// </summary>
-            ExternalPause,
-
-            /// <summary>
-            ///         If the server is paused, you can run the game by setting
-            /// <br/>   <see cref="Game1.netWorldState.Value.IsPaused"/> to false.
-            /// <br/>   To go back, the same value must be set to true.
-            /// <br/>   
-            /// <br/>   So you can come from state <see cref="WaitingForUpcomingPlayers"/>
-            /// <br/>   to this one and go back.
-            /// </summary>
-            ExternalPauseDisabled,
+            internalState = internalStates.PreventPause;
+            AddOnDayStarted(OnDayStartedWorker);
         }
 
-        private internalStates internalState = internalStates.WaitingForPlayersToLeave;
+        /// <summary>
+        /// Disables the pause once.
+        /// </summary>
+        protected static void PauseDisabledUntilNextDay()
+        {
+            internalState = internalStates.PauseDisabled;
+            IsPaused = false;
+            AddOnDayStarted(OnDayStartedWorker);
+        }
 
-        private internalStates saveInternalState;
-        private bool saveIsPaused;
+        /// <summary>
+        ///         Resets this class to its initial state
+        /// </summary>
+        protected static void Reset()
+        {
+            internalState = default;
+            enableHostAutomation = true;
+            RemoveOnDayStarted(OnDayStartedWorker);
 
+            OnResetAction();
+        }
+
+        protected static void OnResetAction()
+        {
+            ResetAction?.Invoke(null, EventArgs.Empty);
+        }
+
+        // <![CDATA[
+        //    stateDiagram-v2
+        //
+        //    [*] --> init
+        //
+        //    init : *
+        //    states --> init : Init()
+        //    states --> init : ⚡newDay
+        //
+        //    init --> states
+        //
+        //    states : ProcessPauseBehaviorLink
+        //    state states {
+        //        [*] --> core
+        //        PreventPause : <center>PreventPause\n----\nIsPause = false\nprocessNext()\n⚡ += newDay</center>
+        //        core --> PreventPause : PreventPauseUntilNextDay()
+        //
+        //
+        //        PauseDisabled : <center>PauseDisabled\n----\nprocessNext()\n⚡ += newDay</center>
+        //        core --> PauseDisabled : PauseDisabledUntilNextDay()
+        //    }
+        //
+        //    core : core
+        //    state core {
+        //        [*] --> DisablePause
+        //        DisablePause --> WaitingForPlayersToLeave
+        //        WaitingForPlayersToLeave --> EnablePause : 1 > player
+        //        EnablePause --> WaitingForUpcomingPlayers
+        //        WaitingForUpcomingPlayers --> DisablePause : 0 < player
+        //
+        //        WaitingForUpcomingPlayers : <center>WaitingForUpcomingPlayers\n----\nprocessNext()</center>
+        //    }
+        // ]]>
         public override void Process(BehaviorState state)
         {
-            if (preventPause && 
-                internalStates.PreventPause != internalState)
-            {
-                saveInternalState = internalState;
-                saveIsPaused = IsPaused;
-                internalState = internalStates.PreparePreventPause;
-            }
-
             switch (internalState)
             {
-                case internalStates.WaitingForPlayersToLeave:
-                    if (IsPaused)
-                    {
-                        internalState = internalStates.ExternalPause;
-                        return; 
-                    }
+                case internalStates.DisablePause:
+                    IsPaused = false;
+                    internalState = internalStates.WaitingForPlayersToLeave;
+                    return;
 
+                case internalStates.WaitingForPlayersToLeave:
                     if (  0   == state.GetNumOtherPlayers() && // If no other player is online
                         false == Game1.isFestival()         )  // if it is not a festival
                     {
                         internalState = internalStates.EnablePause;
                         return;
                     }
+
                     if (enableHostAutomation)
                     {
                         processNext(state);
@@ -129,35 +164,26 @@ namespace DedicatedServer.HostAutomatorStages
                     return;
 
                 case internalStates.WaitingForUpcomingPlayers:
+
                     if (false == IsPaused)
                     {
-                        internalState = internalStates.ExternalPauseDisabled;
-                        return;
+                        IsPaused = true;
                     }
 
-                    if (  0  <  state.GetNumOtherPlayers() || 
+                    if (  0  <  state.GetNumOtherPlayers() ||
                         true == Game1.isFestival()         )
                     {
                         internalState = internalStates.DisablePause;
+                        return;
                     }
                     return;
 
-                case internalStates.DisablePause:
-                    IsPaused = false;
-                    internalState = internalStates.WaitingForPlayersToLeave;
-                    return;
-
-                case internalStates.PreparePreventPause:
-                    IsPaused = false;
-                    internalState = internalStates.PreventPause;
-                    goto case internalStates.PreventPause;
+                // A reset must be carried out to exit the states, <see cref="Reset"/>.
 
                 case internalStates.PreventPause:
-                    if (false == preventPause)
+                    if (IsPaused)
                     {
-                        internalState = saveInternalState;
-                        IsPaused = saveIsPaused;
-                        return;
+                        IsPaused = false;
                     }
                     if (enableHostAutomation)
                     {
@@ -165,26 +191,33 @@ namespace DedicatedServer.HostAutomatorStages
                     }
                     return;
 
-                case internalStates.ExternalPause:
-                    if (false == IsPaused)
-                    {
-                        internalState = internalStates.WaitingForPlayersToLeave;
-                        return;
-                    }
-                    return;
-
-                case internalStates.ExternalPauseDisabled:
-                    if (true == IsPaused)
-                    {
-                        internalState = internalStates.WaitingForUpcomingPlayers;
-                        return;
-                    }
+                case internalStates.PauseDisabled:
                     if (enableHostAutomation)
                     {
                         processNext(state);
                     }
                     return;
             }
+        }
+
+        private static void AddOnDayStarted(EventHandler<DayStartedEventArgs> handler)
+        {
+            if (false == addedHandler)
+            {
+                addedHandler = true;
+                helper.Events.GameLoop.DayStarted += handler;
+            }
+        }
+
+        private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
+        {
+            addedHandler = false;
+            helper.Events.GameLoop.DayStarted -= handler;
+        }
+
+        private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)
+        {
+            Reset();
         }
     }
 }

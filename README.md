@@ -78,7 +78,8 @@ Administration:
 
 All these commands only work if you are the host. This allows you to take control of the server. The host sends the commands by entering them directly, without anything before or after:
 
-- `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller.
+- `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
+  Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
 ## Running the Server on Linux Without GUI
 
