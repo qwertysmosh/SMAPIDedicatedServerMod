@@ -53,8 +53,9 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
   Toggle the visibility of the farm host.
 - `Sleep`: (Toggle command) \
   When it is sent, the host goes to bed. When all players leave the game or go to bed, the next day begins. On a second send, the host will get up and the mod's normal behavior will be restored.
-- `ResetDay`: Kicks all players and restarts the day.
-- `Shutdown`: Kicks all players and starts a new day.
+- `ForceSleep`: Kick out all players and starts a new day.
+- `ForceResetDay`: Kick out all players and restarts the day.
+- `ForceShutDown`: Kick out all players, start a new day and shut down the server.
 - `WalletSeparate`: Separate the wallets tonight.
 - `WalletMerge`: Connect the wallets tonight.
 - `SpawnMonster`: (Toggle command, Saved in config) \
