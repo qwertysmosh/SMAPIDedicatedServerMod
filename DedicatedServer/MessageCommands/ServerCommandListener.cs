@@ -153,7 +153,7 @@ namespace DedicatedServer.MessageCommands
                     break;
 
                 case "forcesleep": // /message ServerBot ForceSleep
-                    RestartDay.ForceSleep((seconds) => chatBox.textBoxEnter($"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
+                    ForceSleep(sourceFarmer);
                     break;
 
                 case "forceresetday": // /message ServerBot ForceResetDay
@@ -269,7 +269,7 @@ namespace DedicatedServer.MessageCommands
         /// <summary>
         ///         (Toggle command)
         /// <br/>   When it is sent, the host goes to bed.When all players leave the game
-        /// <br/>   or go to bed, the next day begins.On a second send, the host will get
+        /// <br/>   or go to bed, the next day begins. On a second send, the host will get
         /// <br/>   up and the mod's normal behavior will be restored.
         /// </summary>
         /// <param name="farmer">The player who requested the command</param>
@@ -297,6 +297,17 @@ namespace DedicatedServer.MessageCommands
                 WriteToPlayer(null, $"The host will go to bed." + TextColor.Green);
                 Sleeping.ShouldSleepOverwrite = true;
             }
+        }
+
+        private void ForceSleep(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceSleep))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+            
+            RestartDay.ForceSleep((seconds) => chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
         }
 
         private void ResetDay(Farmer farmer)
