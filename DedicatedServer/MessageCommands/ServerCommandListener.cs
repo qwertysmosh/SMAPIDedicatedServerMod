@@ -266,13 +266,6 @@ namespace DedicatedServer.MessageCommands
             WriteToPlayer(farmer, $"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
         }
 
-        /// <summary>
-        ///         (Toggle command)
-        /// <br/>   When it is sent, the host goes to bed.When all players leave the game
-        /// <br/>   or go to bed, the next day begins. On a second send, the host will get
-        /// <br/>   up and the mod's normal behavior will be restored.
-        /// </summary>
-        /// <param name="farmer">The player who requested the command</param>
         private void Sleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
@@ -374,18 +367,6 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        /// <summary>
-        ///         (Saved in config)
-        /// <br/>   Changes farmhands permissions to move buildings from the Carpenter's shop.
-        /// <br/>   Set to `off` to entirely disable moving buildings, set to `owned` to allow
-        /// <br/>   farmhands to move buildings that they purchased, or set to `on` to allow
-        /// <br/>   moving all buildings.
-        /// <br/>   
-        /// <br/>   As the host you can run commands in the chat box, using a forward slash(/) before the command.
-        /// <br/>   See: <seealso href="https://stardewcommunitywiki.com/Multiplayer"/>
-        /// </summary>
-        /// <param name="farmer">The player who requested the command</param>
-        /// <param name="param"></param>
         private void MoveBuildPermissionSub(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
