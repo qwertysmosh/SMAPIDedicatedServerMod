@@ -3,13 +3,11 @@ using DedicatedServer.Config;
 using DedicatedServer.HostAutomatorStages;
 using DedicatedServer.Utils;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace DedicatedServer.MessageCommands
@@ -62,6 +60,15 @@ namespace DedicatedServer.MessageCommands
 
                     #region DEBUG_COMMANDS
                     #if false
+
+                    case "emptyinventoryall": // /message serverbot EmptyInventoryAll
+                        ServerHost.EmptyHostInventory();
+                        break;
+
+                    case "menu":
+                        var menu = Game1.activeClickableMenu;
+                        chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
+                        break;
 
                     case "letmecontrol":
                         HostAutomation.LetMeControl();
@@ -145,12 +152,16 @@ namespace DedicatedServer.MessageCommands
                     Sleep(sourceFarmer);
                     break;
 
-                case "resetday": // /message ServerBot ResetDay
-                    ResetDay(sourceFarmer);
+                case "forcesleep": // /message ServerBot ForceSleep
+                    ForceSleep(sourceFarmer);
                     break;
 
-                case "shutdown": // /message ServerBot Shutdown
-                    Shutdown(sourceFarmer);
+                case "forceresetday": // /message ServerBot ForceResetDay
+                    ForceResetDay(sourceFarmer);
+                    break;
+
+                case "forceshutdown": // /message ServerBot ForceShutdown
+                    ForceShutdown(sourceFarmer);
                     break;
 
                 case "walletseparate": // /message ServerBot WalletSeparate
@@ -255,13 +266,6 @@ namespace DedicatedServer.MessageCommands
             WriteToPlayer(farmer, $"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
         }
 
-        /// <summary>
-        ///         (Toggle command)
-        /// <br/>   When it is sent, the host goes to bed.When all players leave the game
-        /// <br/>   or go to bed, the next day begins.On a second send, the host will get
-        /// <br/>   up and the mod's normal behavior will be restored.
-        /// </summary>
-        /// <param name="farmer">The player who requested the command</param>
         private void Sleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
@@ -288,9 +292,20 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void ResetDay(Farmer farmer)
+        private void ForceSleep(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ResetDay))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceSleep))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+            
+            RestartDay.ForceSleep((seconds) => chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
+        }
+
+        private void ForceResetDay(Farmer farmer)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceResetDay))
             {
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
@@ -299,9 +314,9 @@ namespace DedicatedServer.MessageCommands
             RestartDay.ResetDay((seconds) => WriteToPlayer(null, $"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void Shutdown(Farmer farmer)
+        private void ForceShutdown(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Shutdown))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceShutdown))
             {
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
@@ -352,18 +367,6 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        /// <summary>
-        ///         (Saved in config)
-        /// <br/>   Changes farmhands permissions to move buildings from the Carpenter's shop.
-        /// <br/>   Set to `off` to entirely disable moving buildings, set to `owned` to allow
-        /// <br/>   farmhands to move buildings that they purchased, or set to `on` to allow
-        /// <br/>   moving all buildings.
-        /// <br/>   
-        /// <br/>   As the host you can run commands in the chat box, using a forward slash(/) before the command.
-        /// <br/>   See: <seealso href="https://stardewcommunitywiki.com/Multiplayer"/>
-        /// </summary>
-        /// <param name="farmer">The player who requested the command</param>
-        /// <param name="param"></param>
         private void MoveBuildPermissionSub(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
