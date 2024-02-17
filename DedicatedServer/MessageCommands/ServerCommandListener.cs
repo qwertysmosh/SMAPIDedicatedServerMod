@@ -157,11 +157,11 @@ namespace DedicatedServer.MessageCommands
                     break;
 
                 case "forceresetday": // /message ServerBot ForceResetDay
-                    ResetDay(sourceFarmer);
+                    ForceResetDay(sourceFarmer);
                     break;
 
                 case "forceshutdown": // /message ServerBot ForceShutdown
-                    Shutdown(sourceFarmer);
+                    ForceShutdown(sourceFarmer);
                     break;
 
                 case "walletseparate": // /message ServerBot WalletSeparate
@@ -310,9 +310,9 @@ namespace DedicatedServer.MessageCommands
             RestartDay.ForceSleep((seconds) => chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void ResetDay(Farmer farmer)
+        private void ForceResetDay(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ResetDay))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceResetDay))
             {
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
@@ -321,9 +321,9 @@ namespace DedicatedServer.MessageCommands
             RestartDay.ResetDay((seconds) => WriteToPlayer(null, $"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void Shutdown(Farmer farmer)
+        private void ForceShutdown(Farmer farmer)
         {
-            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Shutdown))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceShutdown))
             {
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;
