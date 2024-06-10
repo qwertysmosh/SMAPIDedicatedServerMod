@@ -63,7 +63,7 @@ namespace DedicatedServer.Crops
             public bool HasExistedInIncompatibleSeason { get; set; }
             public bool OriginalRegrowAfterHarvest { get; set; }
             public bool HarvestableLastNight { get; set; }
-            public string Id { get; set; } // TODO: HarvestItemId
+            public string HarvestItemId { get; set; }
         }
 
         public CropSaver(IModHelper helper, IMonitor monitor, ModConfig config)
@@ -236,14 +236,14 @@ namespace DedicatedServer.Crops
 
                 if(0 < cropDictionary.Count)
                 {
-                    var harvestItemIds = cropDictionary.Values.Select(x => x.Id).Distinct().ToList();
+                    var harvestItemIds = cropDictionary.Values.Select(x => x.HarvestItemId).Distinct().ToList();
 
                     foreach (var harvestItemId in harvestItemIds)
                     {
                         harvestItemIdSeasonDictionary.Add(
                             harvestItemId, 
                             cropDictionary.Values
-                                .Where(c => c.Id == harvestItemId)
+                                .Where(c => c.HarvestItemId == harvestItemId)
                                 .First().OriginalSeasonsToGrowIn);
 
                         var global_crop = Game1.cropData.Values.Where(x => x.HarvestItemId == harvestItemId).FirstOrDefault();
@@ -336,7 +336,7 @@ namespace DedicatedServer.Crops
                                         HasExistedInIncompatibleSeason = false,
                                         OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest(),
                                         HarvestableLastNight = false,
-                                        Id = id,
+                                        HarvestItemId = id,
                                     };
 
                                     cropDictionary[cropLocation] = cd;
