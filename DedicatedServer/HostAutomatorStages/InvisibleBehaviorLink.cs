@@ -101,9 +101,9 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.displayFarmer = true;
                 // Refresh to make bot back to visible
                 Game1.player.warpFarmer(new Warp(
-                    Game1.player.getTileX(), Game1.player.getTileY(),
+                    (int)Game1.player.Tile.X, (int)Game1.player.Tile.Y,
                     Game1.player.currentLocation.Name,
-                    Game1.player.getTileX(), Game1.player.getTileY(),
+                    (int)Game1.player.Tile.X, (int)Game1.player.Tile.Y,
                     false, false));
                 changed = true;
             }

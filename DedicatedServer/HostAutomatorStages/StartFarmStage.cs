@@ -67,7 +67,7 @@ namespace DedicatedServer.HostAutomatorStages
             }
             
             MethodInfo info = typeof(LoadGameMenu).GetMethod("FindSaveGames", BindingFlags.Static | BindingFlags.NonPublic);
-            object result = info.Invoke(obj: null, parameters: Array.Empty<object>());
+            object result = info.Invoke(obj: null, parameters: new object[] { "" });
             List<Farmer> farmers = result as List<Farmer>;
             if (farmers == null)
             {
@@ -179,11 +179,11 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 if (config.PetSpecies == "cat")
                 {
-                    Game1.player.catPerson = true;
+                    Game1.player.whichPetType = StardewValley.Characters.Pet.type_cat;
                 }
                 else
                 {
-                    Game1.player.catPerson = false;
+                    Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
                 }
 
                 // Pet breed
@@ -198,10 +198,15 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 if (config.PetBreed.HasValue)
                 {
-                    Game1.player.whichPetBreed = config.PetBreed.Value;
-                } else
+                    if( (0 > config.PetBreed) || (3 < config.PetBreed) )
+                    {
+                        config.PetBreed = 0;
+                    }
+                    Game1.player.whichPetBreed = config.PetBreed.ToString();
+                }
+                else
                 {
-                    Game1.player.whichPetBreed = 0;
+                    Game1.player.whichPetBreed = "0";
                 }
 
                 // Farm type
@@ -308,8 +313,8 @@ namespace DedicatedServer.HostAutomatorStages
             // maybe we just have to sacrifice cellar-per-player. Or maybe we have to
             // update the value dynamically, and load new cellars whenever a new player
             // joins? Unclear...
-            //Game1.netWorldState.Value.HighestPlayerLimit.Value = int.MaxValue;
-            Game1.netWorldState.Value.CurrentPlayerLimit.Value = int.MaxValue;
+              Game1.netWorldState.Value.CurrentPlayerLimit = 16; // 32, int.MaxValue
+
             // NOTE: It will be very difficult, if not impossible, to remove the
             // cabin-per-player requirement. This requirement is very much built in
             // to much of the multiplayer networking connect / disconnect logic, and,
@@ -334,7 +339,7 @@ namespace DedicatedServer.HostAutomatorStages
             // be totally impossible.
 
             //We set bot mining lvl to 10 so he doesn't lvlup passively
-            Game1.player.MiningLevel = 10;
+            Game1.player.miningLevel.Value = 10;
             passwordValidation = new PasswordValidation(helper, config, chatBox);
             passwordValidation.Enable();
             automatedHost = new AutomatedHost(helper, monitor, config, chatBox);

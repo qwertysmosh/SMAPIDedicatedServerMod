@@ -104,7 +104,7 @@ If Stardew Valley was not installed in the default path, the installation path m
 
 ```text
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GamePath>D:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
   </PropertyGroup>
 ```

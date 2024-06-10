@@ -45,7 +45,8 @@ namespace DedicatedServer.HostAutomatorStages
         /// </returns>
         public static bool OthersInBed(int numOtherPlayers)
         {
-            return Game1.player.team.GetNumberReady("sleep") == (numOtherPlayers + (IsSleeping() ? 1 : 0));
+            // TODO: Logic and Parameter
+            return Game1.player.team.announcedSleepingFarmers.Count == (numOtherPlayers + (IsSleeping() ? 1 : 0));
         }
 
         /// <summary>
@@ -57,6 +58,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <br/>   false: The host should not go to bed</returns>
         public static bool ShouldSleep(int numOtherPlayers)
         {
+            // TODO: Logic and Parameter
             return (numOtherPlayers > 0 && (Game1.timeOfDay >= 2530 || OthersInBed(numOtherPlayers))) || ShouldSleepOverwrite;
         }
 
