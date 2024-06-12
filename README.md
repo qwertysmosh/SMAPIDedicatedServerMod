@@ -1,7 +1,13 @@
 # SMAPI Dedicated Server Mod for Stardew Valley
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.6-blue" />
+</p>
+
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
 
 ## Configuration File
+
 Upon running SMAPI with the mod installed for the first time, a `config.json` file will be generated in the mod's folder. This file specifies which farm will be loaded on startup, farm creation options, host automation details, and other mod configuration options. Default values will be provided, which can then be modified. Here is an overview of the available settings:
 
 ### Startup options
