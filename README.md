@@ -88,6 +88,19 @@ All these commands only work if you are the host. This allows you to take contro
 - `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
   Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
+## Use an 1.5 Game with 1.6 Server
+
+I don't know if it is possible or what will happen if you use a 1.5 savegame with this 1.6 server.
+If you want to do it, you need to do the following steps:
+
+- Back up your game data first
+- If you have an old version from before 1.6, you must delete the file
+  `AdditionalCropData` in the game directory. GropSaver then only works
+  for all plants planted from this point onwards.
+- If you use an old `config.json` file, the server will not start.
+  Delete the file and the file will be created with the default configuration.
+  Stop the server, change it according to your wishes and start the server.
+
 ## Running the Server on Linux Without GUI
 
 This mod can be run without the use of a GUI. To start the game, you must enter the following command:
