@@ -60,6 +60,12 @@ namespace DedicatedServer.MessageCommands
 
                     #region DEBUG_COMMANDS
                     #if false
+                    case "item":
+                        Item item;
+                        item = new StardewValley.Object(StardewValley.Object.woodID, 1);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 100);
+                        Game1.player.addItemToInventory(item);
+                        break;
 
                     case "emptyinventoryall": // /message serverbot EmptyInventoryAll
                         ServerHost.EmptyHostInventory();
@@ -69,11 +75,7 @@ namespace DedicatedServer.MessageCommands
                         var menu = Game1.activeClickableMenu;
                         chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
                         break;
-
-                    case "letmecontrol":
-                        HostAutomation.LetMeControl();
-                        break;
-                        
+                                            
                     case "multiplayer":
                         MultiplayerOptions.EnableServer = true;
                         break;
@@ -107,7 +109,7 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "location":
-                        var location = Game1.player.getTileLocation();
+                        var location = Game1.player.Tile;
                         chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
                         chatBox.textBoxEnter("x: " + location.X + ", y:" + location.Y);
                         break;

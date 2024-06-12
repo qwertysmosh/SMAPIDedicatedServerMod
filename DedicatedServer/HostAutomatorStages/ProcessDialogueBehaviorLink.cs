@@ -44,7 +44,7 @@ namespace DedicatedServer.HostAutomatorStages
                         int batsResponseIdx = -1;
                         int yesResponseIdx = -1;
                         int noResponseIdx = -1;
-                        // TODO: I could not reach this, so I could not test it
+                        
                         for (int i = 0; i < db.responses.Length; i++)
                         {
                             var response = db.responses[i];

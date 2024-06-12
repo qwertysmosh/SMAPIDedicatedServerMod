@@ -21,7 +21,7 @@ namespace DedicatedServer.Utils
         }
         public static bool IsWaitingToAttend()
         {
-            return ReadyCheckHelper.IsReady("festivalStart", Game1.player);
+            return ReadyCheckHelper.IsReady("festivalStart");
         }
         public static bool OthersWaitingToAttend(int numOtherPlayers)
         {
@@ -38,7 +38,7 @@ namespace DedicatedServer.Utils
 
         public static bool IsWaitingToLeave()
         {
-            return ReadyCheckHelper.IsReady("festivalEnd", Game1.player);
+            return ReadyCheckHelper.IsReady("festivalEnd");
         }
         public static bool OthersWaitingToLeave(int numOtherPlayers)
         {

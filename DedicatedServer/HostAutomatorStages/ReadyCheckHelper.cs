@@ -31,9 +31,15 @@ namespace DedicatedServer.HostAutomatorStages
             }
         }
 
-        public static bool IsReady(string checkName, Farmer player)
+        /// <summary>
+        ///         Get whether all required players are ready to proceed.
+        /// </summary>
+        /// <param name="checkName">The ready check ID.</param>
+        /// <returns>
+        ///         true : If all required players are ready
+        /// <br/>   false: If one required player is not ready</returns>
+        public static bool IsReady(string checkName)
         {
-            // TODO: This function checks, if all are ready. This needs to be changed to only player? only host?
             return Game1.netReady.IsReady(checkName);
         }
     }
