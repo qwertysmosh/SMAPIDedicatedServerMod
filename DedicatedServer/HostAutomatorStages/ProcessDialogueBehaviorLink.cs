@@ -44,7 +44,8 @@ namespace DedicatedServer.HostAutomatorStages
                         int batsResponseIdx = -1;
                         int yesResponseIdx = -1;
                         int noResponseIdx = -1;
-                        for (int i = 0; i < db.responses.Count; i++)
+                        
+                        for (int i = 0; i < db.responses.Length; i++)
                         {
                             var response = db.responses[i];
                             var lowercaseText = response.responseText.ToLower();

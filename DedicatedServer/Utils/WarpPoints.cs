@@ -83,9 +83,9 @@ namespace DedicatedServer.Utils
         {
 
             return new Warp(
-                farmer.getTileX(), farmer.getTileY(),
+                (int)farmer.Tile.X, (int)farmer.Tile.Y,
                 farmer.currentLocation.Name,
-                farmer.getTileX(), farmer.getTileY(),
+                (int)farmer.Tile.X, (int)farmer.Tile.Y,
                 false, false);
         }
     }

@@ -38,7 +38,7 @@ namespace DedicatedServer.HostAutomatorStages
                 {
                     var location = Game1.getLocationFromName(getLocationOfFestival());
                     var warp = new Warp(0, 0, location.NameOrUniqueName, 0, 0, false);
-                    Game1.player.team.SetLocalReady("festivalStart", ready: true);
+                    Game1.netReady.SetLocalReady("festivalStart", ready: true);
                     Game1.activeClickableMenu = new ReadyCheckDialog("festivalStart", allowCancel: true, delegate (Farmer who)
                     {
                         Game1.exitActiveMenu();
@@ -61,7 +61,7 @@ namespace DedicatedServer.HostAutomatorStages
                     {
                         rcd.closeDialog(Game1.player);
                     }
-                    Game1.player.team.SetLocalReady("festivalStart", false);
+                    Game1.netReady.SetLocalReady("festivalStart", false);
                     state.StopWaitingForFestivalAttendance();
                 }
             }

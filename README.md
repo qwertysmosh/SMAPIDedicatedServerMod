@@ -1,7 +1,13 @@
 # SMAPI Dedicated Server Mod for Stardew Valley
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.6-blue" />
+</p>
+
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
 
 ## Configuration File
+
 Upon running SMAPI with the mod installed for the first time, a `config.json` file will be generated in the mod's folder. This file specifies which farm will be loaded on startup, farm creation options, host automation details, and other mod configuration options. Default values will be provided, which can then be modified. Here is an overview of the available settings:
 
 ### Startup options
@@ -82,6 +88,19 @@ All these commands only work if you are the host. This allows you to take contro
 - `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
   Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
+## Use an 1.5 Game with 1.6 Server
+
+I don't know if it is possible or what will happen if you use a 1.5 savegame with this 1.6 server.
+If you want to do it, you need to do the following steps:
+
+- Back up your game data first
+- If you have an old version from before 1.6, you must delete the file
+  `AdditionalCropData` in the game directory. GropSaver then only works
+  for all plants planted from this point onwards.
+- If you use an old `config.json` file, the server will not start.
+  Delete the file and the file will be created with the default configuration.
+  Stop the server, change it according to your wishes and start the server.
+
 ## Running the Server on Linux Without GUI
 
 This mod can be run without the use of a GUI. To start the game, you must enter the following command:
@@ -104,7 +123,7 @@ If Stardew Valley was not installed in the default path, the installation path m
 
 ```text
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GamePath>D:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
   </PropertyGroup>
 ```

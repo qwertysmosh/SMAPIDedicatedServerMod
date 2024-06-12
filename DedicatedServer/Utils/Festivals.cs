@@ -21,11 +21,11 @@ namespace DedicatedServer.Utils
         }
         public static bool IsWaitingToAttend()
         {
-            return ReadyCheckHelper.IsReady("festivalStart", Game1.player);
+            return ReadyCheckHelper.IsReady("festivalStart");
         }
         public static bool OthersWaitingToAttend(int numOtherPlayers)
         {
-            return Game1.player.team.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
+            return Game1.netReady.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
         }
         private static bool isTodayBeachNightMarket()
         {
@@ -33,16 +33,16 @@ namespace DedicatedServer.Utils
         }
         public static bool ShouldAttend(int numOtherPlayers)
         {
-            return numOtherPlayers > 0 && OthersWaitingToAttend(numOtherPlayers) && Utility.isFestivalDay(Game1.dayOfMonth, Game1.currentSeason) && !isTodayBeachNightMarket() && Game1.timeOfDay >= Utility.getStartTimeOfFestival() && Game1.timeOfDay <= getFestivalEndTime();
+            return numOtherPlayers > 0 && OthersWaitingToAttend(numOtherPlayers) && Utility.isFestivalDay(Game1.dayOfMonth, Game1.season) && !isTodayBeachNightMarket() && Game1.timeOfDay >= Utility.getStartTimeOfFestival() && Game1.timeOfDay <= getFestivalEndTime();
         }
 
         public static bool IsWaitingToLeave()
         {
-            return ReadyCheckHelper.IsReady("festivalEnd", Game1.player);
+            return ReadyCheckHelper.IsReady("festivalEnd");
         }
         public static bool OthersWaitingToLeave(int numOtherPlayers)
         {
-            return Game1.player.team.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
+            return Game1.netReady.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
         }
         public static bool ShouldLeave(int numOtherPlayers)
         {

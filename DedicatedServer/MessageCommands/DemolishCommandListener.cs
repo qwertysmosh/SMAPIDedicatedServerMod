@@ -65,7 +65,7 @@ namespace DedicatedServer.MessageCommands
                         }
                     }
 
-                    if (building.indoors.Value is Cabin && (building.indoors.Value as Cabin).farmhand.Value.isActive())
+                    if (building.indoors.Value is Cabin && (building.indoors.Value as Cabin).owner.isActive())
                     {
                         WriteToPlayer(farmer, $"Error: {Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_FarmhandOnline")}");
                     }
@@ -80,7 +80,8 @@ namespace DedicatedServer.MessageCommands
                             {
                                 chest = new Chest(playerChest: true);
                                 chest.fixLidFrame();
-                                chest.items.Set(list);
+                                chest.Items.Clear();
+                                chest.Items.AddRange(list);
                             }
                         }
 
@@ -164,7 +165,7 @@ namespace DedicatedServer.MessageCommands
 
                 if (location is Farm f)
                 {
-                    var tileLocation = sourceFarmer.getTileLocation();
+                    var tileLocation = sourceFarmer.Tile;
                     switch (sourceFarmer.facingDirection.Value)
                     {
                         case 1: // Right
@@ -184,42 +185,19 @@ namespace DedicatedServer.MessageCommands
                     {
                         if (building.occupiesTile(tileLocation))
                         {
-                            // Determine if the building can be demolished
-                            var demolishCheckBlueprint = new BluePrint(building.buildingType.Value);
-                            if (demolishCheckBlueprint.moneyRequired < 0)
+                            var carpenterMenu = new CarpenterMenu(StardewValley.Game1.builder_robin);
+
+                            if (false == carpenterMenu.hasPermissionsToDemolish(building))
                             {
                                 // Hard-coded magic number (< 0) means it cannot be demolished
                                 WriteToPlayer(sourceFarmer, "Error: This building can't be demolished.");
                                 return;
                             }
-                            else if (demolishCheckBlueprint.name == "Shipping Bin")
-                            {
-                                int num = 0;
-                                foreach (var b in Game1.getFarm().buildings)
-                                {
-                                    if (b is ShippingBin)
-                                    {
-                                        num++;
-                                    }
-
-                                    if (num > 1)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                if (num <= 1)
-                                {
-                                    // Must have at least one shipping bin at all times.
-                                    WriteToPlayer(sourceFarmer, "Error: Can't demolish the last shipping bin.");
-                                    return;
-                                }
-                            }
 
                             if (building.indoors.Value is Cabin)
                             {
                                 Cabin cabin = building.indoors.Value as Cabin;
-                                if (cabin.farmhand.Value != null && cabin.farmhand.Value.isCustomized.Value)
+                                if (cabin.owner != null && cabin.owner.isCustomized.Value)
                                 {
                                     // The cabin is owned by someone. Ask the player if they're certain; record in memory the action to destroy the building.
                                     var responseActions = new Dictionary<string, Action>();

@@ -3,6 +3,7 @@ using DedicatedServer.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Menus;
 using StardewValley.Monsters;
 using System;
 using System.Collections.Generic;
@@ -25,27 +26,68 @@ namespace DedicatedServer.HostAutomatorStages
 
         /// <summary>
         ///         Checks whether the host is sleeping
+        /// <br/>
+        /// <br/>   If you you want to test for all required player use <c>Game1.netReady.IsReady("sleep");</c>
         /// </summary>
         /// <returns>
         ///         true : The host is sleeping
         /// <br/>   false: The host is not asleep
         /// </returns>
         public static bool IsSleeping()
-        {
-            return ReadyCheckHelper.IsReady("sleep", Game1.player);
+        {  
+            // Check if all players are ready:
+            // `Game1.netReady.IsReady("sleep");`
+            // 
+            // Get number of ready players:
+            // `Game1.netReady.GetNumberReady("sleep");`
+            // 
+            // Get number of required players:
+            // `Game1.netReady.GetNumberRequired("sleep")}");`
+            // 
+            // In Bed region without sleeping:
+            // `Game1.player.isInBed.Value.ToString();`
+            // 
+            // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
+            // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
+
+            bool hostSleeping = false;
+            if (Game1.activeClickableMenu is ReadyCheckDialog rcd)
+            {
+                if ("sleep" == rcd.checkName.ToLower())
+                {
+                    hostSleeping = true;
+
+                    // TODO  The next line is to ensure that this works only if the player is in bed
+                    // DEBUG
+                    if (false == Game1.player.isInBed.Value)
+                    {
+                        throw new Exception("Host should sleep but is not in bed region.");
+                    }
+                }
+            }
+            return hostSleeping;
         }
 
         /// <summary>
-        ///         Checks whether all players are asleep
+        ///         Checks whether all players without the host are asleep
         /// </summary>
         /// <param name="numOtherPlayers">Number of players</param>
         /// <returns>
-        ///         true : All players are sleeping
+        ///         true : All other players are sleeping
         /// <br/>   false: Not all players are sleeping
         /// </returns>
         public static bool OthersInBed(int numOtherPlayers)
         {
-            return Game1.player.team.GetNumberReady("sleep") == (numOtherPlayers + (IsSleeping() ? 1 : 0));
+            const int oneHostPlayer = 1;
+            int readyPlayer = Game1.netReady.GetNumberRequired("sleep");
+            if (0 == readyPlayer)
+            {
+                return false;
+            }
+            else
+            {
+                return Game1.netReady.GetNumberReady("sleep") == (readyPlayer - oneHostPlayer);
+            }            
         }
 
         /// <summary>

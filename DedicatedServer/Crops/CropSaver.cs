@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 
 namespace DedicatedServer.Crops
 {
+    // Plants that ripen on the first day are not saved.
     public class CropSaver
     {
         private IModHelper helper;
@@ -19,6 +20,10 @@ namespace DedicatedServer.Crops
         private SerializableDictionary<CropLocation, CropData> cropDictionary = new SerializableDictionary<CropLocation, CropData>();
         private SerializableDictionary<CropLocation, CropComparisonData> beginningOfDayCrops = new SerializableDictionary<CropLocation, CropComparisonData>();
         private XmlSerializer cropSaveDataSerializer = new XmlSerializer(typeof(CropSaveData));
+
+        private bool loadDataOnce = true;
+        private Dictionary<string, List<Season>> harvestItemIdSeasonDictionary = new Dictionary<string, List<Season>>();
+        private List<Season> allSeasonsList = new List<Season>() { Season.Winter, Season.Spring, Season.Summer, Season.Fall };
 
         public struct CropSaveData
         {
@@ -39,7 +44,7 @@ namespace DedicatedServer.Crops
             public int DayOfCurrentPhase { get; set; }
             public bool FullyGrown { get; set; }
             public List<int> PhaseDays { get; set; }
-            public int OriginalRegrowAfterHarvest { get; set; }
+            public bool OriginalRegrowAfterHarvest { get; set; }
         }
 
         public struct CropComparisonData
@@ -48,16 +53,17 @@ namespace DedicatedServer.Crops
             public int RowInSpriteSheet { get; set; }
             public bool Dead { get; set; }
             public bool ForageCrop { get; set; }
-            public int WhichForageCrop { get; set; }
+            public string WhichForageCrop { get; set; }
         }
 
         public struct CropData
         {
             public bool MarkedForDeath { get; set; }
-            public List<string> OriginalSeasonsToGrowIn { get; set; }
+            public List<Season> OriginalSeasonsToGrowIn { get; set; }
             public bool HasExistedInIncompatibleSeason { get; set; }
-            public int OriginalRegrowAfterHarvest { get; set; }
+            public bool OriginalRegrowAfterHarvest { get; set; }
             public bool HarvestableLastNight { get; set; }
+            public string HarvestItemId { get; set; }
         }
 
         public CropSaver(IModHelper helper, IMonitor monitor, ModConfig config)
@@ -221,6 +227,34 @@ namespace DedicatedServer.Crops
 
         private void onDayEnding(object sender, StardewModdingAPI.Events.DayEndingEventArgs e)
         {
+            if (loadDataOnce)
+            {
+                // crop.GetData().Seasons is a cached value that does not change until the game is restarted.
+                // As this is a server, this should not happen. This code deals with the case
+
+                loadDataOnce = false;
+
+                if(0 < cropDictionary.Count)
+                {
+                    var harvestItemIds = cropDictionary.Values.Select(x => x.HarvestItemId).Distinct().ToList();
+
+                    foreach (var harvestItemId in harvestItemIds)
+                    {
+                        harvestItemIdSeasonDictionary.Add(
+                            harvestItemId, 
+                            cropDictionary.Values
+                                .Where(c => c.HarvestItemId == harvestItemId)
+                                .First().OriginalSeasonsToGrowIn);
+
+                        var global_crop = Game1.cropData.Values.Where(x => x.HarvestItemId == harvestItemId).FirstOrDefault();
+                        if (null != global_crop)
+                        {
+                            global_crop.Seasons = allSeasonsList;
+                        }
+                    }
+                }
+            }
+
             // In order to check for crops that have been destroyed and need to be removed from
             // the cropDictionary all together, we need to keep track of which crop locations
             // from the cropDictionary are found during the iteration over all crops in all
@@ -263,7 +297,7 @@ namespace DedicatedServer.Crops
                                     DayOfCurrentPhase = crop.dayOfCurrentPhase.Value,
                                     FullyGrown = crop.fullyGrown.Value,
                                     PhaseDays = crop.phaseDays.ToList(),
-                                    OriginalRegrowAfterHarvest = crop.regrowAfterHarvest.Value
+                                    OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest()
                                 };
 
                                 var cropComparisonData = new CropComparisonData
@@ -281,35 +315,36 @@ namespace DedicatedServer.Crops
                                 {
                                     // No crop was found at this location at the beginning of the day, or the comparison data
                                     // is different. Consider it a new crop, and add a new CropData for it in the cropDictionary.
+
+                                    var id = crop.GetData().HarvestItemId;
+
+                                    List<Season> seasons = null;
+
+                                    if (harvestItemIdSeasonDictionary.ContainsKey(id))
+                                    {
+                                        seasons = harvestItemIdSeasonDictionary[id];
+                                    }
+                                    else
+                                    {
+                                        seasons = new List<Season>(crop.GetData().Seasons);
+                                    }
+
                                     var cd = new CropData
                                     {
                                         MarkedForDeath = false,
-                                        OriginalSeasonsToGrowIn = crop.seasonsToGrowIn.ToList(),
+                                        OriginalSeasonsToGrowIn = seasons,
                                         HasExistedInIncompatibleSeason = false,
-                                        OriginalRegrowAfterHarvest = crop.regrowAfterHarvest.Value,
-                                        HarvestableLastNight = false
+                                        OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest(),
+                                        HarvestableLastNight = false,
+                                        HarvestItemId = id,
                                     };
+
                                     cropDictionary[cropLocation] = cd;
 
                                     // Make sure that the crop is set to survive in all seasons, so that it
                                     // only dies if it's harvested for the last time or manually killed after being
                                     // marked for death
-                                    if (!crop.seasonsToGrowIn.Contains("spring"))
-                                    {
-                                        crop.seasonsToGrowIn.Add("spring");
-                                    }
-                                    if (!crop.seasonsToGrowIn.Contains("summer"))
-                                    {
-                                        crop.seasonsToGrowIn.Add("summer");
-                                    }
-                                    if (!crop.seasonsToGrowIn.Contains("fall"))
-                                    {
-                                        crop.seasonsToGrowIn.Add("fall");
-                                    }
-                                    if (!crop.seasonsToGrowIn.Contains("winter"))
-                                    {
-                                        crop.seasonsToGrowIn.Add("winter");
-                                    }
+                                    crop.GetData().Seasons = allSeasonsList;
                                 }
 
                                 // If there's a crop in the dictionary at this location (just planted today or otherwise),
@@ -397,7 +432,7 @@ namespace DedicatedServer.Crops
                                         DayOfCurrentPhase = crop.dayOfCurrentPhase.Value,
                                         FullyGrown = crop.fullyGrown.Value,
                                         PhaseDays = crop.phaseDays.ToList(),
-                                        OriginalRegrowAfterHarvest = crop.regrowAfterHarvest.Value
+                                        OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest()
                                     };
 
                                     cropComparisonData = new CropComparisonData
@@ -422,7 +457,7 @@ namespace DedicatedServer.Crops
                                 // Check if it's currently a season which is incompatible with the
                                 // crop's ORIGINAL compatible seasons. If so, update the crop data to
                                 // reflect this.
-                                if (!cropData.OriginalSeasonsToGrowIn.Contains(location.GetSeasonForLocation()))
+                                if (!cropData.OriginalSeasonsToGrowIn.Contains(location.GetSeason()))
                                 {
                                     cropData.HasExistedInIncompatibleSeason = true;
                                 }
@@ -442,7 +477,7 @@ namespace DedicatedServer.Crops
                                 // farmer only gets one more harvest out of it.
                                 if (cropData.HasExistedInIncompatibleSeason)
                                 {
-                                    crop.regrowAfterHarvest.Value = -1;
+                                    crop.GetData().RegrowDays = -1;
                                 }
 
                                 // And if the crop has been marked for death because it was planted too close to
