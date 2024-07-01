@@ -210,38 +210,36 @@ namespace DedicatedServer.HostAutomatorStages
                 }
 
                 // Farm type
-                if (config.FarmType != "standard" && config.FarmType != "riverland" && config.FarmType != "forest" && config.FarmType != "hilltop" && config.FarmType != "wilderness" && config.FarmType != "fourcorners" && config.FarmType != "beach")
+                switch (config.FarmType)
                 {
-                    logConfigError("Farm type must be one of \"standard\", \"riverland\", \"forest\", \"hilltop\", \"wilderness\", \"fourcorners\", or \"beach\"");
-                    exit(-1);
-                }
-                if (config.FarmType == "standard")
-                {
-                    Game1.whichFarm = 0;
-                }
-                else if (config.FarmType == "riverland")
-                {
-                    Game1.whichFarm = 1;
-                }
-                else if (config.FarmType == "forest")
-                {
-                    Game1.whichFarm = 2;
-                }
-                else if (config.FarmType == "hilltop")
-                {
-                    Game1.whichFarm = 3;
-                }
-                else if (config.FarmType == "wilderness")
-                {
-                    Game1.whichFarm = 4;
-                }
-                else if (config.FarmType == "fourcorners")
-                {
-                    Game1.whichFarm = 5;
-                }
-                else if (config.FarmType == "beach")
-                {
-                    Game1.whichFarm = 6;
+                    case "standard":
+                        Game1.whichFarm = 0;
+                        break;
+                    case "riverland":
+                        Game1.whichFarm = 1;
+                        break;
+                    case "forest":
+                        Game1.whichFarm = 2;
+                        break;
+                    case "hilltop":
+                        Game1.whichFarm = 3;
+                        break;
+                    case "wilderness":
+                        Game1.whichFarm = 4;
+                        break;
+                    case "fourcorners":
+                        Game1.whichFarm = 5;
+                        break;
+                    case "beach":
+                        Game1.whichFarm = 6;
+                        break;
+                    case "meadowlands":
+                        Game1.whichFarm = 7;
+                        break;
+                    default:
+                        logConfigError("Farm type must be one of \"standard\", \"riverland\", \"forest\", \"hilltop\", \"wilderness\", \"fourcorners\", \"beach\", or \"meadowlands\"");
+                        exit(-1);
+                        break;
                 }
 
                 // Community center bundles type
@@ -293,6 +291,8 @@ namespace DedicatedServer.HostAutomatorStages
 
                 MoveBuildPermission.Change(config.MoveBuildPermission);
 
+                // Cause of the error
+                Game1.whichFarm = 7;
                 // Start game
                 menu.createdNewCharacter(true);
             }
