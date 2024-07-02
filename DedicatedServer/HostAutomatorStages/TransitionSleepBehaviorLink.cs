@@ -4,6 +4,7 @@ using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,6 +24,10 @@ namespace DedicatedServer.HostAutomatorStages
         {
             if (Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && !Utils.Sleeping.IsSleeping())
             {
+                // After the required number of players have triggered sleep once,
+                // the pause is deactivated until the next day.
+                HostAutomation.PreventPauseUntilNextDay();
+
                 if (state.HasBetweenTransitionSleepWaitTicks())
                 {
                     state.DecrementBetweenTransitionSleepWaitTicks();
