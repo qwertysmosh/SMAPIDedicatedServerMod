@@ -27,14 +27,14 @@ namespace DedicatedServer.HostAutomatorStages
         /// <summary>
         ///         Checks whether the host is sleeping
         /// <br/>
-        /// <br/>   If you you want to test for all required player use <c>Game1.netReady.IsReady("sleep");</c>
+        /// <br/>   Tested, this function worked a little longer than the <see cref="helper.Events.GameLoop.DayEnding"/> event.
         /// </summary>
         /// <returns>
         ///         true : The host is sleeping
         /// <br/>   false: The host is not asleep
         /// </returns>
         public static bool IsSleeping()
-        {  
+        {
             // Check if all players are ready:
             // `Game1.netReady.IsReady("sleep");`
             // 
@@ -50,22 +50,23 @@ namespace DedicatedServer.HostAutomatorStages
             // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
             // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
 
-            bool hostSleeping = false;
-            if (Game1.activeClickableMenu is ReadyCheckDialog rcd)
+            if (Game1.netReady.IsReady("sleep"))
             {
-                if ("sleep" == rcd.checkName.ToLower())
-                {
-                    hostSleeping = true;
+                return true;
+            }
 
-                    // TODO  The next line is to ensure that this works only if the player is in bed
-                    // DEBUG
-                    if (false == Game1.player.isInBed.Value)
+            if (Game1.player.isInBed.Value)
+            {
+                if (Game1.activeClickableMenu is ReadyCheckDialog rcd)
+                {
+                    if ("sleep" == rcd.checkName.ToLower())
                     {
-                        throw new Exception("Host should sleep but is not in bed region.");
+                        return true;
                     }
                 }
             }
-            return hostSleeping;
+
+            return false;
         }
 
         /// <summary>
@@ -77,17 +78,17 @@ namespace DedicatedServer.HostAutomatorStages
         /// </returns>
         public static bool OthersInBed()
         {
-            const int oneHostPlayer = 1;
+            int requiredPlayer = Game1.netReady.GetNumberRequired("sleep");
 
-            int readyPlayer = Game1.netReady.GetNumberRequired("sleep");
-
-            if (0 == readyPlayer)
+            if (0 == requiredPlayer)
             {
                 return false;
             }
             else
             {
-                return Game1.netReady.GetNumberReady("sleep") >= (readyPlayer - oneHostPlayer);
+                int readyPlayer = Game1.netReady.GetNumberReady("sleep");
+                int hostPlayer = (true == IsSleeping()) ? 0 : 1;
+                return readyPlayer >= (requiredPlayer - hostPlayer);
             }            
         }
 

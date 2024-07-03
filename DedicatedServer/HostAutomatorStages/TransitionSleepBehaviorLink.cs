@@ -22,7 +22,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process(BehaviorState state)
         {
-            if (Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && !Utils.Sleeping.IsSleeping())
+            if (Utils.Sleeping.ShouldSleep() && !Utils.Sleeping.IsSleeping())
             {
                 // After the required number of players have triggered sleep once,
                 // the pause is deactivated until the next day.
@@ -64,7 +64,8 @@ namespace DedicatedServer.HostAutomatorStages
                     Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                     state.WarpToSleep();
                 }
-            } else if (!Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && Utils.Sleeping.IsSleeping())
+            }
+            else if (!Utils.Sleeping.ShouldSleep() && Utils.Sleeping.IsSleeping())
             {
                 if (state.HasBetweenTransitionSleepWaitTicks())
                 {
