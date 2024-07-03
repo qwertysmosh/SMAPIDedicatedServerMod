@@ -13,6 +13,24 @@ using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
+
+    // Check if all players are ready:
+    // `Game1.netReady.IsReady("sleep");`
+    // 
+    // Get number of ready players:
+    // `Game1.netReady.GetNumberReady("sleep");`
+    // 
+    // Get number of required players.
+    // Returns 0 until the first player sleeps.
+    // Returns the number of players required from the time a player goes to sleep until the new day:
+    // `Game1.netReady.GetNumberRequired("sleep")}");`
+    // 
+    // In Bed region without sleeping:
+    // `Game1.player.isInBed.Value.ToString();`
+    // 
+    // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
+    // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
+
     internal class SleepWorker
     {
         private static IModHelper helper = null;
@@ -35,21 +53,6 @@ namespace DedicatedServer.HostAutomatorStages
         /// </returns>
         public static bool IsSleeping()
         {
-            // Check if all players are ready:
-            // `Game1.netReady.IsReady("sleep");`
-            // 
-            // Get number of ready players:
-            // `Game1.netReady.GetNumberReady("sleep");`
-            // 
-            // Get number of required players:
-            // `Game1.netReady.GetNumberRequired("sleep")}");`
-            // 
-            // In Bed region without sleeping:
-            // `Game1.player.isInBed.Value.ToString();`
-            // 
-            // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
-            // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
-
             if (Game1.netReady.IsReady("sleep"))
             {
                 return true;
@@ -72,16 +75,29 @@ namespace DedicatedServer.HostAutomatorStages
         /// <summary>
         ///         Checks whether all players without the host are asleep
         /// </summary>
+        /// <param name="allowHostOnly">
+        ///         If true, the function returns true if only the host is
+        /// <br/>   on the server and at least one player has previously
+        /// <br/>   gone to bed that day. </param>
         /// <returns>
         ///         true : All other players are sleeping
         /// <br/>   false: Not all players are sleeping
         /// </returns>
-        public static bool OthersInBed()
+        public static bool OthersInBed(bool allowHostOnly = false)
         {
             int requiredPlayer = Game1.netReady.GetNumberRequired("sleep");
 
-            if (0 == requiredPlayer)
+            // 0 Nobody went to bed that day
+            // 1 Only the host is on the server
+            if (1 >= requiredPlayer)
             {
+                if(allowHostOnly)
+                {
+                    if (1 <= requiredPlayer)
+                    {
+                        return true;
+                    }
+                }
                 return false;
             }
             else
@@ -100,7 +116,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <br/>   false: The host should not go to bed</returns>
         public static bool ShouldSleep()
         {
-            return (Game1.timeOfDay >= 2530) || ShouldSleepOverwrite || OthersInBed();
+            return (Game1.timeOfDay >= 2530) || ShouldSleepOverwrite || OthersInBed(true);
         }
 
         /// <summary>
