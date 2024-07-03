@@ -48,7 +48,7 @@ namespace DedicatedServer.HostAutomatorStages
                 new UnlockCommunityCenterBehaviorLink(),
                 new PurchaseJojaMembershipBehaviorLink(config),
                 new EndCommunityCenterBehaviorLink(),
-                new TransitionSleepBehaviorLink(),
+                new TransitionSleepBehaviorLink(monitor),
                 new TransitionFestivalAttendanceBehaviorLink(),
                 new TransitionFestivalEndBehaviorLink(),
                 new ProcessFestivalChatBoxBehaviorLink()

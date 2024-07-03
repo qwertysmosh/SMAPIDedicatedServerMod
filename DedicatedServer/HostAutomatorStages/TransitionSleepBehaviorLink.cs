@@ -1,4 +1,5 @@
 ﻿using DedicatedServer.Utils;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
@@ -14,10 +15,13 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class TransitionSleepBehaviorLink : BehaviorLink
     {
+        private IMonitor monitor;
+
         private static MethodInfo info = typeof(GameLocation).GetMethod("doSleep", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        public TransitionSleepBehaviorLink(BehaviorLink next = null) : base(next)
+        public TransitionSleepBehaviorLink(IMonitor monitor, BehaviorLink next = null) : base(next)
         {
+            this.monitor = monitor;
         }
 
         public override void Process(BehaviorState state)
@@ -34,6 +38,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else if (Game1.currentLocation is FarmHouse)
                 {
+                    monitor.Log($"The host lies down in bed", LogLevel.Debug);
                     Game1.player.isInBed.Value = true;
                     Game1.player.sleptInTemporaryBed.Value = true;
                     Game1.player.timeWentToBed.Value = Game1.timeOfDay;
@@ -61,6 +66,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
+                    monitor.Log($"Warp to sleep", LogLevel.Debug);
                     Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                     state.WarpToSleep();
                 }
@@ -73,6 +79,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
+                    monitor.Log($"Cancel sleep", LogLevel.Debug);
                     if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
                     {
                         rcd.closeDialog(Game1.player);
