@@ -1,9 +1,11 @@
 ﻿using DedicatedServer.Utils;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -13,22 +15,30 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class TransitionSleepBehaviorLink : BehaviorLink
     {
+        private IMonitor monitor;
+
         private static MethodInfo info = typeof(GameLocation).GetMethod("doSleep", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        public TransitionSleepBehaviorLink(BehaviorLink next = null) : base(next)
+        public TransitionSleepBehaviorLink(IMonitor monitor, BehaviorLink next = null) : base(next)
         {
+            this.monitor = monitor;
         }
 
         public override void Process(BehaviorState state)
         {
-            if (Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && !Utils.Sleeping.IsSleeping())
+            if (Utils.Sleeping.ShouldSleep() && !Utils.Sleeping.IsSleeping())
             {
+                // After the required number of players have triggered sleep once,
+                // the pause is deactivated until the next day.
+                HostAutomation.PreventPauseUntilNextDay();
+
                 if (state.HasBetweenTransitionSleepWaitTicks())
                 {
                     state.DecrementBetweenTransitionSleepWaitTicks();
                 }
                 else if (Game1.currentLocation is FarmHouse)
                 {
+                    monitor.Log($"The host lies down in bed", LogLevel.Debug);
                     Game1.player.isInBed.Value = true;
                     Game1.player.sleptInTemporaryBed.Value = true;
                     Game1.player.timeWentToBed.Value = Game1.timeOfDay;
@@ -56,10 +66,12 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
+                    monitor.Log($"Warp to sleep", LogLevel.Debug);
                     Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
                     state.WarpToSleep();
                 }
-            } else if (!Utils.Sleeping.ShouldSleep(state.GetNumOtherPlayers()) && Utils.Sleeping.IsSleeping())
+            }
+            else if (!Utils.Sleeping.ShouldSleep() && Utils.Sleeping.IsSleeping())
             {
                 if (state.HasBetweenTransitionSleepWaitTicks())
                 {
@@ -67,6 +79,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
+                    monitor.Log($"Cancel sleep", LogLevel.Debug);
                     if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
                     {
                         rcd.closeDialog(Game1.player);
