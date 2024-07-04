@@ -1,7 +1,7 @@
 # SMAPI Dedicated Server Mod for Stardew Valley
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.6-blue" />
+  <img src="https://img.shields.io/badge/Version-1.6.8-blue" />
 </p>
 
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
@@ -45,7 +45,7 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 
 ## In Game Command
 
-All commands in the game must be sent privately to the player `ServerBot`. For example, you must write the following `/message ServerBot MoveBuildPermission on`. Depending on the setting of the [`Password`](#additional-options) option, the commands can only be executed after you have logged in.
+All commands in the game must be sent privately to the player `ServerBot`. For example, you must write the following `/message ServerBot MoveBuildPermission on`. Depending on the setting of the [`Password`](#additional-options) option, the commands can only be executed after you have logged in. Enter `/message ServerBot Login` followed by the password.
 
 - `Build`: Builds a new cabin for more players at the place where the player is looking at. Allowed parameters are `Stone_Cabin`, `Plank_Cabin`, and `Log_Cabin`.
 - `Demolish`: Destroys any building the player is looking at, not only cabins.
