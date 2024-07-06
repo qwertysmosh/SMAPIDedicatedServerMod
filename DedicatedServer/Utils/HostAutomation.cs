@@ -8,6 +8,24 @@ namespace DedicatedServer.Utils
 {
     internal abstract class HostAutomation : ProcessPauseBehaviorLink
     {
+        //DEBUG
+        public static BehaviorChain BehaviorChain;
+        public static BehaviorState BehaviorState;
+
+        //DEBUG
+        public static bool Update()
+        {
+            if(null == BehaviorChain || null == BehaviorState)
+            {
+                return false;
+            }
+            else
+            {
+                BehaviorChain.Process(BehaviorState);
+                return true;
+            }
+        }
+
         private HostAutomation() : base(null)
         {
         }

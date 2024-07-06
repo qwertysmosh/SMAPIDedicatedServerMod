@@ -130,6 +130,12 @@ namespace DedicatedServer.MessageCommands
 
             switch (command)
             {
+                // DEBUG
+                case "update":
+                    bool result = HostAutomation.Update();
+                    WriteToPlayer(null, $"Update successful = {result}" + TextColor.Aqua);
+                    break;
+
                 case "takeover": // /message ServerBot TakeOver
                     TakeOver(sourceFarmer);
                     break;
