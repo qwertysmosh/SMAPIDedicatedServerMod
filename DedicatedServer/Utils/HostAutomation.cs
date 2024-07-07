@@ -1,7 +1,5 @@
 ﻿using System;
-
 using StardewValley;
-
 using DedicatedServer.HostAutomatorStages;
 
 namespace DedicatedServer.Utils

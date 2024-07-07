@@ -142,41 +142,39 @@ namespace DedicatedServer.HostAutomatorStages
                 case internalStates.DisablePause:
                     IsPaused = false;
                     internalState = internalStates.WaitingForPlayersToLeave;
-                    return;
+                    break;
 
                 case internalStates.WaitingForPlayersToLeave:
                     if (  0   == state.GetNumOtherPlayers() && // If no other player is online
                         false == Game1.isFestival()         )  // if it is not a festival
                     {
                         internalState = internalStates.EnablePause;
-                        return;
                     }
-
-                    if (enableHostAutomation)
-                    {
-                        processNext(state);
-                    }
-                    return;
+                    break;
 
                 case internalStates.EnablePause:
                     IsPaused = true;
                     internalState = internalStates.WaitingForUpcomingPlayers;
-                    return;
+                    break;
 
                 case internalStates.WaitingForUpcomingPlayers:
-
                     if (false == IsPaused)
                     {
                         IsPaused = true;
                     }
 
+                    // Alternative: `Game1.getOnlineFarmers().Count - 1`
                     if (  0  <  state.GetNumOtherPlayers() ||
                         true == Game1.isFestival()         )
                     {
                         internalState = internalStates.DisablePause;
+                    }
+                    else
+                    {
+                        // Do not process the BehaviorLink
                         return;
                     }
-                    return;
+                    break;
 
                 // A reset must be carried out to exit the states, <see cref="Reset"/>.
 
@@ -185,18 +183,19 @@ namespace DedicatedServer.HostAutomatorStages
                     {
                         IsPaused = false;
                     }
-                    if (enableHostAutomation)
-                    {
-                        processNext(state);
-                    }
-                    return;
+                    break;
 
                 case internalStates.PauseDisabled:
-                    if (enableHostAutomation)
-                    {
-                        processNext(state);
-                    }
-                    return;
+                    break;
+            }
+
+            if (enableHostAutomation)
+            {
+                processNext(state);
+            }
+            else
+            {
+                // Do not process the BehaviorLink
             }
         }
 
