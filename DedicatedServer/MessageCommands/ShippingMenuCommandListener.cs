@@ -53,8 +53,10 @@ namespace DedicatedServer.MessageCommands
             switch (command)
             {
                 case "okay":
-                    bool clicked = SkipShippingMenuBehaviorLink.SkipShippingMenu();
-                    chatBox?.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
+                    if (SkipShippingMenuBehaviorLink.SkipShippingMenu())
+                    {
+                        chatBox?.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
+                    }
                     break;
                 default:
                     break;
