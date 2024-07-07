@@ -40,7 +40,7 @@ namespace DedicatedServer.HostAutomatorStages
                 new ProcessWaitTicksBehaviorLink(),
                 new SkipEventsBehaviorLink(),
                 new ProcessDialogueBehaviorLink(config),
-                new SkipShippingMenuBehaviorLink(monitor, chatBox),
+                new SkipShippingMenuBehaviorLink(helper, monitor, chatBox),
                 new CheckForParsnipSeedsBehaviorLink(),
                 new ExitFarmHouseBehaviorLink(),
                 new InvisibleBehaviorLink(),

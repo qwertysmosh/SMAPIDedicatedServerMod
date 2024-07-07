@@ -1,6 +1,7 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Utils;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using System;
@@ -15,43 +16,55 @@ namespace DedicatedServer.HostAutomatorStages
     internal class SkipShippingMenuBehaviorLink : BehaviorLink
     {
         private static MethodInfo info = typeof(ShippingMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
-        
+
+        private static IModHelper helper;
         private static IMonitor monitor;
         private static EventDrivenChatBox chatBox;
 
-        public SkipShippingMenuBehaviorLink(IMonitor monitor, EventDrivenChatBox chatBox, BehaviorLink next = null) : base(next)
+        public SkipShippingMenuBehaviorLink(IModHelper helper, IMonitor monitor, EventDrivenChatBox chatBox, BehaviorLink next = null) : base(next)
         {
+            SkipShippingMenuBehaviorLink.helper = helper;
             SkipShippingMenuBehaviorLink.monitor = monitor;
             SkipShippingMenuBehaviorLink.chatBox = chatBox;
+
+            helper.Events.GameLoop.DayEnding += OnDayEndingWorker;
         }
 
         public override void Process(BehaviorState state)
         {
-            string buf = "";
-
             if (Game1.activeClickableMenu is ShippingMenu sm)
             {
-                buf = "SkipShippingMenuBehaviorLink";
-                monitor.Log(buf, LogLevel.Debug);
-                chatBox?.textBoxEnter(buf + TextColor.Purple);
                 if (state.HasBetweenShippingMenusWaitTicks())
                 {
-                    buf = "SkipShippingMenuBehaviorLink-Wait";
-                    monitor.Log(buf, LogLevel.Debug);
-                    chatBox?.textBoxEnter(buf + TextColor.Purple);
                     state.DecrementBetweenShippingMenusWaitTicks();
                 } else
                 {
-                    buf = "SkipShippingMenuBehaviorLink-OkClicked";
-                    monitor.Log(buf, LogLevel.Debug);
-                    chatBox?.textBoxEnter(buf + TextColor.Purple);
-                    info.Invoke(sm, new object[]{});
+                    SkipShippingMenu();
                     state.SkipShippingMenu();
                 }
             } else
             {
                 state.ClearBetweenShippingMenusWaitTicks();
                 processNext(state);
+            }
+        }
+
+        public void OnDayEndingWorker(object sender, DayEndingEventArgs e)
+        {
+            chatBox?.textBoxEnter("Shipping menu Workaroud, if the host does not click Ok, enter 'okay'");
+        }
+
+        public static bool SkipShippingMenu()
+        {
+            if (Game1.activeClickableMenu is ShippingMenu sm)
+            {
+                info.Invoke(sm, new object[]{});
+                monitor?.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

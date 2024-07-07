@@ -33,6 +33,7 @@ namespace DedicatedServer.HostAutomatorStages
         private ServerCommandListener serverCommandListener = null;
         private MultiplayerOptions multiplayerOptions = null;
         private MoveBuildPermission moveBuildPermission = null;
+        private ShippingMenuCommandListener shippingMenuCommandListener = null;
         private Wallet wallet = null;
 
         public StartFarmStage(IModHelper helper, IMonitor monitor, ModConfig config) : base(helper)
@@ -364,6 +365,8 @@ namespace DedicatedServer.HostAutomatorStages
             pauseCommandListener.Enable();
             serverCommandListener = new ServerCommandListener(helper, config, chatBox);
             serverCommandListener.Enable();
+            shippingMenuCommandListener = new ShippingMenuCommandListener(helper, monitor, config, chatBox);
+            shippingMenuCommandListener.Enable(); 
         }
 
         private void onReturnToTitle(object sender, ReturnedToTitleEventArgs e)

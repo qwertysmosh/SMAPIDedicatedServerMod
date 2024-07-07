@@ -1,7 +1,5 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
-//DEBUG
-using DedicatedServer.Utils;
 using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
@@ -22,10 +20,6 @@ namespace DedicatedServer.HostAutomatorStages
             behaviorChain = new BehaviorChain(helper, monitor, config, chatBox);
             behaviorState = new BehaviorState(monitor, chatBox);
             this.helper = helper;
-
-            //DEBUG
-            HostAutomation.BehaviorChain = behaviorChain;
-            HostAutomation.BehaviorState = behaviorState;
         }
 
         public void Enable()
