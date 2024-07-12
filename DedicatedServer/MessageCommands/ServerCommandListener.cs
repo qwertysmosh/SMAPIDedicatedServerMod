@@ -108,6 +108,14 @@ namespace DedicatedServer.MessageCommands
                         Game1.player.warpFarmer(WarpPoints.beachWarp);
                         break;
 
+                    case "robin":
+                        Game1.player.warpFarmer(WarpPoints.robinWarp);
+                        break;
+
+                    case "clint":
+                        Game1.player.warpFarmer(WarpPoints.clintWarp);
+                        break;
+
                     case "location":
                         var location = Game1.player.Tile;
                         chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
