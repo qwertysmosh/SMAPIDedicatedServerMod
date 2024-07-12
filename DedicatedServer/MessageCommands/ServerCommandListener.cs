@@ -20,6 +20,8 @@ namespace DedicatedServer.MessageCommands
 
         private IModHelper helper;
 
+        private const string HardwoodItemId = "709";
+
         public ServerCommandListener(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
         {
             this.helper  = helper;
@@ -50,6 +52,8 @@ namespace DedicatedServer.MessageCommands
                 .FirstOrDefault()
                 ?? Game1.player;
 
+            string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
+
             if (Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
             {
                 switch (command)
@@ -60,11 +64,29 @@ namespace DedicatedServer.MessageCommands
 
                     #region DEBUG_COMMANDS
                     #if false
-                    case "item":
-                        Item item;
-                        item = new StardewValley.Object(StardewValley.Object.woodID, 1);
-                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 100);
-                        Game1.player.addItemToInventory(item);
+
+                    case "iridium":
+                        Item itemi;
+                        itemi = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(itemi);
+                        break;
+                    case "wood":
+
+                        Item itemw;
+                        itemw = new StardewValley.Object(StardewValley.Object.woodID, 999);
+                        Game1.player.addItemToInventory(itemw);
+                        break;
+
+                    case "stone":
+                        Item items;
+                        items = new StardewValley.Object(StardewValley.Object.stoneID, 999);
+                        Game1.player.addItemToInventory(items);
+                        break;
+
+                    case "hardwood":
+                        Item itemhw;
+                        itemhw = new StardewValley.Object(HardwoodItemId, 999);
+                        Game1.player.addItemToInventory(itemhw);
                         break;
 
                     case "emptyinventoryall": // /message serverbot EmptyInventoryAll
@@ -133,8 +155,6 @@ namespace DedicatedServer.MessageCommands
                     return;
                 }
             }      
-
-            string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
 
             switch (command)
             {
