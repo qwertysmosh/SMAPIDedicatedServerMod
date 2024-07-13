@@ -64,6 +64,7 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
       - Some items will be stored in a chest, but there are only 36 places to store items.
       - Everything else will be deleted.  
       - All beds will be destroyed and a new bed will be set up.
+      - The cellar cannot be removed.
 - `SafeInviteCode`: A file `invite_code.txt` with the invitation code is created in this mods folder. If there is no invitation code, an empty string is saved.
 - `InviteCode`: The invitation code is printed.
 - `ForceInviteCode`: Forces the invitation code by closing and reopening the multiplayer server. There is an 8 second warning before the server stops, after another 2 seconds it is restarted.

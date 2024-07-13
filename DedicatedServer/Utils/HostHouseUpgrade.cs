@@ -64,6 +64,33 @@ namespace DedicatedServer.Utils
         }
 
         /// <summary>
+        ///         Checks whether a cellar is available
+        /// </summary>
+        /// <param name="farmer"></param>
+        /// <returns>
+        ///         true:  Cellar is available
+        /// <br/>   false: There is no cellar
+        /// </returns>
+        public static bool HasCellar(Farmer farmer)
+        {
+            return farmer.craftingRecipes.Keys.Contains("Cask");
+        }
+
+        /// <summary>
+        ///         Checks whether a cellar is available
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns>
+        ///         true:  Cellar is available
+        /// <br/>   false: There is no cellar
+        /// </returns>
+        public static bool HasCellar(FarmHouse location)
+        {
+            return location.owner.craftingRecipes.Keys.Contains("Cask");
+            
+        }
+
+        /// <summary>
         ///         Checks whether the host's house needs to be upgraded based on all players
         /// </summary>
         public static bool NeedsUpgrade()
@@ -263,6 +290,8 @@ namespace DedicatedServer.Utils
         /// <br/>   - It is not safe to be in the house while the house is being upgraded or downgraded.
         /// <br/>   - Some items will be stored in a chest, but there are only 36 places to store items.
         /// <br/>   - All beds will be destroyed and a new bed will be set up.
+        /// <br/>   - The cellar is added to the map so that it cannot be removed.
+        /// <br/>     <see cref="StardewValley.Locations.FarmHouse.setMapForUpgradeLevel(int)"/>
         /// </summary>
         /// <param name="level">Target upgrade level of house</param>
         public static void ManualUpdate(string level)
@@ -303,6 +332,10 @@ namespace DedicatedServer.Utils
                 Game1.stats.checkForBuildingUpgradeAchievements();
                 Game1.player.performRenovation("FarmHouse");
 
+                if(2 == targetLevel && HasCellar(homeOfFarmer))
+                {
+                    chatBox?.textBoxEnter($"Can not remove cellar" + TextColor.Red);
+                }
 
                 AddBed(targetLevel, homeOfFarmer);
                 AddChestAndFillWithItems(items, targetLevel, homeOfFarmer);

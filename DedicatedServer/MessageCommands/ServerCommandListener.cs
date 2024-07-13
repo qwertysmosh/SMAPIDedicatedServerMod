@@ -175,7 +175,7 @@ namespace DedicatedServer.MessageCommands
                 {
                     return;
                 }
-            }      
+            }
 
             switch (command)
             {
@@ -265,7 +265,7 @@ namespace DedicatedServer.MessageCommands
             WriteToPlayer(null, $"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
             HostAutomation.Reset();
         }
-        
+
         private void UpdateHouseLevel(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHouseLevelBasedOnFarmhand))
