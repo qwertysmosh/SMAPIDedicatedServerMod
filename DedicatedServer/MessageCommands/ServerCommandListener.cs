@@ -20,6 +20,8 @@ namespace DedicatedServer.MessageCommands
 
         private IModHelper helper;
 
+        private const string HardwoodItemId = "709";
+
         public ServerCommandListener(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
         {
             this.helper  = helper;
@@ -50,6 +52,8 @@ namespace DedicatedServer.MessageCommands
                 .FirstOrDefault()
                 ?? Game1.player;
 
+            string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
+
             if (Game1.player.UniqueMultiplayerID == e.SourceFarmerId)
             {
                 switch (command)
@@ -60,11 +64,50 @@ namespace DedicatedServer.MessageCommands
 
                     #region DEBUG_COMMANDS
                     #if false
-                    case "item":
+
+                    case "items":
                         Item item;
-                        item = new StardewValley.Object(StardewValley.Object.woodID, 1);
-                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 100);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
                         Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.woodID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.stoneID, 999);
+                        Game1.player.addItemToInventory(item);
+                        break;
+
+                    case "inventory":
+                        foreach(var inventoryItems in Game1.player.Items)
+                        {
+                            ;
+                        }
+                        break;
+
+                    case "iridium":
+                        Item itemi;
+                        itemi = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(itemi);
+                        break;
+
+                    case "wood":
+                        Item itemw;
+                        itemw = new StardewValley.Object(StardewValley.Object.woodID, 999);
+                        Game1.player.addItemToInventory(itemw);
+                        break;
+
+                    case "stone":
+                        Item items;
+                        items = new StardewValley.Object(StardewValley.Object.stoneID, 999);
+                        Game1.player.addItemToInventory(items);
+                        break;
+
+                    case "hardwood":
+                        Item itemhw;
+                        itemhw = new StardewValley.Object(HardwoodItemId, 999);
+                        Game1.player.addItemToInventory(itemhw);
                         break;
 
                     case "emptyinventoryall": // /message serverbot EmptyInventoryAll
@@ -108,6 +151,14 @@ namespace DedicatedServer.MessageCommands
                         Game1.player.warpFarmer(WarpPoints.beachWarp);
                         break;
 
+                    case "robin":
+                        Game1.player.warpFarmer(WarpPoints.robinWarp);
+                        break;
+
+                    case "clint":
+                        Game1.player.warpFarmer(WarpPoints.clintWarp);
+                        break;
+
                     case "location":
                         var location = Game1.player.Tile;
                         chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
@@ -124,14 +175,16 @@ namespace DedicatedServer.MessageCommands
                 {
                     return;
                 }
-            }      
-
-            string param = 1 < tokens.Length ? tokens[1].ToLower() : "";
+            }
 
             switch (command)
             {
                 case "takeover": // /message ServerBot TakeOver
                     TakeOver(sourceFarmer);
+                    break;
+
+                case "updatehouselevel":  // /message ServerBot UpdateHouseLevel
+                    UpdateHouseLevel(sourceFarmer, param);
                     break;
 
                 case "safeinvitecode": // /message ServerBot SafeInviteCode
@@ -212,7 +265,33 @@ namespace DedicatedServer.MessageCommands
             WriteToPlayer(null, $"Control has been transferred to the host, all host functions are switched on." + TextColor.Aqua);
             HostAutomation.Reset();
         }
-        
+
+        private void UpdateHouseLevel(Farmer farmer, string param)
+        {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHouseLevelBasedOnFarmhand))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
+            if ("" == param)
+            {
+                if (HostHouseUpgrade.NeedsUpgrade())
+                {
+                    WriteToPlayer(null, "A host farm house upgrade is being executed" + TextColor.Yellow);
+                }
+                else
+                {
+                    WriteToPlayer(null, "A host farm house upgrade is not necessary" + TextColor.Green);
+                }
+            }
+            else
+            {
+                WriteToPlayer(null, $"The host farm house is upgraded to {param}" + TextColor.Orange);
+                HostHouseUpgrade.ManualUpdate(param);
+            }
+        }
+
         private void SafeInviteCode(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SafeInviteCode))

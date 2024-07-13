@@ -77,6 +77,16 @@ namespace DedicatedServer.Config
         public bool TryActivatingInviteCode { get; set; } = true;
 
         /// <summary>
+        ///         If this option is set to true, the upgrade level of the host's farmhouse
+        /// <br/>   changes to the same, highest upgrade level of all farmers.
+        /// <br/>   
+        /// <br/>   With <see cref="DedicatedServer.Utils.HostHouseUpgrade.ManualUpdate(string)"/> 
+        /// <br/>   you can downgrade or upgrade it manually. As long as this property is set to true,
+        /// <br/>   the house is automatically upgraded again.
+        /// </summary>
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = false;
+
+        /// <summary>
         ///         Password used to log in
         /// <br/>
         /// <br/>   Must be changed to a secure password
@@ -177,5 +187,11 @@ namespace DedicatedServer.Config
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
         public bool MoveBuildPermission { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = true;
+        
     }
 }

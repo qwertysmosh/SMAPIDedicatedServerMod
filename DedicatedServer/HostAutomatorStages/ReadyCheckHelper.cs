@@ -1,4 +1,7 @@
 ﻿using Netcode;
+using DedicatedServer.Config;
+using DedicatedServer.Utils;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Network;
@@ -11,7 +14,28 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class ReadyCheckHelper
     {
-        public static void OnDayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
+        private IModHelper helper;
+        private IMonitor monitor;
+        private ModConfig config;
+
+        public ReadyCheckHelper(IModHelper helper, IMonitor monitor, ModConfig config)
+        {
+            this.helper = helper;
+            this.monitor = monitor;
+            this.config = config;
+        }
+
+        public void Enable()
+        {
+            helper.Events.GameLoop.DayStarted += OnDayStarted;
+        }
+
+        public void Disable()
+        {
+            helper.Events.GameLoop.DayStarted -= OnDayStarted;
+        }
+
+        public void OnDayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
         {
             //Checking mailbox sometimes gives some gold, but it's compulsory to unlock some events
             for (int i = 0; i < 10; ++i) {
@@ -23,11 +47,10 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.eventsSeen.Add("295672");
             }
 
-            //Upgrade farmhouse to match highest level cabin
-            var targetLevel = Game1.getFarm().buildings.Where(o => o.isCabin).Select(o => ((Cabin)o.indoors.Value).upgradeLevel).DefaultIfEmpty(0).Max();
-            if (targetLevel > Game1.player.HouseUpgradeLevel) {
-                Game1.player.HouseUpgradeLevel = targetLevel;
-                Game1.player.performRenovation("FarmHouse");
+
+            if (config?.UpgradeHouseLevelBasedOnFarmhand ?? false)
+            {
+                HostHouseUpgrade.NeedsUpgrade();
             }
         }
 

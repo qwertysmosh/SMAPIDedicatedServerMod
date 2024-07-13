@@ -17,6 +17,7 @@ namespace DedicatedServer.Utils
         private static Town townLocation = Game1.getLocationFromName("Town") as Town;
         private static Mine mineLocation = Game1.getLocationFromName("Mine") as Mine;
         private static Beach beachLocation = Game1.getLocationFromName("Beach") as Beach;
+        private static Mountain mountainLocation = Game1.getLocationFromName("Mountain") as Mountain;
 
         private static Point farmEntryLocation = farmLocation.GetMainFarmHouseEntry();
         private static Point farmHouseEntryLocation = farmHouseLocation.getEntryLocation();
@@ -79,9 +80,26 @@ namespace DedicatedServer.Utils
             beachEntryLocation.X, beachEntryLocation.Y,
             false, false);
 
+        /// <summary>
+        ///         Warp to Robin
+        /// </summary>
+        public static readonly Warp robinWarp = new Warp(
+            12, 26,
+            mountainLocation.NameOrUniqueName,
+            12, 26,
+            false, false);
+
+        /// <summary>
+        ///         Warp to Clint
+        /// </summary>
+        public static readonly Warp clintWarp = new Warp(
+            94, 82,
+            townLocation.NameOrUniqueName,
+            94, 82,
+            false, false);
+
         public static Warp Refresh(Farmer farmer)
         {
-
             return new Warp(
                 (int)farmer.Tile.X, (int)farmer.Tile.Y,
                 farmer.currentLocation.Name,
