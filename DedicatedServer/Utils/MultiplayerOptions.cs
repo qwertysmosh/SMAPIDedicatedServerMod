@@ -65,6 +65,11 @@ namespace DedicatedServer.Utils
             MultiplayerOptions.helper = helper;
             MultiplayerOptions.config = config;
             MultiplayerOptions.chatBox = chatBox;
+
+            if (config.TryActivatingInviteCode)
+            {
+                TryActivatingInviteCode();
+            }
         }
 
         /// <summary>

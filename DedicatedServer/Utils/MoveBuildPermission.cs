@@ -1,4 +1,6 @@
 ﻿using DedicatedServer.Chat;
+using DedicatedServer.Config;
+using StardewModdingAPI;
 using StardewValley;
 using System.Collections.Generic;
 using static StardewValley.FarmerTeam;
@@ -7,6 +9,8 @@ namespace DedicatedServer.Utils
 {
     internal class MoveBuildPermission
     {
+        private static IMonitor monitor = null;
+        private static ModConfig config = null;
         private static EventDrivenChatBox chatBox = null;
 
         private static readonly string moveBuildPermission =
@@ -28,9 +32,13 @@ namespace DedicatedServer.Utils
             set => Game1.player.team.farmhandsCanMoveBuildings.Value = value;
         }
 
-        public MoveBuildPermission(EventDrivenChatBox chatBox)
+        public MoveBuildPermission(IMonitor monitor, ModConfig config, EventDrivenChatBox chatBox)
         {
+            MoveBuildPermission.monitor = monitor;
+            MoveBuildPermission.config = config;
             MoveBuildPermission.chatBox = chatBox;
+
+            MoveBuildPermission.Change(config.MoveBuildPermission);
         }
 
         /// <summary>
@@ -48,13 +56,16 @@ namespace DedicatedServer.Utils
             {
                 case "on":
                     buildPermission = RemoteBuildingPermissions.On;
+                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
                     break;
                 case "owned":
                 case "ownedbuildings":
                     buildPermission = RemoteBuildingPermissions.OwnedBuildings;
+                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
                     break;
                 default:
                     buildPermission = RemoteBuildingPermissions.Off;
+                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
                     break;
             }
 

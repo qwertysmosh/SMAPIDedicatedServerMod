@@ -295,8 +295,6 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.isCustomized.Value = true;
                 Game1.multiplayerMode = 2;
 
-                MoveBuildPermission.Change(config.MoveBuildPermission);
-
                 // Start game
                 menu.createdNewCharacter(true);
             }
@@ -353,11 +351,7 @@ namespace DedicatedServer.HostAutomatorStages
             sleepWorker = new SleepWorker(helper);
             restartDayWorker = new RestartDayWorker(helper);
             multiplayerOptions = new MultiplayerOptions(helper, config, chatBox);
-            if (config.TryActivatingInviteCode)
-            {
-                MultiplayerOptions.TryActivatingInviteCode();
-            }
-            moveBuildPermission = new MoveBuildPermission(chatBox);
+            moveBuildPermission = new MoveBuildPermission(monitor, config, chatBox);
             hostHouseUpgrade = new HostHouseUpgrade(helper, monitor, config, chatBox);
             wallet = new Wallet(chatBox);
 
