@@ -22,6 +22,7 @@ namespace DedicatedServer.HostAutomatorStages
         private IMonitor monitor;
         private ModConfig config;
         private CropSaver cropSaver = null;
+        private ReadyCheckHelper readyCheckHelper = null;
         private PasswordValidation passwordValidation = null;
         private AutomatedHost automatedHost = null;
         private InvincibleWorker invincibleWorker = null;
@@ -33,6 +34,7 @@ namespace DedicatedServer.HostAutomatorStages
         private ServerCommandListener serverCommandListener = null;
         private MultiplayerOptions multiplayerOptions = null;
         private MoveBuildPermission moveBuildPermission = null;
+        private HostHouseUpgrade hostHouseUpgrade = null;
         private ShippingMenuCommandListener shippingMenuCommandListener = null;
         private Wallet wallet = null;
 
@@ -45,7 +47,8 @@ namespace DedicatedServer.HostAutomatorStages
                 cropSaver = new CropSaver(helper, monitor, config);
                 cropSaver.Enable();
             }
-            helper.Events.GameLoop.DayStarted += ReadyCheckHelper.OnDayStarted;
+            readyCheckHelper = new ReadyCheckHelper(helper, monitor, config);
+            readyCheckHelper.Enable();
             helper.Events.GameLoop.ReturnedToTitle += onReturnToTitle;
         }
 
@@ -355,6 +358,7 @@ namespace DedicatedServer.HostAutomatorStages
                 MultiplayerOptions.TryActivatingInviteCode();
             }
             moveBuildPermission = new MoveBuildPermission(chatBox);
+            hostHouseUpgrade = new HostHouseUpgrade(helper, monitor, config, chatBox);
             wallet = new Wallet(chatBox);
 
             buildCommandListener = new BuildCommandListener(chatBox);
@@ -384,6 +388,9 @@ namespace DedicatedServer.HostAutomatorStages
             pauseCommandListener = null;
             serverCommandListener?.Disable();
             serverCommandListener = null;
+
+            readyCheckHelper?.Disable();
+            readyCheckHelper = null;
         }
     }
 }

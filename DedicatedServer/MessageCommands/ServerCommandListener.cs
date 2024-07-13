@@ -65,13 +65,34 @@ namespace DedicatedServer.MessageCommands
                     #region DEBUG_COMMANDS
                     #if false
 
+                    case "items":
+                        Item item;
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.woodID, 999);
+                        Game1.player.addItemToInventory(item);
+                        item = new StardewValley.Object(StardewValley.Object.stoneID, 999);
+                        Game1.player.addItemToInventory(item);
+                        break;
+
+                    case "inventory":
+                        foreach(var inventoryItems in Game1.player.Items)
+                        {
+                            ;
+                        }
+                        break;
+
                     case "iridium":
                         Item itemi;
                         itemi = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
                         Game1.player.addItemToInventory(itemi);
                         break;
-                    case "wood":
 
+                    case "wood":
                         Item itemw;
                         itemw = new StardewValley.Object(StardewValley.Object.woodID, 999);
                         Game1.player.addItemToInventory(itemw);
@@ -162,6 +183,10 @@ namespace DedicatedServer.MessageCommands
                     TakeOver(sourceFarmer);
                     break;
 
+                case "updatehouselevel":  // /message ServerBot UpdateHouseLevel
+                    UpdateHouseLevel(sourceFarmer, param);
+                    break;
+
                 case "safeinvitecode": // /message ServerBot SafeInviteCode
                     SafeInviteCode(sourceFarmer);
                     break;
@@ -241,6 +266,18 @@ namespace DedicatedServer.MessageCommands
             HostAutomation.Reset();
         }
         
+        private void UpdateHouseLevel(Farmer farmer, string param)
+        {
+            if ("" == param)
+            {
+                HostHouseUpgrade.NeedsUpgrade();
+            }
+            else
+            {
+                HostHouseUpgrade.ManualUpdate(param);
+            }
+        }
+
         private void SafeInviteCode(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SafeInviteCode))
