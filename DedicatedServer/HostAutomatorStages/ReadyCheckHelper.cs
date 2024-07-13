@@ -48,7 +48,7 @@ namespace DedicatedServer.HostAutomatorStages
             }
 
 
-            if (config?.UpgradeHostHouseWithFarmhand ?? false)
+            if (config?.UpgradeHouseLevelBasedOnFarmhand ?? false)
             {
                 HostHouseUpgrade.NeedsUpgrade();
             }

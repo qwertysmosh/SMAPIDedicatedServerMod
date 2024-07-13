@@ -84,7 +84,7 @@ namespace DedicatedServer.Config
         /// <br/>   you can downgrade or upgrade it manually. As long as this property is set to true,
         /// <br/>   the house is automatically upgraded again.
         /// </summary>
-        public bool UpgradeHostHouseWithFarmhand { get; set; } = false;
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = false;
 
         /// <summary>
         ///         Password used to log in
@@ -191,7 +191,7 @@ namespace DedicatedServer.Config
         /// <summary>
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
-        public bool UpgradeHostHouseWithFarmhand { get; set; } = true;
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = true;
         
     }
 }

@@ -268,7 +268,7 @@ namespace DedicatedServer.MessageCommands
         
         private void UpdateHouseLevel(Farmer farmer, string param)
         {
-            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHostHouseWithFarmhand))
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHouseLevelBasedOnFarmhand))
             {
                 WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
                 return;

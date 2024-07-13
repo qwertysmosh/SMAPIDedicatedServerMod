@@ -42,6 +42,7 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 - `MoveBuildPermission`: Change farmhands permissions to move buildings from the Carpenter's shop. Is set each time the server is started and can be changed in the game. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
 - `Password`: Password used to log in. It must be changed to a secure password. An empty string `""` means no password. Any check fails if the value is set to `null`.
 - `PasswordProtected`: The password protection of individual functions can be switched on (`true`) and off (`false`) in the group.
+- `UpgradeHouseLevelBasedOnFarmhand`: Set this value to `true` or `false` to activate the automatic upgrade of the host farmhouse according to the highest farmhouse level of a player.
 
 ## In Game Command
 
@@ -52,6 +53,17 @@ All commands in the game must be sent privately to the player `ServerBot`. For e
 - `Pause`: (Toggle command) \
   Pause the game
 - `TakeOver`: The host player returns control to the host, all host functions are switched on. Cancels the [`LetMePlay`](#host-in-game-command) command
+- `UpdateHouseLevel`: Can be used with and without a parameter.
+  - Without a parameter:
+    - The command triggers the check function and the host farmhouse is upgraded to the next level if another farmer has a farmhouse with a higher farmhouse level than the host.
+    - The additional options entry `UpgradeHouseLevelBasedOnFarmhand` is ignored.
+  - With a parameter from 0 to 3:
+    - The host farmhouse will be upgraded immediately, please note:
+      - It is not safe to be in the farmhouse while the farmhouse is being upgraded or downgraded.
+      - Please remove all items, decorations and so on.
+      - Some items will be stored in a chest, but there are only 36 places to store items.
+      - Everything else will be deleted.  
+      - All beds will be destroyed and a new bed will be set up.
 - `SafeInviteCode`: A file `invite_code.txt` with the invitation code is created in this mods folder. If there is no invitation code, an empty string is saved.
 - `InviteCode`: The invitation code is printed.
 - `ForceInviteCode`: Forces the invitation code by closing and reopening the multiplayer server. There is an 8 second warning before the server stops, after another 2 seconds it is restarted.
