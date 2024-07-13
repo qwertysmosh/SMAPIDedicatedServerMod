@@ -1,20 +1,17 @@
-﻿using StardewValley.Locations;
-using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Data;
-
+﻿using DedicatedServer.Chat;
+using DedicatedServer.Config;
 using Microsoft.Xna.Framework;
 using Netcode;
-
 using StardewModdingAPI;
+using StardewValley;
+using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
-
-using DedicatedServer.Config;
-using DedicatedServer.Chat;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Reflection;
 
 namespace DedicatedServer.Utils
 {
@@ -69,11 +66,13 @@ namespace DedicatedServer.Utils
         /// <summary>
         ///         Checks whether the host's house needs to be upgraded based on all players
         /// </summary>
-        public static void NeedsUpgrade()
+        public static bool NeedsUpgrade()
         {
+            bool upgradeIsBeingExecuted = false;
+
             if (IsHostUpgrading)
             {
-                return;
+                return true;
             }
             else
             {
@@ -101,6 +100,7 @@ namespace DedicatedServer.Utils
                 {
                     chatBox?.textBoxEnter($"The host will upgrade his house in {daysMin} days.");
                     DaysUntilHouseUpgrade(Game1.player, daysMin);
+                    upgradeIsBeingExecuted = true;
                 }
                 else
                 {
@@ -110,8 +110,10 @@ namespace DedicatedServer.Utils
                     {
                         chatBox?.textBoxEnter("The host will upgrade his house the next day.");
                         DaysUntilHouseUpgrade(Game1.player, 1);
+                        upgradeIsBeingExecuted = true;
                     }
                 }
+                return upgradeIsBeingExecuted;
             }
         }
 

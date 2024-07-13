@@ -187,5 +187,11 @@ namespace DedicatedServer.Config
         /// <seealso cref="MessageCommands.ServerCommandListener"/>
         /// </summary>
         public bool MoveBuildPermission { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool UpgradeHostHouseWithFarmhand { get; set; } = true;
+        
     }
 }

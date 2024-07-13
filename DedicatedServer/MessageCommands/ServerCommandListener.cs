@@ -268,12 +268,26 @@ namespace DedicatedServer.MessageCommands
         
         private void UpdateHouseLevel(Farmer farmer, string param)
         {
+            if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHostHouseWithFarmhand))
+            {
+                WriteToPlayer(farmer, PasswordValidation.notAuthorizedMessage);
+                return;
+            }
+
             if ("" == param)
             {
-                HostHouseUpgrade.NeedsUpgrade();
+                if (HostHouseUpgrade.NeedsUpgrade())
+                {
+                    WriteToPlayer(null, "A host farm house upgrade is being executed" + TextColor.Yellow);
+                }
+                else
+                {
+                    WriteToPlayer(null, "A host farm house upgrade is not necessary" + TextColor.Green);
+                }
             }
             else
             {
+                WriteToPlayer(null, $"The host farm house is upgraded to {param}" + TextColor.Orange);
                 HostHouseUpgrade.ManualUpdate(param);
             }
         }
