@@ -20,7 +20,7 @@ namespace DedicatedServer.HostAutomatorStages
                 isUnlocking = true;
             }
             else if (isUnlocking && Game1.player.eventsSeen.Contains("611439")) {
-                Game1.player.warpFarmer(WarpPoints.farmWarp);
+                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isUnlocking = false;
             }
             else

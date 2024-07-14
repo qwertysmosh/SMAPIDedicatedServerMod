@@ -21,7 +21,7 @@ namespace DedicatedServer.HostAutomatorStages
                 isGettingFishingRod = true;
             }
             else if (isGettingFishingRod && Game1.player.eventsSeen.Contains("739330")) {
-                Game1.player.warpFarmer(WarpPoints.farmWarp);
+                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isGettingFishingRod = false;
             }
             else

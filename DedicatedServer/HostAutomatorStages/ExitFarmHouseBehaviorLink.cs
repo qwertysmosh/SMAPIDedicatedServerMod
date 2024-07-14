@@ -27,7 +27,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.timeOfDay < TimeToEnterFarmhouse && 
                 Game1.currentLocation != null && Game1.currentLocation is FarmHouse)
             {
-                Game1.player.warpFarmer(WarpPoints.farmWarp);
+                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 state.ExitFarmhouse(); // Mark as exited
                 state.SetWaitTicks(60); // Set up wait ticks to wait for possible event
             }
@@ -38,7 +38,7 @@ namespace DedicatedServer.HostAutomatorStages
                     Game1.currentLocation != null && Game1.currentLocation is Farm &&
                     true == Game1.spawnMonstersAtNight)
                 {
-                    Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
+                    Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
                     state.EnteredFarmhouse();
                     state.SetWaitTicks(60);
                 }

@@ -100,7 +100,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.server.kick(farmer.UniqueMultiplayerID);
             }
 
-            Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
+            Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
 
             Game1.player.isInBed.Value = true;
             Game1.currentLocation.answerDialogueAction("Sleep_Yes", null);

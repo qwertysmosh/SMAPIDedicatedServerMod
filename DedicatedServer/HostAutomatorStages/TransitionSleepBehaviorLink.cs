@@ -67,7 +67,7 @@ namespace DedicatedServer.HostAutomatorStages
                 else
                 {
                     monitor.Log($"Warp to sleep", LogLevel.Debug);
-                    Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
+                    Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
                     state.WarpToSleep();
                 }
             }

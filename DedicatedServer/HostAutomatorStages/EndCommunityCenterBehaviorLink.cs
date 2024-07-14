@@ -20,7 +20,7 @@ namespace DedicatedServer.HostAutomatorStages
                 isEnding = true;
             }
             else if (isEnding && Game1.player.eventsSeen.Contains("191393")) {
-                Game1.player.warpFarmer(WarpPoints.farmWarp);
+                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isEnding = false;
             }
             else
