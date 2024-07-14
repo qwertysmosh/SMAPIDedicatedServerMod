@@ -3,6 +3,7 @@ using DedicatedServer.Config;
 using DedicatedServer.HostAutomatorStages;
 using DedicatedServer.Utils;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
@@ -20,7 +21,10 @@ namespace DedicatedServer.MessageCommands
 
         private IModHelper helper;
 
-        private const string HardwoodItemId = "709";
+        private const string hardwoodItemId = "709";
+        private const string iridiumSprinkler = "645";
+        private const string greenBean = "188";
+        //private const string beanStarter = "473";
 
         public ServerCommandListener(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
         {
@@ -38,6 +42,45 @@ namespace DedicatedServer.MessageCommands
         {
             chatBox.ChatReceived -= chatReceived;
         }
+
+        #region DEBUG_SKIP_DAYS
+        #if true
+
+        // Each day is run so that all events are executed normally.
+
+        private int dayOfMonth = -1;
+        private Season season;
+        private void EnableSkipDays(int dayOfMonth, Season season)
+        {
+            this.dayOfMonth = dayOfMonth;
+            this.season = season;
+            helper.Events.GameLoop.OneSecondUpdateTicked += SkipDays;
+            SkipDays(null, null);
+        }
+
+        private void DisableSkipDays()
+        {
+            this.dayOfMonth = -1;
+            helper.Events.GameLoop.OneSecondUpdateTicked -= SkipDays;
+            Sleeping.ShouldSleepOverwrite = false;
+        }
+
+        private void SkipDays(object sender, OneSecondUpdateTickedEventArgs e)
+        {
+            if (dayOfMonth > Game1.dayOfMonth || Game1.season != this.season)
+            {
+                if(false == Sleeping.ShouldSleepOverwrite)
+                {
+                    Sleeping.ShouldSleepOverwrite = true;
+                }
+            }
+            else
+            {
+                DisableSkipDays();
+            }
+        }
+        #endif
+        #endregion
 
         private void chatReceived(object sender, ChatEventArgs e)
         {
@@ -65,56 +108,54 @@ namespace DedicatedServer.MessageCommands
                     #region DEBUG_COMMANDS
 #if true
 
-                    case "w1":
-                        Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
-                        break;
-                    case "w2":
-                        Game1.player.warpFarmer(WarpPoints.FarmWarp);
+                    case "skipdays":
+                        EnableSkipDays(15, Season.Spring);
                         break;
 
-                    case "items":
-                        Item item;
-                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
-                        Game1.player.addItemToInventory(item);
-                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
-                        Game1.player.addItemToInventory(item);
-                        item = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
-                        Game1.player.addItemToInventory(item);
-                        item = new StardewValley.Object(StardewValley.Object.woodID, 999);
-                        Game1.player.addItemToInventory(item);
-                        item = new StardewValley.Object(StardewValley.Object.stoneID, 999);
-                        Game1.player.addItemToInventory(item);
+                    case "item":
+                        if ("" != param)
+                        {
+                            int param2 = Convert.ToInt16(2 < tokens.Length ? tokens[2].ToLower() : "-1");
+                            if (0 <= param2)
+                            {
+                                Game1.player.addItemToInventory(new StardewValley.Object(param, param2));
+                            }
+                        }
                         break;
 
                     case "inventory":
                         foreach(var inventoryItems in Game1.player.Items)
                         {
-                            ;
+                            var itemId = inventoryItems.ItemId;
                         }
                         break;
 
+                    case "items":
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.iridiumID, 999));
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.iridiumID, 999));
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.iridiumID, 999));
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.woodID, 999));
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.stoneID, 999));
+                        break;
+
+                    case "iridiumsprinkler":
+                        Game1.player.addItemToInventory(new StardewValley.Object(iridiumSprinkler, 10));
+                        break;
+
                     case "iridium":
-                        Item itemi;
-                        itemi = new StardewValley.Object(StardewValley.Object.iridiumID, 999);
-                        Game1.player.addItemToInventory(itemi);
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.iridiumID, 999));
                         break;
 
                     case "wood":
-                        Item itemw;
-                        itemw = new StardewValley.Object(StardewValley.Object.woodID, 999);
-                        Game1.player.addItemToInventory(itemw);
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.woodID, 999));
                         break;
 
                     case "stone":
-                        Item items;
-                        items = new StardewValley.Object(StardewValley.Object.stoneID, 999);
-                        Game1.player.addItemToInventory(items);
+                        Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.stoneID, 999));
                         break;
 
                     case "hardwood":
-                        Item itemhw;
-                        itemhw = new StardewValley.Object(HardwoodItemId, 999);
-                        Game1.player.addItemToInventory(itemhw);
+                        Game1.player.addItemToInventory(new StardewValley.Object(hardwoodItemId, 999));
                         break;
 
                     case "emptyinventoryall": // /message serverbot EmptyInventoryAll
@@ -164,6 +205,10 @@ namespace DedicatedServer.MessageCommands
 
                     case "clint":
                         Game1.player.warpFarmer(WarpPoints.clintWarp);
+                        break;
+
+                    case "pierre":
+                        Game1.player.warpFarmer(WarpPoints.pierreWarp);
                         break;
 
                     case "location":
