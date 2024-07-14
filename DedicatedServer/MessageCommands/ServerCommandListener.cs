@@ -63,7 +63,14 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     #region DEBUG_COMMANDS
-                    #if false
+#if true
+
+                    case "w1":
+                        Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
+                        break;
+                    case "w2":
+                        Game1.player.warpFarmer(WarpPoints.FarmWarp);
+                        break;
 
                     case "items":
                         Item item;
@@ -132,11 +139,11 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "farm":
-                        Game1.player.warpFarmer(WarpPoints.farmWarp);
+                        Game1.player.warpFarmer(WarpPoints.FarmWarp);
                         break;
 
                     case "house":
-                        Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
+                        Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
                         break;
 
                     case "mine":

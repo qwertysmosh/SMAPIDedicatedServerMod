@@ -7,23 +7,27 @@ using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using StardewValley.Locations;
+using xTile.Dimensions;
 
 namespace DedicatedServer.Utils
 {
     internal abstract class WarpPoints
     {
-        private static Farm farmLocation = Game1.getLocationFromName("Farm") as Farm;
-        private static FarmHouse farmHouseLocation = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-        private static Town townLocation = Game1.getLocationFromName("Town") as Town;
-        private static Mine mineLocation = Game1.getLocationFromName("Mine") as Mine;
-        private static Beach beachLocation = Game1.getLocationFromName("Beach") as Beach;
-        private static Mountain mountainLocation = Game1.getLocationFromName("Mountain") as Mountain;
+        private static readonly Farm farmLocation = Game1.getLocationFromName("Farm") as Farm;
+        private static readonly FarmHouse farmHouseLocation = Game1.getLocationFromName("FarmHouse") as FarmHouse;
+        private static readonly Town townLocation = Game1.getLocationFromName("Town") as Town;
+        private static readonly Mine mineLocation = Game1.getLocationFromName("Mine") as Mine;
+        private static readonly Beach beachLocation = Game1.getLocationFromName("Beach") as Beach;
+        private static readonly Mountain mountainLocation = Game1.getLocationFromName("Mountain") as Mountain;
 
-        private static Point farmEntryLocation = farmLocation.GetMainFarmHouseEntry();
-        private static Point farmHouseEntryLocation = farmHouseLocation.getEntryLocation();
-        private static Point townNorthWestEntryLocation = new Point(0, 54);
-        private static Point mineEntryLocation = new Point(18, 13);
-        private static Point beachEntryLocation = new Point(38, 0);
+        private static Point FarmEntryLocation => farmLocation.GetMainFarmHouseEntry();
+        private static Point FarmHouseEntryLocation => farmHouseLocation.getEntryLocation();
+
+        private static readonly Point townNorthWestEntryLocation = new Point(0, 54);
+        private static readonly Point mineEntryLocation = new Point(18, 13);
+        private static readonly Point beachEntryLocation = new Point(38, 0);
+        private static readonly Point robinLocation = new Point(12, 26);
+        private static readonly Point clintLocation = new Point(94, 82);
 
         /// <summary>
         ///         Warppoint on the farm
@@ -31,26 +35,36 @@ namespace DedicatedServer.Utils
         /// <br/>   As the host is invisible and cannot be interacted with, the position
         /// <br/>   does not matter. A visible position simply allows you to interact with
         /// <br/>   the host when it has been made visible again with the `Invisible` command.
-        /// <br/>   +2 places the host on the veranda on the right
-        /// <br/>
-        /// <br/>   Warping to 64, 10 warps just behind the farmhouse. It "hides" the bot,
-        /// <br/>   but still allows him to perform actions like talking to npcs.
-        /// <br/>   64, 15 coords are "magic numbers" pulled from Game1.cs, line 11282, warpFarmer()
+        /// <br/>   +2 places the host on the veranda on the right.
         /// </summary>
-        public static readonly Warp farmWarp = new Warp(
-            farmEntryLocation.X + 2, farmEntryLocation.Y,
-            farmLocation.NameOrUniqueName,
-            farmEntryLocation.X + 2, farmEntryLocation.Y,
-            false, false);
+        public static Warp FarmWarp
+        {
+            get
+            {
+                var location = FarmEntryLocation;
+                return new Warp(
+                    location.X + 2, location.Y,
+                    farmLocation.NameOrUniqueName,
+                    location.X + 2, location.Y,
+                    false, false);
+            }
+        }
 
         /// <summary>
         ///         Warppoint into the farmhouse
         /// </summary>
-        public static readonly Warp farmHouseWarp = new Warp(
-            farmHouseEntryLocation.X, farmHouseEntryLocation.Y,
-            farmHouseLocation.NameOrUniqueName,
-            farmHouseEntryLocation.X, farmHouseEntryLocation.Y,
-            false, false);
+        public static Warp FarmHouseWarp
+        {
+            get
+            {
+                var location = FarmHouseEntryLocation;
+                return new Warp(
+                    location.X, location.Y,
+                    farmHouseLocation.NameOrUniqueName,
+                    location.X, location.Y,
+                    false, false);
+            }
+        }
 
         /// <summary>
         ///         Warppoint to town, northwest entrance
@@ -84,18 +98,18 @@ namespace DedicatedServer.Utils
         ///         Warp to Robin
         /// </summary>
         public static readonly Warp robinWarp = new Warp(
-            12, 26,
+            robinLocation.X, robinLocation.Y,
             mountainLocation.NameOrUniqueName,
-            12, 26,
+            robinLocation.X, robinLocation.Y,
             false, false);
 
         /// <summary>
         ///         Warp to Clint
         /// </summary>
         public static readonly Warp clintWarp = new Warp(
-            94, 82,
+            clintLocation.X, clintLocation.Y,
             townLocation.NameOrUniqueName,
-            94, 82,
+            clintLocation.X, clintLocation.Y,
             false, false);
 
         public static Warp Refresh(Farmer farmer)
