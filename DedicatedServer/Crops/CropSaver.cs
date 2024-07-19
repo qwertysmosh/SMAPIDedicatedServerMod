@@ -108,6 +108,15 @@ namespace DedicatedServer.Crops
             {
                 fstream?.Close();
             }
+
+            foreach(var pair in cropDictionary)
+            {
+                string id = pair.Value.HarvestItemId;
+                if(false == harvestItemIdSeasonDictionary.ContainsKey(id))
+                {
+                    harvestItemIdSeasonDictionary.Add(id, pair.Value.OriginalSeasonsToGrowIn);
+                }
+            }
         }
 
         private void onSaving(object sender, StardewModdingAPI.Events.SavingEventArgs e)
@@ -327,6 +336,7 @@ namespace DedicatedServer.Crops
                                     else
                                     {
                                         seasons = new List<Season>(crop.GetData().Seasons);
+                                        harvestItemIdSeasonDictionary.Add(id, seasons);
                                     }
 
                                     var cd = new CropData
@@ -492,7 +502,7 @@ namespace DedicatedServer.Crops
 
                                 // Lastly, now that the crop has been updated, construct the comparison data for later
                                 // so that we can check if this has been replaced by a newly planted crop in the evening.
-
+                                
                                 var cropGrowthStage = new CropGrowthStage
                                 {
                                     CurrentPhase = crop.currentPhase.Value,

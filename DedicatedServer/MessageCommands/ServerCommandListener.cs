@@ -23,8 +23,9 @@ namespace DedicatedServer.MessageCommands
 
         private const string hardwoodItemId = "709";
         private const string iridiumSprinkler = "645";
-        private const string greenBean = "188";
-        //private const string beanStarter = "473";
+        private const string beanStarter = "473";
+        private const string pepperSeed = "482";
+        private const string eggplantSeeds = "488";
 
         public ServerCommandListener(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
         {
@@ -126,7 +127,7 @@ namespace DedicatedServer.MessageCommands
                     case "inventory":
                         foreach(var inventoryItems in Game1.player.Items)
                         {
-                            var itemId = inventoryItems.ItemId;
+                            var itemId = inventoryItems?.ItemId;
                         }
                         break;
 
