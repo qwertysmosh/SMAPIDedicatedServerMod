@@ -107,10 +107,10 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     #region DEBUG_COMMANDS
-#if true
+                    #if false
 
                     case "skipdays":
-                        EnableSkipDays(28, Season.Spring);
+                        EnableSkipDays(28, Season.Fall);
                         break;
 
                     case "item":

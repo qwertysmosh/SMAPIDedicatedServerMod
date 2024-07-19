@@ -1,8 +1,12 @@
 # SMAPI Dedicated Server Mod for Stardew Valley
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Version-1.6.8-blue" />
-</p>
+<div align="center">
+
+  [![Stardew Valley 1.6.8](https://img.shields.io/badge/Stardew_Valley-1.6.8-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
+  [![SMAPI 4.0.8](https://img.shields.io/badge/SMAPI-4.0.8-5cb811)](https://smapi.io/ "Link to SMAPI")
+  [![Docker Version](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ")
+
+</div>
 
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
 
@@ -38,7 +42,7 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 
 ### Additional Options
 
-- `EnableCropSaver`: Set to `true` or `false` to enable or disable the crop saver feature. When enabled, seasonal crops planted by players and fully grown before the season's end are guaranteed to give at least one more harvest before dying. For example, a spring crop planted by a player and fully grown before Summer 1 will not die immediately on Summer 1. Instead, it'll provide exactly one more harvest, even if it's a crop that ordinarily produces multiple harvests. Defaults to `true`.
+- `EnableCropSaver`: Set to `true` or `false` to enable or disable the crop saver feature. When enabled, seasonal crops planted by players and fully grown before the season's end are guaranteed to give at least one more harvest before dying. For example, a spring crop planted by a player and fully grown before Summer 1 will not die immediately on Summer 1. Instead, it'll provide exactly one more harvest, even if it's a crop that ordinarily produces multiple harvests. You must remember that once a seed of a variety has been sown, it can be sown the next day at any time of the year. But if it is not the original season, it will die the next day. You can lose a lot of seeds. As soon as the last plant of a species has been destroyed (dried plants count), the seed can only be sown in its original season from the next day onwards. Defaults to `true`.
 - `MoveBuildPermission`: Change farmhands permissions to move buildings from the Carpenter's shop. Is set each time the server is started and can be changed in the game. Set to `off` to entirely disable moving buildings, set to `owned` to allow farmhands to move buildings that they purchased, or set to `on` to allow moving all buildings.
 - `Password`: Password used to log in. It must be changed to a secure password. An empty string `""` means no password. Any check fails if the value is set to `null`.
 - `PasswordProtected`: The password protection of individual functions can be switched on (`true`) and off (`false`) in the group.
