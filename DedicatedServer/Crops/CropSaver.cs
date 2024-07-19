@@ -1,6 +1,7 @@
 ﻿using DedicatedServer.Config;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Extensions;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 using System;
@@ -21,7 +22,6 @@ namespace DedicatedServer.Crops
         private SerializableDictionary<CropLocation, CropComparisonData> beginningOfDayCrops = new SerializableDictionary<CropLocation, CropComparisonData>();
         private XmlSerializer cropSaveDataSerializer = new XmlSerializer(typeof(CropSaveData));
 
-        private bool loadDataOnce = true;
         private Dictionary<string, List<Season>> harvestItemIdSeasonDictionary = new Dictionary<string, List<Season>>();
         private List<Season> allSeasonsList = new List<Season>() { Season.Winter, Season.Spring, Season.Summer, Season.Fall };
 
@@ -56,7 +56,7 @@ namespace DedicatedServer.Crops
             public string WhichForageCrop { get; set; }
         }
 
-        public struct CropData
+        public class CropData
         {
             public bool MarkedForDeath { get; set; }
             public List<Season> OriginalSeasonsToGrowIn { get; set; }
@@ -109,12 +109,24 @@ namespace DedicatedServer.Crops
                 fstream?.Close();
             }
 
-            foreach(var pair in cropDictionary)
+            // crop.GetData().Seasons is a cached value that does not change until the game is restarted.
+            // As this is a server, this should not happen. This code deals with the case
+            foreach (var pair in cropDictionary)
             {
-                string id = pair.Value.HarvestItemId;
-                if(false == harvestItemIdSeasonDictionary.ContainsKey(id))
+                string harvestItemId = pair.Value.HarvestItemId;
+
+                if(false == harvestItemIdSeasonDictionary.ContainsKey(harvestItemId))
                 {
-                    harvestItemIdSeasonDictionary.Add(id, pair.Value.OriginalSeasonsToGrowIn);
+                    harvestItemIdSeasonDictionary.Add(harvestItemId, pair.Value.OriginalSeasonsToGrowIn);
+
+                    var crop = Game1.cropData.Values
+                        .Where(x => x.HarvestItemId == harvestItemId)
+                        .FirstOrDefault();
+
+                    if (null != crop)
+                    {
+                        crop.Seasons = allSeasonsList;
+                    }
                 }
             }
         }
@@ -236,34 +248,6 @@ namespace DedicatedServer.Crops
 
         private void onDayEnding(object sender, StardewModdingAPI.Events.DayEndingEventArgs e)
         {
-            if (loadDataOnce)
-            {
-                // crop.GetData().Seasons is a cached value that does not change until the game is restarted.
-                // As this is a server, this should not happen. This code deals with the case
-
-                loadDataOnce = false;
-
-                if(0 < cropDictionary.Count)
-                {
-                    var harvestItemIds = cropDictionary.Values.Select(x => x.HarvestItemId).Distinct().ToList();
-
-                    foreach (var harvestItemId in harvestItemIds)
-                    {
-                        harvestItemIdSeasonDictionary.Add(
-                            harvestItemId, 
-                            cropDictionary.Values
-                                .Where(c => c.HarvestItemId == harvestItemId)
-                                .First().OriginalSeasonsToGrowIn);
-
-                        var global_crop = Game1.cropData.Values.Where(x => x.HarvestItemId == harvestItemId).FirstOrDefault();
-                        if (null != global_crop)
-                        {
-                            global_crop.Seasons = allSeasonsList;
-                        }
-                    }
-                }
-            }
-
             // In order to check for crops that have been destroyed and need to be removed from
             // the cropDictionary all together, we need to keep track of which crop locations
             // from the cropDictionary are found during the iteration over all crops in all
@@ -384,16 +368,50 @@ namespace DedicatedServer.Crops
             // iteration, then they must've been destroyed, AND they weren't replaced with a new crop at the same location.
             // In such a case, we can remove it from the cropDictionary.
             var locationSetComplement = new HashSet<CropLocation>();
+            var cropDataRestore = new Dictionary<string, List<Season>>();
+            var existingHarvestItems = new List<string>();
             foreach (var kvp in cropDictionary)
             {
-                if (!locationSet.Contains(kvp.Key))
+                string harvestItemId = kvp.Value.HarvestItemId;
+                if (false == locationSet.Contains(kvp.Key))
                 {
                     locationSetComplement.Add(kvp.Key);
+
+                    cropDataRestore.TryAdd(harvestItemId, kvp.Value.OriginalSeasonsToGrowIn);
+                }
+                else
+                {
+                    existingHarvestItems.Add(harvestItemId);
                 }
             }
             foreach (var cropLocation in locationSetComplement)
             {
                 cropDictionary.Remove(cropLocation);
+            }
+
+            existingHarvestItems = existingHarvestItems.Distinct().ToList();
+
+            // <see cref="cropDataRestore"/> has been filled with items from one location,
+            // but it is not guaranteed that another plant of this type will be present.
+            // Therefore entries are removed if other plants of the same taype exists.
+            cropDataRestore.RemoveWhere(cropData => existingHarvestItems.Contains(cropData.Key));
+
+            foreach (var cropData in cropDataRestore)
+            {
+                string harvestItemId = cropData.Key;
+
+                // Restore old crop season
+                var crop = Game1.cropData.Values
+                    .Where(x => x.HarvestItemId == harvestItemId)
+                    .FirstOrDefault();
+
+                if (null != crop)
+                {
+                    crop.Seasons = cropData.Value;
+                }
+
+                // Remove old entries
+                harvestItemIdSeasonDictionary.Remove(harvestItemId);
             }
         }
 

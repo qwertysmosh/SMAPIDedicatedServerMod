@@ -110,13 +110,13 @@ namespace DedicatedServer.MessageCommands
 #if true
 
                     case "skipdays":
-                        EnableSkipDays(15, Season.Spring);
+                        EnableSkipDays(28, Season.Spring);
                         break;
 
                     case "item":
                         if ("" != param)
                         {
-                            int param2 = Convert.ToInt16(2 < tokens.Length ? tokens[2].ToLower() : "-1");
+                            int param2 = int.TryParse(2 < tokens.Length ? tokens[2] : "1", out int param2try) ? param2try : 1;
                             if (0 <= param2)
                             {
                                 Game1.player.addItemToInventory(new StardewValley.Object(param, param2));
