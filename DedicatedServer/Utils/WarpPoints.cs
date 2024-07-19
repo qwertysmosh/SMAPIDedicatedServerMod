@@ -28,6 +28,7 @@ namespace DedicatedServer.Utils
         private static readonly Point beachEntryLocation = new Point(38, 0);
         private static readonly Point robinLocation = new Point(12, 26);
         private static readonly Point clintLocation = new Point(94, 82);
+        private static readonly Point pierreLocation = new Point(43, 57);
 
         /// <summary>
         ///         Warppoint on the farm
@@ -110,6 +111,15 @@ namespace DedicatedServer.Utils
             clintLocation.X, clintLocation.Y,
             townLocation.NameOrUniqueName,
             clintLocation.X, clintLocation.Y,
+            false, false);
+
+        /// <summary>
+        ///         Warp to Pierre
+        /// </summary>
+        public static readonly Warp pierreWarp = new Warp(
+            pierreLocation.X, pierreLocation.Y,
+            townLocation.NameOrUniqueName,
+            pierreLocation.X, pierreLocation.Y,
             false, false);
 
         public static Warp Refresh(Farmer farmer)
