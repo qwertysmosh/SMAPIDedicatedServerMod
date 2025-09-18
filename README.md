@@ -2,13 +2,17 @@
 
 <div align="center">
 
-  [![Stardew Valley 1.6.8](https://img.shields.io/badge/Stardew_Valley-1.6.8-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
-  [![SMAPI 4.0.8](https://img.shields.io/badge/SMAPI-4.0.8-5cb811)](https://smapi.io/ "Link to SMAPI")
-  [![Docker Version](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ")
+  [![Shields](https://img.shields.io/badge/Stardew_Valley-1.6.15-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
+  [![Shields](https://img.shields.io/badge/SMAPI-4.3.2-5cb811)](https://smapi.io/ "Link to SMAPI")
+   ![Shields](https://img.shields.io/badge/.NET-6.0-512BD4)
+  [![Shields](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ")
 
 </div>
 
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
+
+> [!CAUTION]
+> The current changes to the source code make the code unworkable.
 
 ## Configuration File
 
@@ -136,7 +140,7 @@ kill -SIGINT ....
 
 ## Development
 
-If Stardew Valley was not installed in the default path, the installation path must be added to the project file `DedicatedServer.csproj`. Add the path with the tag `GamePath` to the `PropertyGroup`. Depending on the path, it should look something like this:
+In order to use the necessary namespaces, the installation path must be added to the project file `DedicatedServer.csproj`. Add the path with the tag `GamePath` to the `PropertyGroup`. Depending on the path, it should look something like this:
 
 ```text
   <PropertyGroup>
