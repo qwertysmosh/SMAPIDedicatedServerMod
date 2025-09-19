@@ -89,10 +89,11 @@ namespace DedicatedServer.Crops
             string str = SaveGame.FilterFileName(Game1.GetSaveGameName());
             string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
             string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-            if (Game1.savePathOverride != "")
-            {
-                save_directory = Game1.savePathOverride;
-            }
+#warning Is it necessary?
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //}
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
 
             // Deserialize crop data from temp save file
@@ -147,14 +148,15 @@ namespace DedicatedServer.Crops
             string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
             string filenameWithTmpString = str + "_" + Game1.uniqueIDForThisGame + tmpString;
             string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-            if (Game1.savePathOverride != "")
-            {
-                save_directory = Game1.savePathOverride;
-                if (Game1.savePathOverride != "")
-                {
-                    save_backups_and_metadata = false;
-                }
-            }
+#warning Is it necessary?
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //    if (Game1.savePathOverride != "")
+            //    {
+            //        save_backups_and_metadata = false;
+            //    }
+            //}
             SaveGame.ensureFolderStructureExists();
             string tmpSaveFile = Path.Combine(save_directory, "AdditionalCropData" + tmpString);
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
@@ -174,24 +176,25 @@ namespace DedicatedServer.Crops
             cropSaveDataSerializer.Serialize(writer, new CropSaveData {cropDictionary = cropDictionary, beginningOfDayCrops = beginningOfDayCrops});
             writer.Close();
 
-            // If appropriate, move old crop data file to backup
-            if (save_backups_and_metadata)
-            {
-                try
-                {
-                    if (File.Exists(backupSaveFile))
-                    {
-                        File.Delete(backupSaveFile);
-                    }
-                }
-                catch (Exception) {}
-
-                try
-                {
-                    File.Move(saveFile, backupSaveFile);
-                }
-                catch (Exception) {}
-            }
+#warning Is it necessary?
+            //// If appropriate, move old crop data file to backup
+            //if (save_backups_and_metadata)
+            //{
+            //    try
+            //    {
+            //        if (File.Exists(backupSaveFile))
+            //        {
+            //            File.Delete(backupSaveFile);
+            //        }
+            //    }
+            //    catch (Exception) {}
+            //
+            //    try
+            //    {
+            //        File.Move(saveFile, backupSaveFile);
+            //    }
+            //    catch (Exception) {}
+            //}
 
             // Delete previous save file if it still exists (hasn't been moved to
             // backup)
