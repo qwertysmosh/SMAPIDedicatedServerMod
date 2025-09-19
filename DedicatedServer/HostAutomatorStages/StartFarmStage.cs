@@ -190,10 +190,10 @@ namespace DedicatedServer.HostAutomatorStages
                     Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
                 }
 
-                // Pet breed
-                if (config.PetBreed.HasValue && (config.PetBreed < 0 || config.PetBreed > 2))
+                const int petBreedMax = 9;
+                if (config.PetBreed.HasValue && (config.PetBreed < 0 || config.PetBreed > petBreedMax))
                 {
-                    logConfigError("PetBreed must be an integer in [0, 2]");
+                    logConfigError($"PetBreed must be an integer in [0, {petBreedMax}]");
                     exit(-1);
                 }
                 if (config.AcceptPet && !config.PetBreed.HasValue)
@@ -214,9 +214,12 @@ namespace DedicatedServer.HostAutomatorStages
                 }
 
                 // Farm type
-                if (config.FarmType != "standard" && config.FarmType != "riverland" && config.FarmType != "forest" && config.FarmType != "hilltop" && config.FarmType != "wilderness" && config.FarmType != "fourcorners" && config.FarmType != "beach")
+                if (config.FarmType != "standard" && config.FarmType != "riverland" && 
+                    config.FarmType != "forest" && config.FarmType != "hilltop" && 
+                    config.FarmType != "wilderness" && config.FarmType != "fourcorners" && 
+                    config.FarmType != "beach" && config.FarmType != "meadowlands")
                 {
-                    logConfigError("Farm type must be one of \"standard\", \"riverland\", \"forest\", \"hilltop\", \"wilderness\", \"fourcorners\", or \"beach\"");
+                    logConfigError("Farm type must be one of \"standard\", \"riverland\", \"forest\", \"hilltop\", \"wilderness\", \"fourcorners\", \"beach\", or \"meadowlands\"");
                     exit(-1);
                 }
                 if (config.FarmType == "standard")
@@ -246,6 +249,17 @@ namespace DedicatedServer.HostAutomatorStages
                 else if (config.FarmType == "beach")
                 {
                     Game1.whichFarm = 6;
+                }
+                else if (config.FarmType == "meadowlands")
+                {
+                    // Farm type 7 is mod
+                    // https://github.com/Pathoschild/SMAPI/issues/957
+                    // ModFarmType modFarmType = Game1.whichModFarm;
+                    // modFarmType.Id = "MeadowlandsFarm";
+                    // Game1.whichFarm = 7;
+
+                    logConfigError("The meadowlands farm is currently not supported:\nhttps://github.com/Pathoschild/SMAPI/issues/957");
+                    exit(-1);
                 }
 
                 // Community center bundles type

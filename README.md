@@ -39,7 +39,19 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 
 - `AcceptPet`: Set to `true` or `false` to determine if the farm pet should be accepted.
 - `PetSpecies`: The desired pet species. Options are "dog" or "cat". Irrelevant if `AcceptPet` is `false`.
-- `PetBreed`: An integer in {0, 1, 2} specifying the pet breed index. 0 selects the leftmost breed; 1 selects the middle breed; 2 selects the rightmost breed. Irrelevant if `AcceptPet` is `false`.
+- `PetBreed`: An integer in [0, 9] specifying the pet breed index.  
+  0 selects the leftmost breed; 9 selects the rightmost breed:  
+  <picture> <img alt="Index 0" src="./Docs/PetBreed/0.png" height="30" /> </picture>
+  <picture> <img alt="Index 1" src="./Docs/PetBreed/1.png" height="30" /> </picture>
+  <picture> <img alt="Index 2" src="./Docs/PetBreed/2.png" height="30" /> </picture>
+  <picture> <img alt="Index 3" src="./Docs/PetBreed/3.png" height="30" /> </picture>
+  <picture> <img alt="Index 4" src="./Docs/PetBreed/4.png" height="30" /> </picture>
+  <picture> <img alt="Index 5" src="./Docs/PetBreed/5.png" height="30" /> </picture>
+  <picture> <img alt="Index 6" src="./Docs/PetBreed/6.png" height="30" /> </picture>
+  <picture> <img alt="Index 7" src="./Docs/PetBreed/7.png" height="30" /> </picture>
+  <picture> <img alt="Index 8" src="./Docs/PetBreed/8.png" height="30" /> </picture>
+  <picture> <img alt="Index 9" src="./Docs/PetBreed/9.png" height="30" /> </picture>  
+  Irrelevant if `AcceptPet` is `false`.
 - `PetName`: The desired pet name. Irrelevant if `AcceptPet` is `false`.
 - `MushroomsOrBats`: Choose between the mushroom or bat cave. Options are "mushrooms" or "bats" (case insensitive).
 - `PurchaseJojaMembership`: Set to `true` or `false` to determine if the automated host should "purchase" (acquire for free) a Joja membership when available, committing to the Joja route. Defaults to `false`.
