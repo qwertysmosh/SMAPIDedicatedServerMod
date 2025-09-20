@@ -12,7 +12,13 @@
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
 
 > [!WARNING]
-> The current changes to the source code ensure that the code can be compiled, but nothing has been tested.
+> The current changes to the source code ensure that the code can be compiled, but nothing has been tested.  
+> The following must be tested:
+>
+> - Crop Saver
+> - Selecting the animal from 0 to 9 and whether it is accepted.
+> - When selecting the animal, if the number is specified, the type `Pet` can be defined automatically.
+> - The house upgrade needs to be checked.
 
 ## Configuration File
 

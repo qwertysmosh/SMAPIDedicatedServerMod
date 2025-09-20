@@ -1,4 +1,5 @@
 ﻿using DedicatedServer.Config;
+using DedicatedServer.Helpers;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Extensions;
@@ -86,10 +87,9 @@ namespace DedicatedServer.Crops
             /**
              * Loads the cropDictionary and beginningOfDayCrops.
              */
-            string str = SaveGame.FilterFileName(Game1.GetSaveGameName());
-            string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
-            string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-#warning Is it necessary?
+            string save_directory = SaveGameHelper.Path;
+
+#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
             //if (Game1.savePathOverride != "")
             //{
             //    save_directory = Game1.savePathOverride;
@@ -142,13 +142,11 @@ namespace DedicatedServer.Crops
              */
 
             // Determine save paths
-            string tmpString = "_STARDEWVALLEYSAVETMP";
-            bool save_backups_and_metadata = true;
-            string str = SaveGame.FilterFileName(Game1.GetSaveGameName());
-            string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
-            string filenameWithTmpString = str + "_" + Game1.uniqueIDForThisGame + tmpString;
-            string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-#warning Is it necessary?
+            string tmpString = SaveGame.TempNameSuffix;
+            string save_directory = SaveGameHelper.Path;
+
+#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
             //if (Game1.savePathOverride != "")
             //{
             //    save_directory = Game1.savePathOverride;
@@ -160,7 +158,8 @@ namespace DedicatedServer.Crops
             SaveGame.ensureFolderStructureExists();
             string tmpSaveFile = Path.Combine(save_directory, "AdditionalCropData" + tmpString);
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
-            string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
+#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+            //string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
 
             // Serialize crop data to temp save file
             TextWriter writer = null;
@@ -176,7 +175,8 @@ namespace DedicatedServer.Crops
             cropSaveDataSerializer.Serialize(writer, new CropSaveData {cropDictionary = cropDictionary, beginningOfDayCrops = beginningOfDayCrops});
             writer.Close();
 
-#warning Is it necessary?
+#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
             //// If appropriate, move old crop data file to backup
             //if (save_backups_and_metadata)
             //{
