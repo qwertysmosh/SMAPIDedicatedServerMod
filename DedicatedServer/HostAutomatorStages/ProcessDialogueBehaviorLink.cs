@@ -82,8 +82,9 @@ namespace DedicatedServer.HostAutomatorStages
                         }
                         else if (yesResponseIdx >= 0 && noResponseIdx >= 0)
                         {
+#warning Where is the logic in naming the pet?
                             // This is the pet question. Answer based on mod config.
-                            if (config.AcceptPet)
+                            if (config.shouldAcceptPet())
                             {
                                 db.selectedResponse = yesResponseIdx;
                             }

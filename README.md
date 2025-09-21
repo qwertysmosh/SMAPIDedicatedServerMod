@@ -158,11 +158,16 @@ kill -SIGINT ....
 
 ## Development
 
-In order to use the necessary namespaces, the installation path must be added to the project file `DedicatedServer.csproj`. Add the path with the tag `GamePath` to the `PropertyGroup`. Depending on the path, it should look something like this:
+After cloning the repository and performing the first (probably incorrect) build, the SMAPI readme file can be opened. It describes how to create the `stardewvalley.targets` file in the user's home directory in order to select a specific version when multiple versions are installed.
+([Linux](https://superuser.com/a/409223),
+[macOS](https://www.cnet.com/how-to/how-to-find-your-macs-home-folder-and-add-it-to-finder/) or
+[Windows](https://www.computerhope.com/issues/ch000109.htm).)  
+The file must contain the following:
 
-```text
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <GamePath>D:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
-  </PropertyGroup>
+```xml
+<Project>
+    <PropertyGroup>
+        <GamePath>C:/Program Files (x86)/Steam/steamapps/common/Stardew Valley</GamePath>
+    </PropertyGroup>
+</Project>
 ```

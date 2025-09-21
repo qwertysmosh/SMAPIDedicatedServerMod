@@ -171,14 +171,12 @@ namespace DedicatedServer.HostAutomatorStages
                 // Farm name
                 Game1.player.farmName.Value = config.FarmName;
 
-                const int petBreedMax = 9;
-                if (0 <= config.PetBreed && petBreedMax >= config.PetBreed)
+                // Pet species
+                if (config.shouldAcceptPet())
                 {
                     Game1.player.whichPetBreed = config.PetBreed.ToString();
 
-                    // Pet species
-                    const int firstDogIndex = 5;
-                    if (firstDogIndex <= config.PetBreed)
+                    if (ModConfig.FirstDogIndex <= config.PetBreed)
                     {
                         Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
                     }
