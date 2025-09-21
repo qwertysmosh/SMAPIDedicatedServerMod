@@ -17,8 +17,9 @@ This mod provides a dedicated (headless) server for Stardew Valley, powered by S
 >
 > - Crop Saver
 > - Selecting the animal from 0 to 9 and whether it is accepted.
-> - When selecting the animal, if the number is specified, the type `Pet` can be defined automatically.
 > - The house upgrade needs to be checked.
+> - After you have sold something, the host needs some time to close the dialog,  
+>   and the client only sees a black screen (they must disconnect and reconnect).
 
 ## Configuration File
 
@@ -43,8 +44,6 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 
 ### Host Automation Options
 
-- `AcceptPet`: Set to `true` or `false` to determine if the farm pet should be accepted.
-- `PetSpecies`: The desired pet species. Options are "dog" or "cat". Irrelevant if `AcceptPet` is `false`.
 - `PetBreed`: An integer in [0, 9] specifying the pet breed index.  
   0 selects the leftmost breed; 9 selects the rightmost breed:  
   <picture> <img alt="Index 0" src="./Docs/PetBreed/0.png" height="30" /> </picture>
@@ -57,7 +56,8 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
   <picture> <img alt="Index 7" src="./Docs/PetBreed/7.png" height="30" /> </picture>
   <picture> <img alt="Index 8" src="./Docs/PetBreed/8.png" height="30" /> </picture>
   <picture> <img alt="Index 9" src="./Docs/PetBreed/9.png" height="30" /> </picture>  
-  Irrelevant if `AcceptPet` is `false`.
+  The index clearly shows whether a dog or a cat is desired.  
+  If no pet is desired, the value should be set to `-1`.
 - `PetName`: The desired pet name. Irrelevant if `AcceptPet` is `false`.
 - `MushroomsOrBats`: Choose between the mushroom or bat cave. Options are "mushrooms" or "bats" (case insensitive).
 - `PurchaseJojaMembership`: Set to `true` or `false` to determine if the automated host should "purchase" (acquire for free) a Joja membership when available, committing to the Joja route. Defaults to `false`.

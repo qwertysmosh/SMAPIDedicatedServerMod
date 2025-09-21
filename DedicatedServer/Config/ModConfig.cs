@@ -31,13 +31,9 @@ namespace DedicatedServer.Config
 
         public ulong? RandomSeed { get; set; } = null;
 
-        public bool AcceptPet = true; // By default, accept the pet (of course).
-        
-        // Nullable. Must not be null if AcceptPet is true. Options are "dog" or "cat".
-        public string PetSpecies { get; set; } = "dog";
-
-        // Nullable. Must not be null if AcceptPet is true. Options are 0, 1, or 2.
-        public int? PetBreed { get; set; } = 0;
+        // If no pet is desired, an invalid value, e.g. -1, must be set.
+        // The options are 0 to 4 for cats and 5 to 9 for dogs.
+        public int PetBreed { get; set; } = 5;
 
         // Nullable. Must not be null if AcceptPet is true. Any string.
         public string PetName { get; set; } = "Stella";

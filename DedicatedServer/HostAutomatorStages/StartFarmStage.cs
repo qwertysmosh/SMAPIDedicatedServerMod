@@ -171,46 +171,26 @@ namespace DedicatedServer.HostAutomatorStages
                 // Farm name
                 Game1.player.farmName.Value = config.FarmName;
 
-                // Pet species
-                if (config.PetSpecies != null && config.PetSpecies != "dog" && config.PetSpecies != "cat")
-                {
-                    logConfigError("PetSpecies must be either \"dog\" or \"cat\"");
-                    exit(-1);
-                }
-                if (config.AcceptPet && config.PetSpecies == null)
-                {
-                    logConfigError("PetSpecies must be specified if AcceptPet is true");
-                }
-                if (config.PetSpecies == "cat")
-                {
-                    Game1.player.whichPetType = StardewValley.Characters.Pet.type_cat;
-                }
-                else
-                {
-                    Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
-                }
-
                 const int petBreedMax = 9;
-                if (config.PetBreed.HasValue && (config.PetBreed < 0 || config.PetBreed > petBreedMax))
+                if (0 <= config.PetBreed && petBreedMax >= config.PetBreed)
                 {
-                    logConfigError($"PetBreed must be an integer in [0, {petBreedMax}]");
-                    exit(-1);
-                }
-                if (config.AcceptPet && !config.PetBreed.HasValue)
-                {
-                    logConfigError("PetBreed must be specified if AcceptPet is true");
-                }
-                if (config.PetBreed.HasValue)
-                {
-                    if( (0 > config.PetBreed) || (3 < config.PetBreed) )
-                    {
-                        config.PetBreed = 0;
-                    }
                     Game1.player.whichPetBreed = config.PetBreed.ToString();
+
+                    // Pet species
+                    const int firstDogIndex = 5;
+                    if (firstDogIndex <= config.PetBreed)
+                    {
+                        Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
+                    }
+                    else
+                    {
+                        Game1.player.whichPetType = StardewValley.Characters.Pet.type_cat;
+                    }
                 }
                 else
                 {
-                    Game1.player.whichPetBreed = "0";
+                    Game1.player.whichPetBreed = "5";
+                    Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
                 }
 
                 // Farm type
