@@ -10,8 +10,14 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class SkipEventsBehaviorLink : BehaviorLink
     {
+        private readonly Dictionary<string, Func<bool>> Functions;
+
         public SkipEventsBehaviorLink(BehaviorLink next = null) : base(next)
         {
+            Functions = new Dictionary<string, Func<bool>>
+            {
+                { "897405", Event897405 },
+            };
         }
 
         public override void Process(BehaviorState state)
@@ -24,14 +30,32 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
-                    Game1.CurrentEvent.skipEvent();
-                    state.SkipEvent(); // Set up wait ticks to wait before trying to skip event again, and wait to anticipate another following event
+                    if (Functions.TryGetValue(Game1.CurrentEvent.id, out var action))
+                    {
+                        if(action())
+                        {
+                            state.ClearBetweenEventsWaitTicks();
+                            processNext(state);
+                        }
+                    }
+                    else
+                    {
+                        Game1.CurrentEvent.skipEvent();
+                        state.SkipEvent(); // Set up wait ticks to wait before trying to skip event again, and wait to anticipate another following event
+                    }
                 }
-            } else
+            }
+            else
             {
                 state.ClearBetweenEventsWaitTicks();
                 processNext(state);
             }
+        }
+
+        private bool Event897405()
+        {
+            // Nothing should be done except to proceed to the next process
+            return true;
         }
     }
 }

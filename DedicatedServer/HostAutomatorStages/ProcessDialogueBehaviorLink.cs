@@ -10,8 +10,6 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class ProcessDialogueBehaviorLink : BehaviorLink
     {
-        private static FieldInfo textBoxFieldInfo = typeof(NamingMenu).GetField("textBox", BindingFlags.NonPublic | BindingFlags.Instance);
-
         private static MethodInfo itemListMenuInfo = typeof(ItemListMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private ModConfig config;
@@ -25,7 +23,11 @@ namespace DedicatedServer.HostAutomatorStages
         {
             if (Game1.activeClickableMenu != null)
             {
-                if (Game1.activeClickableMenu is DialogueBox db)
+                if (Game1.activeClickableMenu is SaveGameMenu saveGameMenu)
+                {
+                    ;
+                }
+                else if (Game1.activeClickableMenu is DialogueBox db)
                 {
                     if (state.HasBetweenDialoguesWaitTicks())
                     {
@@ -82,7 +84,6 @@ namespace DedicatedServer.HostAutomatorStages
                         }
                         else if (yesResponseIdx >= 0 && noResponseIdx >= 0)
                         {
-#warning Where is the logic in naming the pet?
                             // This is the pet question. Answer based on mod config.
                             if (config.shouldAcceptPet())
                             {
@@ -106,7 +107,7 @@ namespace DedicatedServer.HostAutomatorStages
                     }
                     else
                     {
-                        TextBox textBox = (TextBox) textBoxFieldInfo.GetValue(nm);
+                        TextBox textBox = nm.textBox;
                         textBox.Text = config.PetName;
                         textBox.RecieveCommandInput('\r');
                         state.SkipDialogue();
