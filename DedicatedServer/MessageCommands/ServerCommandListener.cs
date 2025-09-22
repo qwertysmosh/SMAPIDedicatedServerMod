@@ -113,6 +113,10 @@ namespace DedicatedServer.MessageCommands
                         EnableSkipDays(28, Season.Fall);
                         break;
 
+                    case "pp":
+                        HostAutomation.PreventPauseUntilNextDay();
+                        break;
+
                     case "item":
                         if ("" != param)
                         {

@@ -10,6 +10,10 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class SkipEventsBehaviorLink : BehaviorLink
     {
+        /// <summary>
+        ///         The return value false waits in the current process.
+        /// <br/>   The return value true switches to the next process.
+        /// </summary>
         private readonly Dictionary<string, Func<bool>> Functions;
 
         public SkipEventsBehaviorLink(BehaviorLink next = null) : base(next)
@@ -52,6 +56,10 @@ namespace DedicatedServer.HostAutomatorStages
             }
         }
 
+        /// <summary>
+        /// This is the pet adoption event.
+        /// </summary>
+        /// <returns></returns>
         private bool Event897405()
         {
             // Nothing should be done except to proceed to the next process

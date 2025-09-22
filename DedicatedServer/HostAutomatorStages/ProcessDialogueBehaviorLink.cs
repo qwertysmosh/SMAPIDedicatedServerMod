@@ -33,8 +33,10 @@ namespace DedicatedServer.HostAutomatorStages
                     {
                         state.DecrementBetweenDialoguesWaitTicks();
                     }
-                    else if (!db.isQuestion)
+                    else if (false == db.isQuestion)
                     {
+#warning Now there is sometimes an error, you need to enter the "pp" command:
+                        // System.NullReferenceException: "Object reference not set to an instance of an object."
                         db.receiveLeftClick(0, 0); // Skip the non-question dialogue
                         state.SkipDialogue();
                     }
