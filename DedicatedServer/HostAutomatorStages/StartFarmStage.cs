@@ -174,8 +174,6 @@ namespace DedicatedServer.HostAutomatorStages
                 // Pet species
                 if (config.shouldAcceptPet())
                 {
-                    Game1.player.whichPetBreed = config.PetBreed.ToString();
-
                     if (ModConfig.FirstDogIndex <= config.PetBreed)
                     {
                         Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
@@ -184,10 +182,12 @@ namespace DedicatedServer.HostAutomatorStages
                     {
                         Game1.player.whichPetType = StardewValley.Characters.Pet.type_cat;
                     }
+
+                    Game1.player.whichPetBreed = Convert.ToString(config.PetBreed - ModConfig.FirstDogIndex);
                 }
                 else
                 {
-                    Game1.player.whichPetBreed = "5";
+                    Game1.player.whichPetBreed = "0";
                     Game1.player.whichPetType = StardewValley.Characters.Pet.type_dog;
                 }
 

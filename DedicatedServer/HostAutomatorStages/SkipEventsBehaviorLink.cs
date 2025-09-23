@@ -21,6 +21,7 @@ namespace DedicatedServer.HostAutomatorStages
             Functions = new Dictionary<string, Func<bool>>
             {
                 { "897405", Event897405 },
+                { "1590166", Event1590166 },      
             };
         }
 
@@ -57,10 +58,20 @@ namespace DedicatedServer.HostAutomatorStages
         }
 
         /// <summary>
-        /// This is the pet adoption event.
+        /// Marnie asks the farmer if they'd like to adopt a dog. 
         /// </summary>
         /// <returns></returns>
         private bool Event897405()
+        {
+            // Nothing should be done except to proceed to the next process
+            return true;
+        }
+
+        /// <summary>
+        /// Marnie asks the farmer if they'd like to adopt a cat. 
+        /// </summary>
+        /// <returns></returns>
+        private bool Event1590166()
         {
             // Nothing should be done except to proceed to the next process
             return true;
