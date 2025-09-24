@@ -183,7 +183,7 @@ namespace DedicatedServer.HostAutomatorStages
                         Game1.player.whichPetType = StardewValley.Characters.Pet.type_cat;
                     }
 
-                    Game1.player.whichPetBreed = Convert.ToString(config.PetBreed - ModConfig.FirstDogIndex);
+                    Game1.player.whichPetBreed = config.getPetBreedIndex().ToString();
                 }
                 else
                 {

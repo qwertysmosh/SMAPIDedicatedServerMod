@@ -16,7 +16,6 @@ This mod provides a dedicated (headless) server for Stardew Valley, powered by S
 > The following must be tested:
 >
 > - Crop Saver
-> - Selecting the animal from 0 to 9 and whether it is accepted.
 > - The house upgrade needs to be checked.
 > - After you have sold something, the host needs some time to close the dialog,  
 >   and the client only sees a black screen (they must disconnect and reconnect).

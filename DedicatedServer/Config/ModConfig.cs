@@ -34,6 +34,7 @@ namespace DedicatedServer.Config
         public const int PetBreedMax = 9;
         public const int FirstDogIndex = 5;
         public bool shouldAcceptPet() { return 0 <= this.PetBreed && PetBreedMax >= this.PetBreed; }
+        public int getPetBreedIndex() { return (ModConfig.FirstDogIndex <= this.PetBreed) ? this.PetBreed - ModConfig.FirstDogIndex : this.PetBreed; }
 
         // If no pet is desired, an invalid value, e.g. -1, must be set.
         // The options are 0 to 4 for cats and 5 to 9 for dogs.
