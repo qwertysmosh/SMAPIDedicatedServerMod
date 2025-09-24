@@ -16,7 +16,6 @@ This mod provides a dedicated (headless) server for Stardew Valley, powered by S
 > The following must be tested:
 >
 > - Crop Saver
-> - The house upgrade needs to be checked.
 > - After you have sold something, the host needs some time to close the dialog,  
 >   and the client only sees a black screen (they must disconnect and reconnect).
 > - With the "pp" command, a zero access error is trigger

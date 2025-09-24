@@ -165,13 +165,6 @@ namespace DedicatedServer.Utils
             location.Objects.Clear();
             foreach (var item1 in list1)
             {
-                if (null != item1.Value.lightSource)
-                {
-#warning Is it necessary?
-                    //location.removeLightSource(item1.Value.lightSource.identifier);
-                    ;
-                }
-
                 if (item1.Value.GetType() == typeof(Chest))
                 {
                     // The chest will not be added
