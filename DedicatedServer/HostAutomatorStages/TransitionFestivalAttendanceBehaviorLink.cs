@@ -1,25 +1,147 @@
-﻿using StardewValley;
-using StardewValley.Locations;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
+using DedicatedServer.Utils;
+using StardewModdingAPI.Events;
+using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class TransitionFestivalAttendanceBehaviorLink : BehaviorLink
+    internal class TransitionFestivalAttendanceBehaviorLink : BehaviorLink2
     {
-        private static MethodInfo info = typeof(Game1).GetMethod("performWarpFarmer", BindingFlags.Static | BindingFlags.NonPublic);
-        public TransitionFestivalAttendanceBehaviorLink(BehaviorLink next = null) : base(next)
+        #region Required in derived class
+
+        public override int WaitTimeAutoLoad { get; set; } = (int)(60 * 0.2);
+        public override int WaitTime { get; set; }
+
+        public override void Process()
         {
+            if (Utils.Festivals.ShouldAttend(DedicatedServer.otherPlayers.Count) && 
+                false == Utils.Festivals.IsWaitingToAttend())
+            {
+                WaitForFestivalAttendance();
+            }
+            else if (
+                false == Utils.Festivals.ShouldAttend(DedicatedServer.otherPlayers.Count) && 
+                Utils.Festivals.IsWaitingToAttend())
+            {
+                StopWaitingForFestivalAttendance();
+            }
+            else if(Utils.Festivals.ShouldLeave(DedicatedServer.otherPlayers.Count) &&
+                false == Utils.Festivals.IsWaitingToLeave())
+            {
+                WaitForFestivalEnd();
+            }
+            else if (
+                false == Utils.Festivals.ShouldLeave(DedicatedServer.otherPlayers.Count) &&
+                Utils.Festivals.IsWaitingToLeave())
+            {
+                StopWaitingForFestivalEnd();
+            }
+            else
+            {
+                Tuple<int, int> voteCounts = UpdateFestivalStartVotes();
+                if (voteCounts != null)
+                {
+                    if (voteCounts.Item1 == voteCounts.Item2)
+                    {
+                        // Start the festival
+                        SendChatMessage($"{voteCounts.Item1} / {voteCounts.Item2} votes casted. Starting the festival event...");
+                        if (Game1.currentSeason == "summer" && Game1.dayOfMonth == 11 && Game1.player.team.luauIngredients.Count > 0)
+                        {
+                            // If it's the Luau and the pot isn't empty, add a duplicate of someone else's item to the pot. It (mostly) doesn't matter
+                            // which item is duplicated. Indeed, the total luau score is simply equal to the lowest score (or some extremum) of any item
+                            // added, with two exceptions: 1) if anyone adds the mayor's shorts, the score is set to a magic number (6)
+                            // and all other items added are ignored, and 2) if anyone doesn't add an item, the score is set to a magic number (5).
+                            // This means that having X players put in X items is no different from having X+1 players put in X+1 items, where the
+                            // additional item is a duplicate of one of the original X items. This is the intention. The only possible concern is that it
+                            // looks like putting in better items will improve relationships more. But it's probably not all that noticeable of a difference
+                            // anyways. So just duplicate the first element with Item.getOne().
+                            Game1.player.team.luauIngredients.Add(Game1.player.team.luauIngredients[0].getOne());
+                        }
+                        Game1.CurrentEvent.answerDialogueQuestion(null, "yes");
+
+                        DisableFestivalChatBox();
+                    }
+                    else
+                    {
+                        SendChatMessage($"{voteCounts.Item1} / {voteCounts.Item2} votes casted.");
+                    }
+                }
+
+                //WaitTime = 0;
+            }
+        }
+
+        #endregion
+
+        private static MethodInfo info = typeof(Game1).GetMethod("performWarpFarmer", BindingFlags.Static | BindingFlags.NonPublic);
+
+        private FestivalChatBox festivalChatBox;
+
+        private int numFestivalStartVotes = 0;
+        private int numFestivalStartVotesRequired = 0;
+
+        public TransitionFestivalAttendanceBehaviorLink()
+        {
+            DedicatedServer.helper.Events.GameLoop.DayStarted += NewDay;
+
+            festivalChatBox = new FestivalChatBox(
+                DedicatedServer.chatBox,
+                DedicatedServer.otherPlayers);
+        }
+
+        ~TransitionFestivalAttendanceBehaviorLink() => Dispose();
+
+        public void Dispose()
+        {
+            DedicatedServer.helper.Events.GameLoop.DayStarted -= NewDay;
+        }
+
+        public Tuple<int, int> UpdateFestivalStartVotes()
+        {
+            if (festivalChatBox.IsEnabled())
+            {
+                int numFestivalStartVotes = festivalChatBox.NumVoted();
+                if (numFestivalStartVotes != this.numFestivalStartVotes || DedicatedServer.otherPlayers.Count != numFestivalStartVotesRequired)
+                {
+                    this.numFestivalStartVotes = numFestivalStartVotes;
+                    numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+                    return Tuple.Create(numFestivalStartVotes, numFestivalStartVotesRequired);
+                }
+            }
+            return null;
+        }
+
+        public void EnableFestivalChatBox()
+        {
+            festivalChatBox.Enable();
+            numFestivalStartVotes = 0;
+            numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+        }
+
+        public void DisableFestivalChatBox()
+        {
+            festivalChatBox.Disable();
+        }
+
+        public void NewDay(object sender, DayStartedEventArgs e)
+        {
+            numFestivalStartVotes = 0;
+            numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+        }
+
+#warning other behavior link
+        public void SendChatMessage(string message)
+        {
+            festivalChatBox.SendChatMessage(message);
         }
 
         private static string getLocationOfFestival()
         {
-            if (Game1.weatherIcon == 1)
+            if (1 == Game1.weatherIcon)
             {
                 return Game1.temporaryContent.Load<Dictionary<string, string>>("Data\\Festivals\\" + Game1.currentSeason + Game1.dayOfMonth)["conditions"].Split('/')[0];
             }
@@ -27,49 +149,58 @@ namespace DedicatedServer.HostAutomatorStages
             return null;
         }
 
-        public override void Process(BehaviorState state)
+        private void WaitForFestivalAttendance()
         {
-            if (Utils.Festivals.ShouldAttend(state.GetNumOtherPlayers()) && !Utils.Festivals.IsWaitingToAttend())
+            var location = Game1.getLocationFromName(getLocationOfFestival());
+            var warp = new Warp(0, 0, location.NameOrUniqueName, 0, 0, false);
+            Game1.netReady.SetLocalReady("festivalStart", ready: true);
+            Game1.activeClickableMenu = new ReadyCheckDialog("festivalStart", allowCancel: true, delegate (Farmer who)
             {
-                if (state.HasBetweenTransitionFestivalAttendanceWaitTicks())
+                Game1.exitActiveMenu();
+                info.Invoke(null, new object[] { Game1.getLocationRequest(warp.TargetName), 0, 0, Game1.player.facingDirection.Value });
+
+                if ((Game1.currentSeason != "fall" || Game1.dayOfMonth != 27) &&
+                    (Game1.currentSeason != "winter" || Game1.dayOfMonth != 25)
+                )
                 {
-                    state.DecrementBetweenTransitionFestivalAttendanceWaitTicks();
-                } else
-                {
-                    var location = Game1.getLocationFromName(getLocationOfFestival());
-                    var warp = new Warp(0, 0, location.NameOrUniqueName, 0, 0, false);
-                    Game1.netReady.SetLocalReady("festivalStart", ready: true);
-                    Game1.activeClickableMenu = new ReadyCheckDialog("festivalStart", allowCancel: true, delegate (Farmer who)
-                    {
-                        Game1.exitActiveMenu();
-                        info.Invoke(null, new object[] { Game1.getLocationRequest(warp.TargetName), 0, 0, Game1.player.facingDirection.Value });
-                        if ((Game1.currentSeason != "fall" || Game1.dayOfMonth != 27) && (Game1.currentSeason != "winter" || Game1.dayOfMonth != 25)) // Don't enable chat box on spirit's eve nor feast of the winter star
-                        {
-                            state.EnableFestivalChatBox();
-                        }
-                    });
-                    state.WaitForFestivalAttendance();
+                    // Don't enable chat box on spirit's eve nor feast of the winter star
+                    EnableFestivalChatBox();
                 }
-            } else if (!Utils.Festivals.ShouldAttend(state.GetNumOtherPlayers()) && Utils.Festivals.IsWaitingToAttend())
+            });
+
+            // Wait for festival attendance
+        }
+
+        private void StopWaitingForFestivalAttendance()
+        {
+            if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
             {
-                if (state.HasBetweenTransitionFestivalAttendanceWaitTicks())
-                {
-                    state.DecrementBetweenTransitionFestivalAttendanceWaitTicks();
-                } else
-                {
-                    if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
-                    {
-                        rcd.closeDialog(Game1.player);
-                    }
-                    Game1.netReady.SetLocalReady("festivalStart", false);
-                    state.StopWaitingForFestivalAttendance();
-                }
+                rcd.closeDialog(Game1.player);
             }
-            else
+            Game1.netReady.SetLocalReady("festivalStart", false);
+
+            // Stop waiting for festival attendance
+        }
+        private void WaitForFestivalEnd()
+        {
+            Game1.netReady.SetLocalReady("festivalEnd", ready: true);
+            Game1.activeClickableMenu = new ReadyCheckDialog("festivalEnd", allowCancel: true, delegate (Farmer who)
             {
-                state.ClearBetweenTransitionFestivalAttendanceWaitTicks();
-                processNext(state);
+                Game1.currentLocation.currentEvent.forceEndFestival(who);
+                DisableFestivalChatBox();
+            });
+
+            // Wait for festival end
+        }
+        private void StopWaitingForFestivalEnd()
+        {
+            if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
+            {
+                rcd.closeDialog(Game1.player);
             }
+            Game1.netReady.SetLocalReady("festivalEnd", false);
+
+            // Stop waiting for festival end;
         }
     }
 }

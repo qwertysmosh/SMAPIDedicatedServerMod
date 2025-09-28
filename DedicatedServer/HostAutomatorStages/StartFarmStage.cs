@@ -1,6 +1,7 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
 using DedicatedServer.Crops;
+using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.MessageCommands;
 using DedicatedServer.Utils;
 using StardewModdingAPI;
@@ -24,7 +25,6 @@ namespace DedicatedServer.HostAutomatorStages
         private CropSaver cropSaver = null;
         private ReadyCheckHelper readyCheckHelper = null;
         private PasswordValidation passwordValidation = null;
-        private AutomatedHost automatedHost = null;
         private InvincibleWorker invincibleWorker = null;
         private SleepWorker sleepWorker = null;
         private RestartDayWorker restartDayWorker = null;
@@ -336,8 +336,6 @@ namespace DedicatedServer.HostAutomatorStages
             Game1.player.miningLevel.Value = 10;
             passwordValidation = new PasswordValidation(helper, config, chatBox);
             passwordValidation.Enable();
-            automatedHost = new AutomatedHost(helper, monitor, config, chatBox);
-            automatedHost.Enable();
             invincibleWorker = new InvincibleWorker(helper);
             invincibleWorker.Enable();
             sleepWorker = new SleepWorker(helper);
@@ -356,13 +354,63 @@ namespace DedicatedServer.HostAutomatorStages
             serverCommandListener = new ServerCommandListener(helper, config, chatBox);
             serverCommandListener.Enable();
             shippingMenuCommandListener = new ShippingMenuCommandListener(helper, monitor, config, chatBox);
-            shippingMenuCommandListener.Enable(); 
+            shippingMenuCommandListener.Enable();
+
+            ;
+
+            DedicatedServer.InitStaticVariables(helper, monitor, config, chatBox);
+
+            BehaviorChain2.InitStaticVariables(
+
+                // 2. Transition the game pause state
+                ProcessPauseBehaviorLink.ShouldPause,                                // Finished :-)
+
+                // 0. Test
+                // 1. Perform prerequisite per-tick state updates, such as detecting the number of other players online
+                //      (this is a non-blocking chain link; the process will always follow through to the next link).
+
+                // 4. Skip skippable events
+                // 5. Respond to dialogue box question if present, skipping non-question dialogue
+                // 6. Skip shipping menu
+                // 7. If in farmhouse and haven't checked for parsnip seeds, check for parsnip seeds
+                // 8. If in farmhouse and haven't left farmhouse for the day, leave farmhouse
+                // 9. If we don't have the fishing rod yet, and it's available, get it.
+                // 10. If we haven't unlocked the community center yet, and we can, then unlock it.
+                // 12. If we haven't watched the end cutscene for the community scenter yet, and we can, then watch it.
+                // 13. If our sleep state should be switched, then switch it
+                // 14. If our state of festival attendance should be switched, then switch it
+                // 15. If our leave festival state should be switched, then switch it
+                // 16. If we're at a festival and we need to watch the festival chatbox, then watch it
+
+                new List<BehaviorLink2> { 
+
+                    new TestBehaviorLink(),                        // ?
+
+                    new UpdateStateBehaviorLink(),                 //
+
+                    //new SkipEventsBehaviorLink(),                  //
+                    //new ProcessDialogueBehaviorLink(),             //
+                    //new SkipShippingMenuBehaviorLink(),            //
+                    new CheckForParsnipSeedsBehaviorLink(),        //
+                    //new ExitFarmHouseBehaviorLink(),               //
+                    //new InvisibleBehaviorLink(),                   //
+                    //new GetFishingRodBehaviorLink(),               //
+                    //new UnlockCommunityCenterBehaviorLink(),       //
+                    //new PurchaseJojaMembershipBehaviorLink(),      // 
+                    //new EndCommunityCenterBehaviorLink(),          // 
+                    //new TransitionSleepBehaviorLink(),             // 
+                    
+                    //new TransitionFestivalAttendanceBehaviorLink(),
+                }
+            );
+
+            BehaviorChain2.Enable();
         }
 
         private void onReturnToTitle(object sender, ReturnedToTitleEventArgs e)
         {
-            automatedHost?.Disable();
-            automatedHost = null;
+            BehaviorChain2.Disable();
+
             invincibleWorker?.Disable();
             invincibleWorker = null;
 

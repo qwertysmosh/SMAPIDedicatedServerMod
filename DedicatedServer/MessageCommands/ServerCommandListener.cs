@@ -107,10 +107,14 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     #region DEBUG_COMMANDS
-                    #if false
+                    #if true
 
                     case "skipdays":
                         EnableSkipDays(28, Season.Fall);
+                        break;
+
+                    case "t1":
+                        var a = Utility.getAllPets();
                         break;
 
                     case "pp":

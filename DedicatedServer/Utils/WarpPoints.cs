@@ -87,7 +87,7 @@ namespace DedicatedServer.Utils
 
 
         /// <summary>
-        ///         Warppoint to mine
+        ///         Warppoint to beach
         /// </summary>
         public static readonly Warp beachWarp = new Warp(
             beachEntryLocation.X, beachEntryLocation.Y,

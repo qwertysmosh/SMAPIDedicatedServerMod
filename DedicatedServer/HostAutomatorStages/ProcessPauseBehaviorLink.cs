@@ -1,12 +1,11 @@
-﻿using System;
-using System.ComponentModel;
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
+﻿using StardewModdingAPI.Events;
 using StardewValley;
+using System;
+using System.ComponentModel;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class ProcessPauseBehaviorLink : BehaviorLink
+    internal class ProcessPauseBehaviorLink
     {
         [DefaultValue(DisablePause)]
         private enum internalStates
@@ -30,8 +29,6 @@ namespace DedicatedServer.HostAutomatorStages
             /// <summary> Disables the pause once </summary>
             PauseDisabled,
         }
-
-        private static IModHelper helper = null;
 
         private static bool addedHandler = false;
 
@@ -59,11 +56,6 @@ namespace DedicatedServer.HostAutomatorStages
         {
             set { Game1.netWorldState.Value.IsPaused = value; }
             get { return Game1.netWorldState.Value.IsPaused; }
-        }
-
-        public ProcessPauseBehaviorLink(IModHelper helper, BehaviorLink next = null) : base(next)
-        {
-            ProcessPauseBehaviorLink.helper = helper;
         }
 
         /// <summary>
@@ -135,7 +127,7 @@ namespace DedicatedServer.HostAutomatorStages
         //        WaitingForUpcomingPlayers : <center>WaitingForUpcomingPlayers\n----\nprocessNext()</center>
         //    }
         // ]]>
-        public override void Process(BehaviorState state)
+        public static bool ShouldPause()
         {
             switch (internalState)
             {
@@ -145,8 +137,10 @@ namespace DedicatedServer.HostAutomatorStages
                     break;
 
                 case internalStates.WaitingForPlayersToLeave:
-                    if (  0   == state.GetNumOtherPlayers() && // If no other player is online
-                        false == Game1.isFestival()         )  // if it is not a festival
+#warning (Do I need to use GetNumOtherPlayers)
+                    if (0 == DedicatedServer.GetNumOtherPlayers() && // If no other player is online
+                        false == Game1.isFestival() // if it is not a festival
+                    )
                     {
                         internalState = internalStates.EnablePause;
                     }
@@ -163,16 +157,16 @@ namespace DedicatedServer.HostAutomatorStages
                         IsPaused = true;
                     }
 
-                    // Alternative: `Game1.getOnlineFarmers().Count - 1`
-                    if (  0  <  state.GetNumOtherPlayers() ||
-                        true == Game1.isFestival()         )
+                    if (0 < DedicatedServer.GetNumOtherPlayers() ||
+                        true == Game1.isFestival()
+                    )
                     {
                         internalState = internalStates.DisablePause;
                     }
                     else
                     {
-                        // Do not process the BehaviorLink
-                        return;
+                        // do not proceed, shouldPause
+                        return true;
                     }
                     break;
 
@@ -191,11 +185,13 @@ namespace DedicatedServer.HostAutomatorStages
 
             if (enableHostAutomation)
             {
-                processNext(state);
+                // shouldPause
+                return false;
             }
             else
             {
-                // Do not process the BehaviorLink
+                // shouldPause
+                return true;
             }
         }
 
@@ -204,14 +200,14 @@ namespace DedicatedServer.HostAutomatorStages
             if (false == addedHandler)
             {
                 addedHandler = true;
-                helper.Events.GameLoop.DayStarted += handler;
+                DedicatedServer.helper.Events.GameLoop.DayStarted += handler;
             }
         }
 
         private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
             addedHandler = false;
-            helper.Events.GameLoop.DayStarted -= handler;
+            DedicatedServer.helper.Events.GameLoop.DayStarted -= handler;
         }
 
         private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)

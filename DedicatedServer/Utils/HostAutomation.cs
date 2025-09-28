@@ -6,10 +6,6 @@ namespace DedicatedServer.Utils
 {
     internal abstract class HostAutomation : ProcessPauseBehaviorLink
     {
-        private HostAutomation() : base(null)
-        {
-        }
-
         public static new event EventHandler ResetAction
         {
             add { ProcessPauseBehaviorLink.ResetAction += value; }

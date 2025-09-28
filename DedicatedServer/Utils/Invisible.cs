@@ -12,10 +12,6 @@ namespace DedicatedServer.Utils
     /// </summary>
     internal abstract class Invisible : InvisibleBehaviorLink
     {
-        private Invisible() : base(null)
-        {
-        }
-
         /// <summary>
         /// <inheritdoc cref = "InvisibleBehaviorLink.InvisibleOverwrite"/>
         /// </summary>

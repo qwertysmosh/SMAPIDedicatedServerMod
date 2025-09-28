@@ -1,65 +1,76 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Utils;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
+using Force.DeepCloner;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class SkipShippingMenuBehaviorLink : BehaviorLink
+    internal class SkipShippingMenuBehaviorLink : BehaviorLink2
     {
-        private static MethodInfo info = typeof(ShippingMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+        #region Required in derived class
 
-        private static IModHelper helper;
-        private static IMonitor monitor;
-        private static EventDrivenChatBox chatBox;
+        public override int WaitTimeAutoLoad { get; set; } = 60;
+        public override int WaitTime { get; set; }
 
-        public SkipShippingMenuBehaviorLink(IModHelper helper, IMonitor monitor, EventDrivenChatBox chatBox, BehaviorLink next = null) : base(next)
+        public override void Process()
         {
-            SkipShippingMenuBehaviorLink.helper = helper;
-            SkipShippingMenuBehaviorLink.monitor = monitor;
-            SkipShippingMenuBehaviorLink.chatBox = chatBox;
-
-            helper.Events.GameLoop.DayEnding += OnDayEndingWorker;
-        }
-
-        public override void Process(BehaviorState state)
-        {
-            if (Game1.activeClickableMenu is ShippingMenu sm)
+            if (Game1.activeClickableMenu is ShippingMenu shippingMenu)
             {
-                if (state.HasBetweenShippingMenusWaitTicks())
+               
+                var clickables = shippingMenu.allClickableComponents;
+                if (null == copy) { copy = DeepClonerExtensions.DeepClone(clickables[6]); }
+#warning I need to find a way so that the click is performed after the button is visible
+                //if (clickables[6].visible)
+                //{
+                var a = false;
+                if (a)
                 {
-                    state.DecrementBetweenShippingMenusWaitTicks();
-                } else
-                {
-                    SkipShippingMenu();
-                    state.SkipShippingMenu();
+                    if (runOncePerMenu)
+                    {
+                        runOncePerMenu = false;
+                        okClicked(shippingMenu);
+                    }
                 }
-            } else
+                //}
+            }
+            else
             {
-                state.ClearBetweenShippingMenusWaitTicks();
-                processNext(state);
+                runOncePerMenu = true;
+                //WaitTime = 60;
             }
         }
 
+        #endregion
+
+        private static MethodInfo info = typeof(ShippingMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static void okClicked(ShippingMenu shippingMenu) => info.Invoke(shippingMenu, Array.Empty<object>());
+
+        bool runOncePerMenu = true;
+
+        public SkipShippingMenuBehaviorLink()
+        {
+            DedicatedServer.helper.Events.GameLoop.DayEnding += OnDayEndingWorker;
+        }
+
+#warning TEST
+        ClickableComponent copy = null;
+        
         public void OnDayEndingWorker(object sender, DayEndingEventArgs e)
         {
-            chatBox?.textBoxEnter("Shipping menu Workaroud, if the host does not click Ok, enter 'okay'");
+            DedicatedServer.chatBox.textBoxEnter("Shipping menu Workaroud, if the host does not click Ok, enter 'okay'");
         }
 
         public static bool SkipShippingMenu()
         {
-            if (Game1.activeClickableMenu is ShippingMenu sm)
+            if (Game1.activeClickableMenu is ShippingMenu shippingMenu)
             {
-                info.Invoke(sm, new object[]{});
-                monitor?.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
+                okClicked(shippingMenu);
+                DedicatedServer.monitor.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
                 return true;
             }
             else

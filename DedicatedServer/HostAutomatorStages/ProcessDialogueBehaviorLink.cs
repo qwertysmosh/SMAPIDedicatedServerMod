@@ -1,4 +1,4 @@
-﻿using DedicatedServer.Config;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewValley;
 using StardewValley.Menus;
@@ -8,35 +8,24 @@ using System.Reflection;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class ProcessDialogueBehaviorLink : BehaviorLink
+    internal class ProcessDialogueBehaviorLink : BehaviorLink2
     {
-        private static MethodInfo itemListMenuInfo = typeof(ItemListMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+        #region Required in derived class
 
-        private ModConfig config;
+        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTime { get; set; }
 
-        public ProcessDialogueBehaviorLink(ModConfig config, BehaviorLink next = null) : base(next)
-        {
-            this.config = config;
-        }
-
-        public override void Process(BehaviorState state)
+        public override void Process()
         {
             if (Game1.activeClickableMenu != null)
             {
-                if (Game1.activeClickableMenu is SaveGameMenu saveGameMenu)
+                if (Game1.activeClickableMenu is DialogueBox dialogueBox)
                 {
-                    ;
-                }
-                else if (Game1.activeClickableMenu is DialogueBox db)
-                {
-                    if (state.HasBetweenDialoguesWaitTicks())
+                    if (false == dialogueBox.isQuestion)
                     {
-                        state.DecrementBetweenDialoguesWaitTicks();
-                    }
-                    else if (false == db.isQuestion)
-                    {
-                        db.receiveLeftClick(0, 0); // Skip the non-question dialogue
-                        state.SkipDialogue();
+                        // Skip the non-question dialogue
+                        dialogueBox.receiveLeftClick(0, 0);
+                        WaitTime = (int)(60 * 0.2);
                     }
                     else
                     {
@@ -46,10 +35,10 @@ namespace DedicatedServer.HostAutomatorStages
                         int batsResponseIdx = -1;
                         int yesResponseIdx = -1;
                         int noResponseIdx = -1;
-                        
-                        for (int i = 0; i < db.responses.Length; i++)
+
+                        for (int i = 0; i < dialogueBox.responses.Length; i++)
                         {
-                            var response = db.responses[i];
+                            var response = dialogueBox.responses[i];
                             var lowercaseText = response.responseText.ToLower();
                             if (lowercaseText == "mushrooms")
                             {
@@ -69,72 +58,58 @@ namespace DedicatedServer.HostAutomatorStages
                             }
                         }
 
-                        db.selectedResponse = 0;
+                        dialogueBox.selectedResponse = 0;
                         if (mushroomsResponseIdx >= 0 && batsResponseIdx >= 0)
                         {
                             // This is the cave question. Answer based on mod config.
-                            if (config.MushroomsOrBats.ToLower() == "mushrooms")
+                            if (DedicatedServer.config.MushroomsOrBats.ToLower() == "mushrooms")
                             {
-                                db.selectedResponse = mushroomsResponseIdx;
+                                dialogueBox.selectedResponse = mushroomsResponseIdx;
                             }
-                            else if (config.MushroomsOrBats.ToLower() == "bats")
+                            else if (DedicatedServer.config.MushroomsOrBats.ToLower() == "bats")
                             {
-                                db.selectedResponse = batsResponseIdx;
+                                dialogueBox.selectedResponse = batsResponseIdx;
                             }
                         }
                         else if (yesResponseIdx >= 0 && noResponseIdx >= 0)
                         {
                             // This is the pet question. Answer based on mod config.
-                            if (config.shouldAcceptPet())
+                            if (DedicatedServer.config.shouldAcceptPet())
                             {
-                                db.selectedResponse = yesResponseIdx;
+                                dialogueBox.selectedResponse = yesResponseIdx;
                             }
                             else
                             {
-                                db.selectedResponse = noResponseIdx;
+                                dialogueBox.selectedResponse = noResponseIdx;
                             }
                         }
 
-                        db.receiveLeftClick(0, 0);
-                        state.SkipDialogue();
+                        dialogueBox.receiveLeftClick(0, 0);
+                        WaitTime = (int)(60 * 0.2);
                     }
                 }
-                else if (Game1.activeClickableMenu is NamingMenu nm)
+                else if (Game1.activeClickableMenu is NamingMenu namingMenu)
                 {
-                    if (state.HasBetweenDialoguesWaitTicks())
-                    {
-                        state.DecrementBetweenDialoguesWaitTicks();
-                    }
-                    else
-                    {
-                        TextBox textBox = nm.textBox;
-                        textBox.Text = config.PetName;
-                        textBox.RecieveCommandInput('\r');
-                        state.SkipDialogue();
-                    }
+                    TextBox textBox = namingMenu.textBox;
+                    textBox.Text = DedicatedServer.config.PetName;
+                    textBox.RecieveCommandInput('\r');
+                    WaitTime = (int)(60 * 0.2);
                 }
-                else if (Game1.activeClickableMenu is LevelUpMenu lum) 
+                else if (Game1.activeClickableMenu is LevelUpMenu levelUpMenu)
                 {
-                    if (state.HasBetweenDialoguesWaitTicks())
-                    {
-                        state.DecrementBetweenDialoguesWaitTicks();
-                    }
-                    else
-                    {
-                        lum.okButtonClicked();
-                    }
+                    levelUpMenu.okButtonClicked();
                 }
-                else if (Game1.activeClickableMenu is ItemListMenu ilm)
+                else if (Game1.activeClickableMenu is ItemListMenu itemListMenu)
                 {
                     // Lost item dialog when the host faints
-                    itemListMenuInfo?.Invoke(ilm, new object[] { });
-                    state.SkipDialogue();
+                    itemListMenuInfo?.Invoke(itemListMenu, new object[] { });
+                    WaitTime = (int)(60 * 0.2);
                 }
-                else if (Game1.activeClickableMenu is ItemGrabMenu igm)
+                else if (Game1.activeClickableMenu is ItemGrabMenu itemGrabMenu)
                 {
                     // Good to test when you go into the mine and are presented with a sword
 
-                    var count = igm.ItemsToGrabMenu.actualInventory.Count();
+                    var count = itemGrabMenu.ItemsToGrabMenu.actualInventory.Count();
 
                     if (false == ServerHost.EnsureFreeSlotNumber(count))
                     {
@@ -143,9 +118,9 @@ namespace DedicatedServer.HostAutomatorStages
                     }
 
                     var del = new List<Item>();
-                    foreach (var item in igm.ItemsToGrabMenu.actualInventory)
+                    foreach (var item in itemGrabMenu.ItemsToGrabMenu.actualInventory)
                     {
-                        if(null == item) { continue; }
+                        if (null == item) { continue; }
 
                         Game1.player.addItemToInventoryBool(item);
                         del.Add(item);
@@ -153,39 +128,34 @@ namespace DedicatedServer.HostAutomatorStages
 
                     foreach (var item in del)
                     {
-                        igm.ItemsToGrabMenu.actualInventory.Remove(item);
+                        itemGrabMenu.ItemsToGrabMenu.actualInventory.Remove(item);
                     }
 
-                    if(false == igm.areAllItemsTaken())
+                    if (false == itemGrabMenu.areAllItemsTaken())
                     {
                         // Drop all remaining items from the menu
-                        igm.DropRemainingItems();
+                        itemGrabMenu.DropRemainingItems();
                     }
 
-                    if (igm.readyToClose())
+                    if (itemGrabMenu.readyToClose())
                     {
                         okClicked();
                     }
 
-                    state.SkipDialogue();
+                    WaitTime = (int)(60 * 0.2);
                 }
-                else
-                {
-                    state.ClearBetweenDialoguesWaitTicks();
-                    processNext(state);
-                }
-            }
-            else
-            {
-                state.ClearBetweenDialoguesWaitTicks();
-                processNext(state);
             }
         }
+
+        #endregion
+
+        private static MethodInfo itemListMenuInfo = typeof(ItemListMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private void okClicked()
         {
             Game1.activeClickableMenu = null;
-            if (Game1.CurrentEvent != null)
+
+            if (null != Game1.CurrentEvent)
             {
                 Game1.CurrentEvent.CurrentCommand++;
             }

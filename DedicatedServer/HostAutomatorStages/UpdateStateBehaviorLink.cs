@@ -1,26 +1,21 @@
-﻿using StardewModdingAPI;
-using StardewValley;
-using StardewValley.Locations;
-using StardewValley.Menus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class UpdateStateBehaviorLink : BehaviorLink
+    internal class UpdateStateBehaviorLink : BehaviorLink2
     {
-        public UpdateStateBehaviorLink(BehaviorLink next = null) : base(next)
+        #region Required in derived class
+
+        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTime { get; set; }
+
+        public override void Process()
         {
+            DedicatedServer.UpdateOtherPlayers();
         }
 
-        public override void Process(BehaviorState state)
-        {
-            state.UpdateOtherPlayers();
-            processNext(state);
-        }
+        #endregion
+
+        
     }
 }
