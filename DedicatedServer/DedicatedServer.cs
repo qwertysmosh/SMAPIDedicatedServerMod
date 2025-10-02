@@ -110,17 +110,63 @@ namespace DedicatedServer
 
         #endregion
 
-        #region Every Day
+        #region Mailbox 
 
-        public static void ClearMailbox()
+        /// <summary>
+        ///         Open mailbox
+        /// <br/>   
+        /// <br/>   It's the same as if you were standing in front of the mailbox and right-clicking.
+        /// <br/>   Then you need to process the start menu `LetterViewerMenu`.
+        /// </summary>
+        public static void OpenMailbox()
         {
-            while (0 < Game1.MasterPlayer.mailbox.Count)
-            {
-                // If the function is called without anything in the inbox,
-                // then it will not continue for a logged-in player on the new day.
-                Game1.getFarm().mailbox();
-            }
+            Game1.getFarm().mailbox();
         }
+
+        /// <summary>
+        ///         Opens the mailbox if there are letters and returns whether there were letters.
+        /// </summary>
+        /// <returns>
+        ///         true: There were letters in the mailbox.
+        /// <br/>   false: The mailbox was empty</returns>
+        public static bool OpenMailboxIfHasMail()
+            {
+            if(HasMail())
+            {
+                OpenMailbox();
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Checks whether the mailbox contains messages
+        /// </summary>
+        /// <returns>
+        ///         true: There are letters in the mailbox
+        /// <br/>   false: The mailbox is empty</returns>
+        public static bool HasMail()
+        {
+            return 0 < MailCount();
+            }
+
+        /// <summary>
+        /// Returns the number of emails in the mailbox
+        /// </summary>
+        /// <returns>Number of emails in the mailbox</returns>
+        public static int MailCount()
+        {
+            // The command `Game1.MasterPlayer.mailbox.Count` can also be used
+            return Game1.mailbox.Count;
+        }
+
+        /// <summary>
+        /// Returns the number of open journal items
+        /// </summary>
+        //public static int JournalCount()
+        //{
+        //    return Game1.MasterPlayer.mailReceived.Count;
+        //}
 
         #endregion
 

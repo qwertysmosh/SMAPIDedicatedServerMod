@@ -442,6 +442,9 @@ namespace DedicatedServer.HostAutomatorStages
 
                 new List<BehaviorLink> {
 
+                    // Opens the mailbox when letters are present 
+                    new CheckTheMailboxBehaviorLink(),
+
                     // Skip skippable events
                     new SkipEventsBehaviorLink(),
 

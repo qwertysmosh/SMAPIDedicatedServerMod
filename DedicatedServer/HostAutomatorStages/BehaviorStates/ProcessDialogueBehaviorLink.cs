@@ -119,13 +119,23 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else if (Game1.activeClickableMenu is LetterViewerMenu letterViewerMenu)
                 {
+                    // This block deals with opened letters
+                    // This can be triggered with `DedicatedServer.OpenMailboxIfHasMail()`
+                    // and it is triggered with the `CheckTheMailboxBehaviorLink` class
+
                     if (letterViewerMenu.readyToClose())
                     {
                         var point = letterViewerMenu.upperRightCloseButton.bounds.Center;
                         letterViewerMenu.receiveLeftClick(point.X, point.Y, true);
+
+                        CheckTheMailboxBehaviorLink.CheckForNewMails();
                     }
-                    WaitTime = (int)(60 * 0.2);
+                    WaitTime = (int)(60.0);
                 }
+                //else if (Game1.activeClickableMenu is QuestLog questLog)
+                //{
+                //    ; // As far as I know, you don't have to accept the quests to trigger anything.
+                //}
                 else if (Game1.activeClickableMenu is ItemListMenu itemListMenu)
                 {
                     // Lost item dialog when the host faints
