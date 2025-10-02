@@ -1,8 +1,5 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Netcode;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -17,29 +14,16 @@ namespace DedicatedServer.Utils
 {
     internal class HostHouseUpgrade
     {
-        private static string defaultBed = BedFurniture.DEFAULT_BED_INDEX;
-        private static string doubleBed = BedFurniture.DOUBLE_BED_INDEX;
-        private static string childBed = BedFurniture.CHILD_BED_INDEX;
+        private static readonly string defaultBed = BedFurniture.DEFAULT_BED_INDEX;
+        private static readonly string doubleBed = BedFurniture.DOUBLE_BED_INDEX;
+        private static readonly string childBed = BedFurniture.CHILD_BED_INDEX;
 
-        private static FieldInfo farmerDaysUntilHouseUpgradeFieldInfo = typeof(Farmer).GetField("daysUntilHouseUpgrade");
-
-        private static IModHelper helper;
-        private static IMonitor monitor;
-        private static ModConfig config;
-        private static EventDrivenChatBox chatBox;
+        private static readonly FieldInfo farmerDaysUntilHouseUpgradeFieldInfo = typeof(Farmer).GetField("daysUntilHouseUpgrade");
 
         /// <summary>
         ///         Checks whether the host is upgrading their home
         /// </summary>
         public static bool IsHostUpgrading { get { return DaysUntilHouseUpgrade(Game1.player) > -1; } }
-
-        public HostHouseUpgrade(IModHelper helper, IMonitor monitor, ModConfig config, EventDrivenChatBox chatBox)
-        {
-            HostHouseUpgrade.helper = helper;
-            HostHouseUpgrade.monitor = monitor;
-            HostHouseUpgrade.config = config;
-            HostHouseUpgrade.chatBox = chatBox;
-        }
 
         /// <summary>
         ///         Gets the days until the house is updated
@@ -60,7 +44,7 @@ namespace DedicatedServer.Utils
         public static void DaysUntilHouseUpgrade(Farmer farmer, int value)
         {
             if(0 >= value) { value = -1; }
-            farmerDaysUntilHouseUpgradeFieldInfo.SetValue(Game1.player, new NetInt(value));
+            farmerDaysUntilHouseUpgradeFieldInfo.SetValue(farmer, new NetInt(value));
         }
 
         /// <summary>
@@ -125,7 +109,7 @@ namespace DedicatedServer.Utils
 
                 if (daysMin != int.MaxValue && daysMin >= 0)
                 {
-                    chatBox?.textBoxEnter($"The host will upgrade his house in {daysMin} days.");
+                    DedicatedServer.chatBox.textBoxEnter($"The host will upgrade his house in {daysMin} days.");
                     DaysUntilHouseUpgrade(Game1.player, daysMin);
                     upgradeIsBeingExecuted = true;
                 }
@@ -135,7 +119,7 @@ namespace DedicatedServer.Utils
                     // delayed upgrade (if ModConfig.UpgradeHostHouseWithFarmhand was deactivated)
                     if (levelMax > Game1.player.HouseUpgradeLevel)
                     {
-                        chatBox?.textBoxEnter("The host will upgrade his house the next day.");
+                        DedicatedServer.chatBox.textBoxEnter("The host will upgrade his house the next day.");
                         DaysUntilHouseUpgrade(Game1.player, 1);
                         upgradeIsBeingExecuted = true;
                     }
@@ -295,7 +279,7 @@ namespace DedicatedServer.Utils
 
             if (IsHostUpgrading)
             {
-                chatBox?.textBoxEnter($"An upgrade is being performed, wait until the update is complete.");
+                DedicatedServer.chatBox.textBoxEnter($"An upgrade is being performed, wait until the update is complete.");
                 return;
             }
 
@@ -309,7 +293,7 @@ namespace DedicatedServer.Utils
 
             if (oldLevel == targetLevel)
             {
-                chatBox?.textBoxEnter($"The house has the level you want.");
+                DedicatedServer.chatBox.textBoxEnter($"The house has the level you want.");
                 return;
             }
 
@@ -329,7 +313,7 @@ namespace DedicatedServer.Utils
 
                 if(2 == targetLevel && HasCellar(homeOfFarmer))
                 {
-                    chatBox?.textBoxEnter($"Can not remove cellar" + TextColor.Red);
+                    DedicatedServer.chatBox.textBoxEnter($"Can not remove cellar" + TextColor.Red);
                 }
 
                 AddBed(targetLevel, homeOfFarmer);

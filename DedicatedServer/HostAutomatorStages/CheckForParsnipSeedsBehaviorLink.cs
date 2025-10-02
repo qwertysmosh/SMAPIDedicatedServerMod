@@ -1,29 +1,24 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using StardewValley;
 using StardewValley.Locations;
-using StardewValley.Menus;
 using StardewValley.Objects;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace DedicatedServer.HostAutomatorStages
 {
     internal class CheckForParsnipSeedsBehaviorLink : BehaviorLink
     {
-        public CheckForParsnipSeedsBehaviorLink(BehaviorLink next = null) : base(next)
-        {
-        }
+        #region Required in derived class
 
-        public override void Process(BehaviorState state)
+        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTime { get; set; }
+
+        public override void Process()
         {
-            if (!state.ExitedFarmhouse() && !state.HasCheckedForParsnipSeeds() && Game1.currentLocation is FarmHouse fh)
+            if (false == hasCheckedForParsnipSeeds &&
+                Game1.currentLocation is FarmHouse farmHouse)
             {
-                state.CheckForParsnipSeeds();
-                foreach (var kvp in fh.Objects.Pairs)
+                hasCheckedForParsnipSeeds = true;
+                foreach (var kvp in farmHouse.Objects.Pairs)
                 {
                     var obj = kvp.Value;
                     if (obj is Chest chest)
@@ -31,16 +26,18 @@ namespace DedicatedServer.HostAutomatorStages
                         if (chest.giftbox.Value)
                         {
                             chest.checkForAction(Game1.player);
-                            state.SetWaitTicks(60 * 2);
+
+                            BehaviorChain.WaitTime = (60 * 2);
+
                             break;
                         }
                     }
                 }
-            } else
-            {
-                processNext(state);
             }
-
         }
+
+        #endregion
+
+        private bool hasCheckedForParsnipSeeds = false;
     }
 }

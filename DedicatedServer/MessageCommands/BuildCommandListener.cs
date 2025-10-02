@@ -7,37 +7,39 @@ using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class BuildCommandListener
+    internal abstract class BuildCommandListener
     {
-        private static Dictionary<string, Action<EventDrivenChatBox, Farmer>> buildingActions = new Dictionary<string, Action<EventDrivenChatBox, Farmer>>
+        public static void Enable()
+        {
+            DedicatedServer.chatBox.ChatReceived += chatReceived;
+        }
+
+        public static void Disable()
+        {
+            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+        }
+
+        private static Dictionary<string, Action<Farmer>> buildingActions = new Dictionary<string, Action<Farmer>>
         {
             {"stone_cabin", genBuildCabin("Stone Cabin")},
             {"plank_cabin", genBuildCabin("Plank Cabin")},
             {"log_cabin", genBuildCabin("Log Cabin")},
         };
+
         private static readonly string validBuildingNamesList = genValidBuildingNamesList();
 
-        private EventDrivenChatBox chatBox;
-
-        public BuildCommandListener(EventDrivenChatBox chatBox)
+        private static Action<Farmer> genBuildCabin(string cabinBlueprintName)
         {
-            this.chatBox = chatBox;
-        }
-
-        private static Action<EventDrivenChatBox, Farmer> genBuildCabin(string cabinBlueprintName)
-        {
-            void buildCabin(EventDrivenChatBox chatBox, Farmer farmer)
+            void buildCabin(Farmer farmer)
             {
                 var point = farmer.Tile;
 
                 if (false == Game1.buildingData.ContainsKey("Cabin"))
                 {
-                    WriteToPlayer(chatBox, null, $"Error building Cabin");
+                    WriteToPlayer(null, $"Error building Cabin");
                     return;
                 }
 
@@ -72,11 +74,11 @@ namespace DedicatedServer.MessageCommands
                         var res = ((Farm)Game1.getLocationFromName("Farm")).buildStructure(building, new Vector2(point.X, point.Y), Game1.player, false);
                         if (res)
                         {
-                            WriteToPlayer(chatBox, null, $"{farmer.Name} just built a {cabinBlueprintName}");
+                            WriteToPlayer(null, $"{farmer.Name} just built a {cabinBlueprintName}");
                         }
                         else
                         {
-                            WriteToPlayer(chatBox, farmer, $"Error {Game1.content.LoadString("Strings\\UI:Carpenter_CantBuild")}");
+                            WriteToPlayer(farmer, $"Error {Game1.content.LoadString("Strings\\UI:Carpenter_CantBuild")}");
                         }
                     }
                     Game1.player.team.buildLock.ReleaseLock();
@@ -104,17 +106,7 @@ namespace DedicatedServer.MessageCommands
             return str;
         }
 
-        public void Enable()
-        {
-            chatBox.ChatReceived += chatReceived;
-        }
-
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
-        }
-
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             // Private message chatKind is 3
             var tokens = e.Message.ToLower().Split(' ');
@@ -157,7 +149,7 @@ namespace DedicatedServer.MessageCommands
                      
                     if (location is Farm f)
                     {
-                        action(chatBox, sourceFarmer);
+                        action(sourceFarmer);
                     }
                     else
                     {
@@ -172,20 +164,15 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void WriteToPlayer(Farmer farmer, string message)
-        {
-            WriteToPlayer(chatBox, farmer, message);
-        }
-
-        private static void WriteToPlayer(EventDrivenChatBox chatBox, Farmer farmer, string message)
+        private static void WriteToPlayer(Farmer farmer, string message)
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                chatBox.textBoxEnter($" {message}");
+                DedicatedServer.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

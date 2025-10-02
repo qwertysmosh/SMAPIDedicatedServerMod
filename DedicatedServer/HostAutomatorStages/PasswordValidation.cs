@@ -1,23 +1,14 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
 using DedicatedServer.Utils;
-using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
-using StardewValley.Objects;
-using StardewValley.Tools;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using xTile.ObjectModel;
-using static StardewValley.Minigames.MineCart;
 
 namespace DedicatedServer.HostAutomatorStages
 {
@@ -27,9 +18,9 @@ namespace DedicatedServer.HostAutomatorStages
 
         private IModHelper helper;
 
-        private EventDrivenChatBox chatBox;
+        private ModConfig config;
 
-        private static ModConfig config = null;
+        private EventDrivenChatBox chatBox;
 
         private static List<long> ids = new List<long>();
 
@@ -40,7 +31,7 @@ namespace DedicatedServer.HostAutomatorStages
         public PasswordValidation(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
         {
             this.helper = helper;
-            PasswordValidation.config = config;
+            this.config = config;
             this.chatBox = chatBox;
 
             allowedPasswordProtectedFunctions.AddRange(
@@ -88,7 +79,7 @@ namespace DedicatedServer.HostAutomatorStages
                 return true;
             }
 
-            if (null != property && false == property(config.PasswordProtected))
+            if (null != property && false == property(DedicatedServer.config.PasswordProtected))
             {
                 return true;
             }

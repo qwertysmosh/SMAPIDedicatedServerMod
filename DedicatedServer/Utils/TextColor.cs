@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DedicatedServer.Utils
+﻿namespace DedicatedServer.Utils
 {
     /// <summary>
     ///         To write a text in a different color attach the string to the end of a string

@@ -1,11 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-
+﻿using DedicatedServer.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-
-using DedicatedServer.Utils;
+using System;
+using System.ComponentModel;
 
 namespace DedicatedServer.HostAutomatorStages
 {

@@ -1,9 +1,4 @@
 ﻿using DedicatedServer.HostAutomatorStages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.Utils
 {
@@ -12,10 +7,6 @@ namespace DedicatedServer.Utils
     /// </summary>
     internal abstract class Invisible : InvisibleBehaviorLink
     {
-        private Invisible() : base(null)
-        {
-        }
-
         /// <summary>
         /// <inheritdoc cref = "InvisibleBehaviorLink.InvisibleOverwrite"/>
         /// </summary>

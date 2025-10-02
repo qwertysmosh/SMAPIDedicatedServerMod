@@ -1,3 +1,4 @@
+using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewValley;
 
@@ -5,28 +6,31 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class EndCommunityCenterBehaviorLink : BehaviorLink
     {
-        private bool isEnding;
+        #region Required in derived class
 
-        public EndCommunityCenterBehaviorLink(BehaviorLink next = null) : base(next)
-        {
-            isEnding = false;
-        }
+        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTime { get; set; }
 
-        public override void Process(BehaviorState state)
+        public override void Process()
         {
-            if (!Game1.player.eventsSeen.Contains("191393") && Game1.player.hasCompletedCommunityCenter() && !Game1.IsRainingHere(Game1.getLocationFromName("Town")) && !isEnding && !Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
+            if (false == Game1.player.eventsSeen.Contains("191393") && 
+                Game1.player.hasCompletedCommunityCenter() && 
+                false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) && 
+                false == isEnding && 
+                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
             {
                 Game1.player.warpFarmer(WarpPoints.townWarp);
                 isEnding = true;
             }
-            else if (isEnding && Game1.player.eventsSeen.Contains("191393")) {
+            else if (isEnding && Game1.player.eventsSeen.Contains("191393"))
+            {
                 Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isEnding = false;
             }
-            else
-            {
-                processNext(state);
-            }
         }
+
+        #endregion
+
+        private bool isEnding = false;
     }
 }

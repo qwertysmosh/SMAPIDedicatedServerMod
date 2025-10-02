@@ -1,25 +1,21 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
+﻿// #define USE_DEBUG
+
+using DedicatedServer.Chat;
 using DedicatedServer.HostAutomatorStages;
 using DedicatedServer.Utils;
-using StardewModdingAPI;
+#if USE_DEBUG
 using StardewModdingAPI.Events;
+#endif
 using StardewValley;
-using StardewValley.Locations;
 using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class ServerCommandListener
+    internal abstract class ServerCommandListener
     {
-        private EventDrivenChatBox chatBox;
-
-        private ModConfig config;
-
-        private IModHelper helper;
+        #if USE_DEBUG
 
         private const string hardwoodItemId = "709";
         private const string iridiumSprinkler = "645";
@@ -27,48 +23,43 @@ namespace DedicatedServer.MessageCommands
         private const string pepperSeed = "482";
         private const string eggplantSeeds = "488";
 
-        public ServerCommandListener(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
+        #endif
+
+        public static void Enable()
         {
-            this.helper  = helper;
-            this.config  = config;
-            this.chatBox = chatBox;
+            DedicatedServer.chatBox.ChatReceived += chatReceived;
         }
 
-        public void Enable()
+        public static void Disable()
         {
-            chatBox.ChatReceived += chatReceived;
-        }
-
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
+            DedicatedServer.chatBox.ChatReceived -= chatReceived;
         }
 
         #region DEBUG_SKIP_DAYS
-        #if true
+        #if USE_DEBUG
 
         // Each day is run so that all events are executed normally.
 
-        private int dayOfMonth = -1;
-        private Season season;
-        private void EnableSkipDays(int dayOfMonth, Season season)
+        private static int dayOfMonth = -1;
+        private static Season season;
+        private static void EnableSkipDays(int dayOfMonth, Season season)
         {
-            this.dayOfMonth = dayOfMonth;
-            this.season = season;
-            helper.Events.GameLoop.OneSecondUpdateTicked += SkipDays;
+            ServerCommandListener.dayOfMonth = dayOfMonth;
+            ServerCommandListener.season = season;
+            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked += SkipDays;
             SkipDays(null, null);
         }
 
-        private void DisableSkipDays()
+        private static void DisableSkipDays()
         {
-            this.dayOfMonth = -1;
-            helper.Events.GameLoop.OneSecondUpdateTicked -= SkipDays;
+            dayOfMonth = -1;
+            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked -= SkipDays;
             Sleeping.ShouldSleepOverwrite = false;
         }
 
-        private void SkipDays(object sender, OneSecondUpdateTickedEventArgs e)
+        private static void SkipDays(object sender, OneSecondUpdateTickedEventArgs e)
         {
-            if (dayOfMonth > Game1.dayOfMonth || Game1.season != this.season)
+            if (dayOfMonth > Game1.dayOfMonth || Game1.season != season)
             {
                 if(false == Sleeping.ShouldSleepOverwrite)
                 {
@@ -80,10 +71,11 @@ namespace DedicatedServer.MessageCommands
                 DisableSkipDays();
             }
         }
+
         #endif
         #endregion
 
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             var tokens = e.Message.Split(' ');
 
@@ -107,10 +99,14 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     #region DEBUG_COMMANDS
-                    #if false
+                    #if USE_DEBUG
 
                     case "skipdays":
                         EnableSkipDays(28, Season.Fall);
+                        break;
+
+                    case "t1":
+                        var a = Utility.getAllPets();
                         break;
 
                     case "pp":
@@ -169,7 +165,7 @@ namespace DedicatedServer.MessageCommands
 
                     case "menu":
                         var menu = Game1.activeClickableMenu;
-                        chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
+                        DedicatedServer.chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
                         break;
                                             
                     case "multiplayer":
@@ -218,12 +214,12 @@ namespace DedicatedServer.MessageCommands
 
                     case "location":
                         var location = Game1.player.Tile;
-                        chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
-                        chatBox.textBoxEnter("x: " + location.X + ", y:" + location.Y);
+                        DedicatedServer.chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
+                        DedicatedServer.chatBox.textBoxEnter("x: " + location.X + ", y:" + location.Y);
                         break;
 
-                    #endif
-                    #endregion
+#endif
+#endregion
                 }
             }
             else
@@ -299,7 +295,7 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void LetMePlay(Farmer farmer)
+        private static void LetMePlay(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.LetMePlay))
             {
@@ -311,7 +307,7 @@ namespace DedicatedServer.MessageCommands
             HostAutomation.LetMePlay();
         }
 
-        private void TakeOver(Farmer farmer)
+        private static void TakeOver(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.TakeOver))
             {
@@ -323,7 +319,7 @@ namespace DedicatedServer.MessageCommands
             HostAutomation.Reset();
         }
 
-        private void UpdateHouseLevel(Farmer farmer, string param)
+        private static void UpdateHouseLevel(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.UpgradeHouseLevelBasedOnFarmhand))
             {
@@ -349,7 +345,7 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void SafeInviteCode(Farmer farmer)
+        private static void SafeInviteCode(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SafeInviteCode))
             {
@@ -368,7 +364,7 @@ namespace DedicatedServer.MessageCommands
             }
         }
         
-        private void InviteCode(Farmer farmer)
+        private static void InviteCode(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.InviteCode))
             {
@@ -381,7 +377,7 @@ namespace DedicatedServer.MessageCommands
                 ("" == MultiplayerOptions.InviteCode ? TextColor.Red : TextColor.Green));
         }
 
-        private void ForceInviteCode(Farmer farmer)
+        private static void ForceInviteCode(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceInviteCode))
             {
@@ -392,7 +388,7 @@ namespace DedicatedServer.MessageCommands
             MultiplayerOptions.TryActivatingInviteCode();
         }
 
-        private void InvisibleSub(Farmer farmer)
+        private static void InvisibleSub(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Invisible))
             {
@@ -404,7 +400,7 @@ namespace DedicatedServer.MessageCommands
             WriteToPlayer(farmer, $"The host is invisible {Invisible.InvisibleOverwrite}" + TextColor.Aqua);
         }
 
-        private void Sleep(Farmer farmer)
+        private static void Sleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Sleep))
             {
@@ -430,7 +426,7 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void ForceSleep(Farmer farmer)
+        private static void ForceSleep(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceSleep))
             {
@@ -438,10 +434,10 @@ namespace DedicatedServer.MessageCommands
                 return;
             }
             
-            RestartDay.ForceSleep((seconds) => chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
+            RestartDay.ForceSleep((seconds) => DedicatedServer.chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void ForceResetDay(Farmer farmer)
+        private static void ForceResetDay(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceResetDay))
             {
@@ -452,7 +448,7 @@ namespace DedicatedServer.MessageCommands
             RestartDay.ResetDay((seconds) => WriteToPlayer(null, $"Attention: Server will reset the day in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void ForceShutdown(Farmer farmer)
+        private static void ForceShutdown(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.ForceShutdown))
             {
@@ -463,7 +459,7 @@ namespace DedicatedServer.MessageCommands
             RestartDay.ShutDown((seconds) => WriteToPlayer(null, $"Attention: Server will shut down in {seconds} seconds" + TextColor.Orange));
         }
 
-        private void WalletSeparate(Farmer farmer)
+        private static void WalletSeparate(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Wallet))
             {
@@ -474,7 +470,7 @@ namespace DedicatedServer.MessageCommands
             Wallet.Separate(farmer);
         }
         
-        private void WalletMerge(Farmer farmer)
+        private static void WalletMerge(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.Wallet))
             {
@@ -485,7 +481,7 @@ namespace DedicatedServer.MessageCommands
             Wallet.Merge(farmer);
         }
 
-        private void SpawnMonster(Farmer farmer)
+        private static void SpawnMonster(Farmer farmer)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.SpawnMonster))
             {
@@ -505,7 +501,7 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void MoveBuildPermissionSub(Farmer farmer, string param)
+        private static void MoveBuildPermissionSub(Farmer farmer, string param)
         {
             if (false == PasswordValidation.IsAuthorized(farmer.UniqueMultiplayerID, p => p.MoveBuildPermission))
             {
@@ -515,15 +511,15 @@ namespace DedicatedServer.MessageCommands
 
             if (MoveBuildPermission.parameter.Any(param.Equals))
             {
-                if (config.MoveBuildPermission == param)
+                if (DedicatedServer.config.MoveBuildPermission == param)
                 {
-                    WriteToPlayer(farmer, "Parameter for MoveBuildPermission is already " + config.MoveBuildPermission + TextColor.Orange);
+                    WriteToPlayer(farmer, "Parameter for MoveBuildPermission is already " + DedicatedServer.config.MoveBuildPermission + TextColor.Orange);
                 }
                 else
                 {
-                    config.MoveBuildPermission = param;
-                    MoveBuildPermission.Change(config.MoveBuildPermission);
-                    helper.WriteConfig(config);
+                    DedicatedServer.config.MoveBuildPermission = param;
+                    MoveBuildPermission.Change(DedicatedServer.config.MoveBuildPermission);
+                    DedicatedServer.helper.WriteConfig(DedicatedServer.config);
                 }
             }
             else
@@ -532,17 +528,16 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void WriteToPlayer(Farmer farmer, string message)
+        private static void WriteToPlayer(Farmer farmer, string message)
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                chatBox.textBoxEnter($" {message}");
+                DedicatedServer.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
-
     }
 }

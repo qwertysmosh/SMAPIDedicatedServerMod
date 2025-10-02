@@ -1,12 +1,7 @@
-﻿using DedicatedServer.Utils;
+﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
+using DedicatedServer.Utils;
 using StardewValley;
-using StardewValley.Locations;
-using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
@@ -18,7 +13,34 @@ namespace DedicatedServer.HostAutomatorStages
     /// </summary>
     internal class InvisibleBehaviorLink : BehaviorLink
     {
-        public InvisibleBehaviorLink(BehaviorLink next = null) : base(next)
+        #region Required in derived class
+
+        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTime { get; set; }
+
+        public override void Process()
+        {
+            switch (InvisibleOverwrite)
+            {
+                case true:
+                    if (SetInvisibleDisplayOnChanges())
+                    {
+                        BehaviorChain.WaitTime = 60;
+                    }
+                    break;
+
+                case false:
+                    if (SetVisibleDisplayOnChanges())
+                    {
+                        BehaviorChain.WaitTime = 60;
+                    }
+                    break;
+            }
+        }
+
+        #endregion
+
+        public InvisibleBehaviorLink()
         {
             HostAutomation.ResetAction += new EventHandler((d, e) => Reset() );
         }
@@ -36,32 +58,12 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         protected static bool InvisibleOverwrite { set; get; } = true;
 
-        public override void Process(BehaviorState state)
+        /// <summary>
+        ///         Resets this class to its initial state
+        /// </summary>
+        private static void Reset()
         {
-            switch (InvisibleOverwrite)
-            {
-                case true:
-                    if (SetInvisibleDisplayOnChanges())
-                    {
-                        state.SetWaitTicks(60);
-                    }
-                    else
-                    {
-                        processNext(state);
-                    }
-                    break;
-
-                case false:
-                    if (SetVisibleDisplayOnChanges())
-                    {
-                        state.SetWaitTicks(60);
-                    }
-                    else
-                    {
-                        processNext(state);
-                    }
-                    break;
-            }
+            InvisibleOverwrite = true;
         }
 
         /// <summary>
@@ -109,14 +111,6 @@ namespace DedicatedServer.HostAutomatorStages
             }
 
             return changed;
-        }
-
-        /// <summary>
-        ///         Resets this class to its initial state
-        /// </summary>
-        private static void Reset()
-        {
-            InvisibleOverwrite = true;
         }
     }
 }

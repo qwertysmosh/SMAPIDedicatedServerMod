@@ -1,19 +1,11 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Utils;
-using StardewModdingAPI;
+﻿using DedicatedServer.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
-using StardewValley.Monsters;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-
     // Check if all players are ready:
     // `Game1.netReady.IsReady("sleep");`
     // 
@@ -31,15 +23,14 @@ namespace DedicatedServer.HostAutomatorStages
     // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
     // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
 
-    internal class SleepWorker
+    internal abstract class SleepWorker
     {
-        private static IModHelper helper = null;
-
         private static bool _ShouldSleepOverwrite = false;
 
-        public SleepWorker(IModHelper helper)
+        public static void Reset()
         {
-            SleepWorker.helper = helper;
+            ShouldSleepOverwrite = false;
+            RemoveOnDayStarted(OnDayStartedWorker);
         }
 
         /// <summary>
@@ -156,12 +147,12 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void AddOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            helper.Events.GameLoop.DayStarted += handler;
+            DedicatedServer.helper.Events.GameLoop.DayStarted += handler;
         }
 
         private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            helper.Events.GameLoop.DayStarted -= handler;
+            DedicatedServer.helper.Events.GameLoop.DayStarted -= handler;
         }
 
         /// <summary>
@@ -171,8 +162,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <param name="e"></param>
         private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)
         {
-            ShouldSleepOverwrite = false;
-            RemoveOnDayStarted(OnDayStartedWorker);
+            Reset();
         }
     }
 }

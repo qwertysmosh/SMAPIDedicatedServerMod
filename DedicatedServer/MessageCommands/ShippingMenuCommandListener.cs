@@ -1,44 +1,24 @@
 ﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using StardewModdingAPI;
-using StardewValley.Menus;
-using StardewValley;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DedicatedServer.HostAutomatorStages;
 using DedicatedServer.Utils;
+using StardewValley;
+using System.Linq;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class ShippingMenuCommandListener
+    internal abstract class ShippingMenuCommandListener
     {
-        private IModHelper helper;
-        private IMonitor monitor;
-        private ModConfig config;
-        private EventDrivenChatBox chatBox;
-
-        public ShippingMenuCommandListener(IModHelper helper, IMonitor monitor, ModConfig config, EventDrivenChatBox chatBox)
+        public static void Enable()
         {
-            this.helper = helper;
-            this.monitor = monitor;
-            this.config = config;
-            this.chatBox = chatBox;
+            DedicatedServer.chatBox.ChatReceived += chatReceived;
         }
 
-        public void Enable()
+        public static void Disable()
         {
-            chatBox.ChatReceived += chatReceived;
+            DedicatedServer.chatBox.ChatReceived -= chatReceived;
         }
 
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
-        }
-
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             var tokens = e.Message.Split(' ');
 
@@ -55,7 +35,7 @@ namespace DedicatedServer.MessageCommands
                 case "okay":
                     if (SkipShippingMenuBehaviorLink.SkipShippingMenu())
                     {
-                        chatBox?.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
+                        DedicatedServer.chatBox.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
                     }
                     break;
                 default:

@@ -5,7 +5,6 @@ using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -89,7 +88,7 @@ namespace DedicatedServer.Crops
              */
             string save_directory = SaveGameHelper.Path;
 
-#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
             //if (Game1.savePathOverride != "")
             //{
             //    save_directory = Game1.savePathOverride;
@@ -145,7 +144,7 @@ namespace DedicatedServer.Crops
             string tmpString = SaveGame.TempNameSuffix;
             string save_directory = SaveGameHelper.Path;
 
-#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
             // `Game1.savePathOverride` is no longer available in `1.6.15`.
             //if (Game1.savePathOverride != "")
             //{
@@ -158,7 +157,7 @@ namespace DedicatedServer.Crops
             SaveGame.ensureFolderStructureExists();
             string tmpSaveFile = Path.Combine(save_directory, "AdditionalCropData" + tmpString);
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
-#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
             //string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
 
             // Serialize crop data to temp save file
@@ -175,7 +174,7 @@ namespace DedicatedServer.Crops
             cropSaveDataSerializer.Serialize(writer, new CropSaveData {cropDictionary = cropDictionary, beginningOfDayCrops = beginningOfDayCrops});
             writer.Close();
 
-#warning The logic is removed, but tests still need to be performed to determine whether it was necessary.
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
             // `Game1.savePathOverride` is no longer available in `1.6.15`.
             //// If appropriate, move old crop data file to backup
             //if (save_backups_and_metadata)
