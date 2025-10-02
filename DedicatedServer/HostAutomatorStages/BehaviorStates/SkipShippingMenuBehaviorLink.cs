@@ -106,6 +106,29 @@ namespace DedicatedServer.HostAutomatorStages
 
             Task.Run(async () =>
             {
+                // Wait to send an error message until all players have clicked "OK" and see the ready to save dialog.
+                // When sleeping, `ready_for_save` is initially set to true, so the wait loop must be performed step by step.
+
+                while (Game1.activeClickableMenu is not ShippingMenu)
+                {
+                    await Task.Delay(100);
+                    if (false == shouldRunning) { return; }
+                }
+
+                var shippingMenu = Game1.activeClickableMenu as ShippingMenu ;
+
+                while (false == shippingMenu.CanReceiveInput())
+                {
+                    await Task.Delay(100);
+                    if (false == shouldRunning) { return; }
+                }
+
+                while (false == DedicatedServer.IsReadyPlayers("ready_for_save"))
+                {
+                    await Task.Delay(100);
+                    if (false == shouldRunning) { return; }
+                }
+
                 int seconds = 10;
                 await Task.Delay(10000);
                 if (false == shouldRunning) { return; }

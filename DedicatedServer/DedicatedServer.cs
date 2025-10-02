@@ -130,7 +130,7 @@ namespace DedicatedServer
         ///         true: There were letters in the mailbox.
         /// <br/>   false: The mailbox was empty</returns>
         public static bool OpenMailboxIfHasMail()
-            {
+        {
             if(HasMail())
             {
                 OpenMailbox();
@@ -148,7 +148,7 @@ namespace DedicatedServer
         public static bool HasMail()
         {
             return 0 < MailCount();
-            }
+        }
 
         /// <summary>
         /// Returns the number of emails in the mailbox
@@ -183,6 +183,7 @@ namespace DedicatedServer
         /// <br/>
         /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalStart");</c>
         /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalEnd");</c>
+        /// <br/>   <c>return ReadyCheckHelper.IsReady("ready_for_save");</c>
         /// </summary>
         /// <param name="checkName">The ready check ID.</param>
         /// <returns>
@@ -201,6 +202,16 @@ namespace DedicatedServer
         public static int GetNumberReady(string checkName)
         {
             return Game1.netReady.GetNumberReady(checkName);
+        }
+
+        /// <summary>
+        ///         Like the function <see cref="IsReady(string)"/>, but excludes the host.
+        /// </summary>
+        /// <param name="checkName"></param>
+        /// <returns></returns>
+        public static bool IsReadyPlayers(string checkName)
+        {
+            return NumberOfPlayers <= Game1.netReady.GetNumberReady(checkName);
         }
 
         #endregion
