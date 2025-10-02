@@ -5,7 +5,7 @@ using StardewValley.Objects;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class CheckForParsnipSeedsBehaviorLink : BehaviorLink2
+    internal class CheckForParsnipSeedsBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -14,10 +14,11 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (false == hasCheckedForParsnipSeeds && Game1.currentLocation is FarmHouse fh)
+            if (false == hasCheckedForParsnipSeeds &&
+                Game1.currentLocation is FarmHouse farmHouse)
             {
                 hasCheckedForParsnipSeeds = true;
-                foreach (var kvp in fh.Objects.Pairs)
+                foreach (var kvp in farmHouse.Objects.Pairs)
                 {
                     var obj = kvp.Value;
                     if (obj is Chest chest)
@@ -26,8 +27,8 @@ namespace DedicatedServer.HostAutomatorStages
                         {
                             chest.checkForAction(Game1.player);
 
-#warning The following was a globla wait tick
-                            // state.SetWaitTicks(60 * 2);
+                            BehaviorChain.WaitTime = (60 * 2);
+
                             break;
                         }
                     }

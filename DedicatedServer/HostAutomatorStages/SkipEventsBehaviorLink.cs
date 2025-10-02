@@ -5,7 +5,12 @@ using System.Collections.Generic;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class SkipEventsBehaviorLink : BehaviorLink2
+    /// <summary>
+    ///         This class skips all events.
+    /// <br/>   If skipping is not desired, this must be entered in the dictionary <see cref="SkipEventsBehaviorLink.Functions"/>.
+    /// <br/>   The events must then be handled elsewhere, e.g. <see cref="ProcessDialogueBehaviorLink.Process()"/>.
+    /// </summary>
+    internal class SkipEventsBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -14,56 +19,58 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (Game1.CurrentEvent != null && Game1.CurrentEvent.skippable)
+            if (null != Game1.CurrentEvent && Game1.CurrentEvent.skippable)
             {
-                if (Functions.TryGetValue(Game1.CurrentEvent.id, out var ChecksIfEventShouldBeSkipped))
+                if (lastEvent != Game1.CurrentEvent)
                 {
-                    if (false == ChecksIfEventShouldBeSkipped())
+                    lastEvent = Game1.CurrentEvent;
+
+                    if (Functions.TryGetValue(Game1.CurrentEvent.id, out var ShouldTheEventBeSkipped))
                     {
-                        return;
+                        if (false == ShouldTheEventBeSkipped())
+                        {
+                            return;
+                        }
                     }
+
+                    Game1.CurrentEvent.skipEvent();
+
+                    // Set up wait ticks to wait before trying to skip event again,
+                    // and wait to anticipate another following event
+                    WaitTime = (int)(600 * 0.2);
                 }
-
-                Game1.CurrentEvent.skipEvent();
-
-                // Set up wait ticks to wait before trying to skip event again,
-                // and wait to anticipate another following event
-                WaitTime = (int)(600 * 0.2);
-                
+            }
+            else
+            {
+                lastEvent = null;
             }
         }
 
         #endregion
 
+        private Event lastEvent = null;
+
         /// <summary>
         ///         The return value of the dictionary values Func:
-        /// <br/>   false The event is skipped.
-        /// <br/>   true The event is not skipped.
+        /// <br/>   false: The event is skipped.
+        /// <br/>   true:  The event is not skipped.
         /// </summary>
         private static Dictionary<string, Func<bool>> Functions = new Dictionary<string, Func<bool>>
             {
-                { "897405", Event897405 },
-                { "1590166", Event1590166 },
+                { "897405", TheEventShouldBeTriggered }, // Marnie asks the farmer if they'd like to adopt a dog. 
+                { "1590166", TheEventShouldBeTriggered }, // Marnie asks the farmer if they'd like to adopt a cat. 
             };
 
         /// <summary>
-        /// Marnie asks the farmer if they'd like to adopt a dog. 
+        /// The event will be skipped
         /// </summary>
         /// <returns></returns>
-        private static bool Event897405()
-        {
-            // Nothing should be done except to proceed to the next process
-            return false;
-        }
+        private static bool TheEventShouldBeSkipped() => true;
 
         /// <summary>
-        /// Marnie asks the farmer if they'd like to adopt a cat. 
+        /// Nothing should be done except to proceed to the next process
         /// </summary>
         /// <returns></returns>
-        private static bool Event1590166()
-        {
-            // Nothing should be done except to proceed to the next process
-            return false;
-        }
+        private static bool TheEventShouldBeTriggered() => false;
     }
 }

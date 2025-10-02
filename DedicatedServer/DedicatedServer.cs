@@ -2,12 +2,10 @@
 using DedicatedServer.Config;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer
 {
@@ -22,23 +20,83 @@ namespace DedicatedServer
         public static ModConfig config { get; private set; }
         public static EventDrivenChatBox chatBox { get; private set; }
 
-        public static void InitStaticVariables(IModHelper helper, IMonitor monitor, ModConfig config, EventDrivenChatBox chatBox)
+        public static void InitStaticVariables(IModHelper helper, IMonitor monitor, ModConfig config)
         {
             DedicatedServer.helper = helper;
             DedicatedServer.monitor = monitor;
+            DedicatedServer.config = config;
+        }
+
+        public static void InitChatBox(EventDrivenChatBox chatBox)
+        {
             DedicatedServer.chatBox = chatBox;
         }
 
-        public static IDictionary<long, Farmer> otherPlayers { get; } = new Dictionary<long, Farmer>();
+        public static void Dispose()
+        {
+            DedicatedServer.helper = null;
+            DedicatedServer.monitor = null;
+            DedicatedServer.config = null;
+            DedicatedServer.chatBox = null;
+        }
 
-#warning (Function optimization possible), alternative: `Game1.getOnlineFarmers().Count - 1`
-        public static void UpdateOtherPlayers()
+        #region Game
+
+        static MethodInfo findSaveGames = typeof(LoadGameMenu).GetMethod("FindSaveGames", BindingFlags.Static | BindingFlags.NonPublic);
+
+        /// <summary>
+        ///         List of farmers of saved games
+        /// </summary>
+        /// <returns>
+        ///         List of <see cref="Farmer"/>
+        /// </returns>
+        public static List<Farmer> GetSaveGameFarmers()
+        {
+            object result = findSaveGames.Invoke(obj: null, parameters: new object[] { "" });
+            List<Farmer> farmers = result as List<Farmer>;
+            return farmers;
+        }
+
+        public static Farmer GetFarmerOfSaveGameOrDefault(string farmName, List<Farmer> saveGameFarmers)
+        {
+            foreach (Farmer farmer in saveGameFarmers)
+            {
+                if (!farmer.slotCanHost)
+                {
+                    continue;
+                }
+                if (farmer.farmName.Value == farmName)
+                {
+                    return farmer;
+                }
+            }
+
+            return null;
+        }
+
+        public static Farmer GetFarmerOfSaveGameOrDefault(string farmName)
+        {
+            return GetFarmerOfSaveGameOrDefault(farmName, GetSaveGameFarmers());
+        }
+
+        #endregion
+
+        #region Players
+
+        /// <summary>
+        /// Get number of all players who are currently connected
+        /// </summary>
+        public static int NumberOfPlayers { get => Game1.getOnlineFarmers().Count - 1; }
+
+        public static Dictionary<long, Farmer> OnlineFarmers()
         {
             if (multiplayer == null)
             {
                 multiplayer = (Multiplayer)multiplayerFieldInfo.GetValue(null);
             }
-            otherPlayers.Clear();
+
+            var otherPlayers = new Dictionary<long, Farmer>();
+            
             foreach (var farmer in Game1.otherFarmers.Values)
             {
                 if (false == multiplayer.isDisconnecting(farmer))
@@ -46,18 +104,59 @@ namespace DedicatedServer
                     otherPlayers.Add(farmer.UniqueMultiplayerID, farmer);
                 }
             }
-        }
 
-#warning (Remove direct access to `otherPlayers`)
-        public static int GetNumOtherPlayers()
-        {
-            return otherPlayers.Count;
-        }
-
-#warning (Remove direct access to `otherPlayers`)
-        public static IDictionary<long, Farmer> GetOtherPlayers()
-        {
             return otherPlayers;
         }
+
+        #endregion
+
+        #region Every Day
+
+        public static void ClearMailbox()
+        {
+            while (0 < Game1.MasterPlayer.mailbox.Count)
+            {
+                // If the function is called without anything in the inbox,
+                // then it will not continue for a logged-in player on the new day.
+                Game1.getFarm().mailbox();
+            }
+        }
+
+        #endregion
+
+        #region Alias with documentation
+
+        public static void Exit(int statusCode)
+        {
+            monitor.Log("Exiting...", LogLevel.Error);
+            Environment.Exit(statusCode);
+        }
+
+        /// <summary>
+        ///         Get whether all required players are ready to proceed.
+        /// <br/>
+        /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalStart");</c>
+        /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalEnd");</c>
+        /// </summary>
+        /// <param name="checkName">The ready check ID.</param>
+        /// <returns>
+        ///         true : If all required players are ready
+        /// <br/>   false: If one required player is not ready</returns>
+        public static bool IsReady(string checkName)
+        {
+            return Game1.netReady.IsReady(checkName);
+        }
+
+        /// <summary>
+        ///         Get the number of players that are ready to proceed.
+        /// </summary>
+        /// <param name="checkName">The ready check ID.</param>
+        /// <returns></returns>
+        public static int GetNumberReady(string checkName)
+        {
+            return Game1.netReady.GetNumberReady(checkName);
+        }
+
+        #endregion
     }
 }

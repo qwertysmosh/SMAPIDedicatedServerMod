@@ -22,8 +22,10 @@ namespace DedicatedServer.HostAutomatorStages
             /// <summary> The server is paused as long as no players are online </summary>
             WaitingForUpcomingPlayers,
 
-
-            /// <summary> Prevents the pause state </summary>
+            /// <summary> 
+            ///         Prevents the pause state 
+            /// <br/>   A reset must be carried out to exit the states, <see cref="Reset"/>.
+            /// </summary>
             PreventPause,
 
             /// <summary> Disables the pause once </summary>
@@ -137,8 +139,7 @@ namespace DedicatedServer.HostAutomatorStages
                     break;
 
                 case internalStates.WaitingForPlayersToLeave:
-#warning (Do I need to use GetNumOtherPlayers)
-                    if (0 == DedicatedServer.GetNumOtherPlayers() && // If no other player is online
+                    if (0 == DedicatedServer.NumberOfPlayers && // If no other player is online
                         false == Game1.isFestival() // if it is not a festival
                     )
                     {
@@ -157,7 +158,7 @@ namespace DedicatedServer.HostAutomatorStages
                         IsPaused = true;
                     }
 
-                    if (0 < DedicatedServer.GetNumOtherPlayers() ||
+                    if (0 < DedicatedServer.NumberOfPlayers ||
                         true == Game1.isFestival()
                     )
                     {
@@ -169,8 +170,6 @@ namespace DedicatedServer.HostAutomatorStages
                         return true;
                     }
                     break;
-
-                // A reset must be carried out to exit the states, <see cref="Reset"/>.
 
                 case internalStates.PreventPause:
                     if (IsPaused)

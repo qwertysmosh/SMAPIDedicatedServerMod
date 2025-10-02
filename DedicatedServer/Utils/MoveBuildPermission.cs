@@ -1,18 +1,12 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewValley;
 using System.Collections.Generic;
 using static StardewValley.FarmerTeam;
 
 namespace DedicatedServer.Utils
 {
-    internal class MoveBuildPermission
+    internal abstract class MoveBuildPermission
     {
-        private static IMonitor monitor = null;
-        private static ModConfig config = null;
-        private static EventDrivenChatBox chatBox = null;
-
         private static readonly string moveBuildPermission =
             Game1.content.LoadString("Strings\\UI:GameMenu_MoveBuildingPermissions");
 
@@ -26,19 +20,15 @@ namespace DedicatedServer.Utils
         /// <summary>
         ///         Alias to change farmhands permissions to move buildings.
         /// </summary>
-        private static RemoteBuildingPermissions farmhandsCanMoveBuildings
+        private static RemoteBuildingPermissions FarmhandsCanMoveBuildings
         {
             get => Game1.player.team.farmhandsCanMoveBuildings.Value;
             set => Game1.player.team.farmhandsCanMoveBuildings.Value = value;
         }
 
-        public MoveBuildPermission(IMonitor monitor, ModConfig config, EventDrivenChatBox chatBox)
+        public static void Init()
         {
-            MoveBuildPermission.monitor = monitor;
-            MoveBuildPermission.config = config;
-            MoveBuildPermission.chatBox = chatBox;
-
-            MoveBuildPermission.Change(config.MoveBuildPermission);
+            Change(DedicatedServer.config.MoveBuildPermission);
         }
 
         /// <summary>
@@ -56,34 +46,34 @@ namespace DedicatedServer.Utils
             {
                 case "on":
                     buildPermission = RemoteBuildingPermissions.On;
-                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
+                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
                     break;
                 case "owned":
                 case "ownedbuildings":
                     buildPermission = RemoteBuildingPermissions.OwnedBuildings;
-                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
+                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
                     break;
                 default:
                     buildPermission = RemoteBuildingPermissions.Off;
-                    monitor?.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
+                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
                     break;
             }
 
-            farmhandsCanMoveBuildings = buildPermission;
+            FarmhandsCanMoveBuildings = buildPermission;
             WriteMoveBuildPermission();
         }
 
         public static void Change(RemoteBuildingPermissions buildPermission)
         {
-            farmhandsCanMoveBuildings = buildPermission;
+            FarmhandsCanMoveBuildings = buildPermission;
             WriteMoveBuildPermission();
         }
 
         public static void WriteMoveBuildPermission()
         {
-            chatBox?.textBoxEnter(
+            DedicatedServer.chatBox.textBoxEnter(
                 " " + moveBuildPermission + ": " +
-                moveBuildPermissionStrings[(int)farmhandsCanMoveBuildings] + 
+                moveBuildPermissionStrings[(int)FarmhandsCanMoveBuildings] + 
                 TextColor.Green);
         }
     }

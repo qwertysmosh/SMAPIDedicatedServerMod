@@ -4,7 +4,7 @@ using StardewValley;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class UnlockCommunityCenterBehaviorLink : BehaviorLink2
+    internal class UnlockCommunityCenterBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 

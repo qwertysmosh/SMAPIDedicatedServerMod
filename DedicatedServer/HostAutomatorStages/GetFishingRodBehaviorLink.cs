@@ -4,7 +4,7 @@ using StardewValley;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class GetFishingRodBehaviorLink : BehaviorLink2
+    internal class GetFishingRodBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 

@@ -1,10 +1,6 @@
-﻿using DedicatedServer.HostAutomatorStages;
-using StardewValley;
+﻿using StardewValley;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.Utils
 {
@@ -21,11 +17,11 @@ namespace DedicatedServer.Utils
         }
         public static bool IsWaitingToAttend()
         {
-            return ReadyCheckHelper.IsReady("festivalStart");
+            return DedicatedServer.IsReady("festivalStart");
         }
         public static bool OthersWaitingToAttend(int numOtherPlayers)
         {
-            return Game1.netReady.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
+            return DedicatedServer.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
         }
         private static bool isTodayBeachNightMarket()
         {
@@ -38,11 +34,11 @@ namespace DedicatedServer.Utils
 
         public static bool IsWaitingToLeave()
         {
-            return ReadyCheckHelper.IsReady("festivalEnd");
+            return DedicatedServer.IsReady("festivalEnd");
         }
         public static bool OthersWaitingToLeave(int numOtherPlayers)
         {
-            return Game1.netReady.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
+            return DedicatedServer.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
         }
         public static bool ShouldLeave(int numOtherPlayers)
         {

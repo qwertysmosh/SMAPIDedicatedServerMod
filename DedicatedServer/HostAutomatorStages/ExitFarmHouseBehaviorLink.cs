@@ -5,7 +5,7 @@ using StardewValley.Locations;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class ExitFarmHouseBehaviorLink : BehaviorLink2
+    internal class ExitFarmHouseBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -21,9 +21,8 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 hasExitedFarmhouse = true;
 
-#warning This is a global wait Time
                 // Set up wait ticks to wait for possible event
-                //state.SetWaitTicks(60); 
+                BehaviorChain.WaitTime = 60;
             }
             else
             {
@@ -35,9 +34,8 @@ namespace DedicatedServer.HostAutomatorStages
                     Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
                     hasExitedFarmhouse = false;
 
-#warning This is a global wait Time
                     // Set up wait ticks to wait for possible event
-                    //state.SetWaitTicks(60);
+                    BehaviorChain.WaitTime = 60;
                 }
             }
         }

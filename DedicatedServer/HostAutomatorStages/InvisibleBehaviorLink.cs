@@ -11,7 +11,7 @@ namespace DedicatedServer.HostAutomatorStages
     /// <br/>   - As long as someone is invisible, you cannot give them anything.
     /// <br/>   - After someone has been warped/teleported, they will be visible again.
     /// </summary>
-    internal class InvisibleBehaviorLink : BehaviorLink2
+    internal class InvisibleBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -25,16 +25,14 @@ namespace DedicatedServer.HostAutomatorStages
                 case true:
                     if (SetInvisibleDisplayOnChanges())
                     {
-#warning This is a global wait Time
-                        //state.SetWaitTicks(60);
+                        BehaviorChain.WaitTime = 60;
                     }
                     break;
 
                 case false:
                     if (SetVisibleDisplayOnChanges())
                     {
-#warning This is a global wait Time
-                        //state.SetWaitTicks(60);
+                        BehaviorChain.WaitTime = 60;
                     }
                     break;
             }

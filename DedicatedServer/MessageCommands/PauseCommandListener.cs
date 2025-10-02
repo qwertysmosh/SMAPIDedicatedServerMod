@@ -5,26 +5,19 @@ using StardewValley.Menus;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class PauseCommandListener
+    internal abstract class PauseCommandListener
     {
-        private EventDrivenChatBox chatBox;
-
-        public PauseCommandListener(EventDrivenChatBox chatBox)
+        public static void Enable()
         {
-            this.chatBox = chatBox;
+            DedicatedServer.chatBox.ChatReceived += chatReceived;
         }
 
-        public void Enable()
+        public static void Disable()
         {
-            chatBox.ChatReceived += chatReceived;
+            DedicatedServer.chatBox.ChatReceived -= chatReceived;
         }
 
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
-        }
-
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             var tokens = e.Message.ToLower().Split(' ');
             if (tokens.Length == 0)
@@ -41,7 +34,7 @@ namespace DedicatedServer.MessageCommands
             {
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Pause))
                 {
-                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    DedicatedServer.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                     return;
                 }
 
@@ -49,10 +42,10 @@ namespace DedicatedServer.MessageCommands
 
                 if (Game1.netWorldState.Value.IsPaused)
                 {
-                    chatBox.globalInfoMessage("Paused");
+                    DedicatedServer.chatBox.globalInfoMessage("Paused");
                     return;
                 }
-                chatBox.globalInfoMessage("Resumed");
+                DedicatedServer.chatBox.globalInfoMessage("Resumed");
             }
         }
     }

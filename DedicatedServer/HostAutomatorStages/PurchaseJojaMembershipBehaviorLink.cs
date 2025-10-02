@@ -3,7 +3,7 @@ using StardewValley;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class PurchaseJojaMembershipBehaviorLink : BehaviorLink2
+    internal class PurchaseJojaMembershipBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 

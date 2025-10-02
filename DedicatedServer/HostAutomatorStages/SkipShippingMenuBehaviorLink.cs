@@ -1,15 +1,15 @@
 ﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
-using Force.DeepCloner;
+using DedicatedServer.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using System;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class SkipShippingMenuBehaviorLink : BehaviorLink2
+    internal class SkipShippingMenuBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -20,63 +20,150 @@ namespace DedicatedServer.HostAutomatorStages
         {
             if (Game1.activeClickableMenu is ShippingMenu shippingMenu)
             {
-               
-                var clickables = shippingMenu.allClickableComponents;
-                if (null == copy) { copy = DeepClonerExtensions.DeepClone(clickables[6]); }
-#warning I need to find a way so that the click is performed after the button is visible
-                //if (clickables[6].visible)
-                //{
-                var a = false;
-                if (a)
+                if (shippingMenu.CanReceiveInput())
                 {
-                    if (runOncePerMenu)
-                    {
-                        runOncePerMenu = false;
-                        okClicked(shippingMenu);
-                    }
+                    var point = shippingMenu.okButton.bounds.Center;
+                    shippingMenu.receiveLeftClick(point.X, point.Y, true);
                 }
-                //}
-            }
-            else
-            {
-                runOncePerMenu = true;
-                //WaitTime = 60;
             }
         }
-
         #endregion
 
-        private static MethodInfo info = typeof(ShippingMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private static void okClicked(ShippingMenu shippingMenu) => info.Invoke(shippingMenu, Array.Empty<object>());
-
-        bool runOncePerMenu = true;
-
-        public SkipShippingMenuBehaviorLink()
-        {
-            DedicatedServer.helper.Events.GameLoop.DayEnding += OnDayEndingWorker;
-        }
-
-#warning TEST
-        ClickableComponent copy = null;
-        
-        public void OnDayEndingWorker(object sender, DayEndingEventArgs e)
-        {
-            DedicatedServer.chatBox.textBoxEnter("Shipping menu Workaroud, if the host does not click Ok, enter 'okay'");
-        }
+        #region For external control
 
         public static bool SkipShippingMenu()
         {
             if (Game1.activeClickableMenu is ShippingMenu shippingMenu)
             {
-                okClicked(shippingMenu);
-                DedicatedServer.monitor.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
-                return true;
+                if (shippingMenu.CanReceiveInput())
+                {
+                    var point = shippingMenu.okButton.bounds.Center;
+                    shippingMenu.receiveLeftClick(point.X, point.Y, true);
+                    DedicatedServer.monitor.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
+
+                    return true;
+                }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
+
+        #endregion
+
+        public SkipShippingMenuBehaviorLink()
+        {
+            Enable();
+        }
+
+        ~SkipShippingMenuBehaviorLink() => Dispose();
+
+        public static void Dispose()
+        {
+            Disable();
+        }
+
+        private static void Enable()
+        {
+            DedicatedServer.helper.Events.GameLoop.DayEnding += OnDayEnding;
+            DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+        }
+
+        private static void Disable()
+        {
+            DedicatedServer.helper.Events.GameLoop.DayEnding -= OnDayEnding;
+            DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
+        }
+
+        #region Additional Timer
+
+        // The problem is that the normal update timer appears to be disabled after a certain amount of time.
+        // In this case, this timer and the event take over.
+
+        public class WhileDayEndingEventArgs : EventArgs
+        {
+            public int Seconds { get; set; }
+            public WhileDayEndingEventArgs(int seconds) => Seconds = seconds;
+        }
+
+        private static event EventHandler<WhileDayEndingEventArgs> WhileDayEnding = Skip;
+
+        private static void OnWhileDayEnding(int seconds)
+        {
+            WhileDayEnding?.Invoke(null, new WhileDayEndingEventArgs(seconds));
+        }
+
+        private static bool shouldRunning = false;
+
+        private static void Skip(object sender, WhileDayEndingEventArgs e)
+        {
+            DedicatedServer.chatBox.textBoxEnter($"The shipping menu has not responded for {e.Seconds} seconds." + TextColor.Red);
+            SkipShippingMenu();
+        }
+
+        private static void OnDayEnding(object sender, DayEndingEventArgs e)
+        {
+            shouldRunning = true;
+
+            Task.Run(async () =>
+            {
+                int seconds = 10;
+                await Task.Delay(10000);
+                if (false == shouldRunning) { return; }
+                OnWhileDayEnding(seconds);
+
+                seconds += 5;
+                await Task.Delay(5000);
+                if (false == shouldRunning) { return; }
+                OnWhileDayEnding(seconds);
+
+                seconds += 2;
+                await Task.Delay(2000);
+                if (false == shouldRunning) { return; }
+                OnWhileDayEnding(seconds);
+
+                seconds += 1;
+                await Task.Delay(1000);
+                while (shouldRunning)
+                {
+                    OnWhileDayEnding(seconds);
+                    seconds += 1;
+                    await Task.Delay(1000);
+                }
+            });
+        }
+
+        private static void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            shouldRunning = false;
+        }
+
+        #endregion
+
+#if false // Outdated solution
+        private static readonly FieldInfo introTimerField = typeof(ShippingMenu).GetField("introTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        /// <summary>
+        /// Provides access to the internal timer; it is better to use the correct method:
+        /// <see cref="ShippingMenu.CanReceiveInput()"/>
+        /// </summary>
+        /// <param name="shippingMenu"></param>
+        /// <returns></returns>
+        private static int GetIntroTimer(ShippingMenu shippingMenu)
+        {
+            return (int)introTimerField.GetValue(shippingMenu);
+        }
+#endif
+
+#if false // Outdated solution
+        private static MethodInfo okClickedMethod = typeof(ShippingMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        /// <summary>
+        ///         This is the internal method; it causes minor stuttering when called frequently.
+        /// <br/>   Call it with okClicked(shippingMenu);
+        /// </summary>
+        /// <param name="shippingMenu"></param>
+        private static void okClicked(ShippingMenu shippingMenu) => okClickedMethod.Invoke(shippingMenu, Array.Empty<object>());
+#endif
+
     }
 }

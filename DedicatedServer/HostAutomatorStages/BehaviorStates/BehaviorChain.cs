@@ -5,21 +5,23 @@ using System.Collections.Generic;
 
 namespace DedicatedServer.HostAutomatorStages.BehaviorStates
 {
-    internal static class BehaviorChain2
+    internal static class BehaviorChain
     {
         private const int waitTimeStartOfDay = 60;
 
         public static int WaitTimeAutoLoad { get; set; } = 0;
+
+        /// <summary> This is a global wait Time </summary>
         public static int WaitTime { get; set; } = WaitTimeAutoLoad;
 
-        private static List<BehaviorLink2> chain;
+        private static List<BehaviorLink> chain;
 
         private static Func<bool> shouldPause;
 
-        public static void InitStaticVariables(Func<bool> shouldPause, List<BehaviorLink2> chain
+        public static void InitStaticVariables(Func<bool> shouldPause, List<BehaviorLink> chain
         ){
-            BehaviorChain2.chain = (null == chain) ? new List<BehaviorLink2>() : chain;
-            BehaviorChain2.shouldPause = (null == shouldPause) ? Empty : shouldPause;
+            BehaviorChain.chain = (null == chain) ? new List<BehaviorLink>() : chain;
+            BehaviorChain.shouldPause = (null == shouldPause) ? Empty : shouldPause;
         }
 
         public static void Enable()
@@ -33,6 +35,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
             DedicatedServer.helper.Events.GameLoop.UpdateTicked -= Execute;
             DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStartedWorker;
         }
+
         private static void Execute(object sender, UpdateTickedEventArgs e)
         {
             try
@@ -65,7 +68,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
             catch (Exception exception)
             {
                 DedicatedServer.monitor.Log(
-                    $"Error in {typeof(BehaviorChain2).Name} class:\n\n{exception}",
+                    $"Error in {typeof(BehaviorChain).Name} class:\n\n{exception}",
                     LogLevel.Error);
             }
         }

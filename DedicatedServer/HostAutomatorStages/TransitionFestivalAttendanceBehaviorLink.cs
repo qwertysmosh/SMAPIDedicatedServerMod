@@ -1,5 +1,4 @@
 ﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
-using DedicatedServer.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
@@ -9,7 +8,7 @@ using System.Reflection;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class TransitionFestivalAttendanceBehaviorLink : BehaviorLink2
+    internal class TransitionFestivalAttendanceBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -18,24 +17,24 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (Utils.Festivals.ShouldAttend(DedicatedServer.otherPlayers.Count) && 
+            if (Utils.Festivals.ShouldAttend(DedicatedServer.NumberOfPlayers) && 
                 false == Utils.Festivals.IsWaitingToAttend())
             {
                 WaitForFestivalAttendance();
             }
             else if (
-                false == Utils.Festivals.ShouldAttend(DedicatedServer.otherPlayers.Count) && 
+                false == Utils.Festivals.ShouldAttend(DedicatedServer.NumberOfPlayers) && 
                 Utils.Festivals.IsWaitingToAttend())
             {
                 StopWaitingForFestivalAttendance();
             }
-            else if(Utils.Festivals.ShouldLeave(DedicatedServer.otherPlayers.Count) &&
+            else if(Utils.Festivals.ShouldLeave(DedicatedServer.NumberOfPlayers) &&
                 false == Utils.Festivals.IsWaitingToLeave())
             {
                 WaitForFestivalEnd();
             }
             else if (
-                false == Utils.Festivals.ShouldLeave(DedicatedServer.otherPlayers.Count) &&
+                false == Utils.Festivals.ShouldLeave(DedicatedServer.NumberOfPlayers) &&
                 Utils.Festivals.IsWaitingToLeave())
             {
                 StopWaitingForFestivalEnd();
@@ -77,9 +76,9 @@ namespace DedicatedServer.HostAutomatorStages
 
         #endregion
 
-        private static MethodInfo info = typeof(Game1).GetMethod("performWarpFarmer", BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo info = typeof(Game1).GetMethod("performWarpFarmer", BindingFlags.Static | BindingFlags.NonPublic);
 
-        private FestivalChatBox festivalChatBox;
+        private readonly FestivalChatBox festivalChatBox;
 
         private int numFestivalStartVotes = 0;
         private int numFestivalStartVotesRequired = 0;
@@ -88,9 +87,7 @@ namespace DedicatedServer.HostAutomatorStages
         {
             DedicatedServer.helper.Events.GameLoop.DayStarted += NewDay;
 
-            festivalChatBox = new FestivalChatBox(
-                DedicatedServer.chatBox,
-                DedicatedServer.otherPlayers);
+            festivalChatBox = new FestivalChatBox();
         }
 
         ~TransitionFestivalAttendanceBehaviorLink() => Dispose();
@@ -98,6 +95,7 @@ namespace DedicatedServer.HostAutomatorStages
         public void Dispose()
         {
             DedicatedServer.helper.Events.GameLoop.DayStarted -= NewDay;
+            DisableFestivalChatBox();
         }
 
         public Tuple<int, int> UpdateFestivalStartVotes()
@@ -105,10 +103,10 @@ namespace DedicatedServer.HostAutomatorStages
             if (festivalChatBox.IsEnabled())
             {
                 int numFestivalStartVotes = festivalChatBox.NumVoted();
-                if (numFestivalStartVotes != this.numFestivalStartVotes || DedicatedServer.otherPlayers.Count != numFestivalStartVotesRequired)
+                if (numFestivalStartVotes != this.numFestivalStartVotes || DedicatedServer.NumberOfPlayers != numFestivalStartVotesRequired)
                 {
                     this.numFestivalStartVotes = numFestivalStartVotes;
-                    numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+                    numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
                     return Tuple.Create(numFestivalStartVotes, numFestivalStartVotesRequired);
                 }
             }
@@ -119,7 +117,7 @@ namespace DedicatedServer.HostAutomatorStages
         {
             festivalChatBox.Enable();
             numFestivalStartVotes = 0;
-            numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+            numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
         }
 
         public void DisableFestivalChatBox()
@@ -130,16 +128,15 @@ namespace DedicatedServer.HostAutomatorStages
         public void NewDay(object sender, DayStartedEventArgs e)
         {
             numFestivalStartVotes = 0;
-            numFestivalStartVotesRequired = DedicatedServer.otherPlayers.Count;
+            numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
         }
 
-#warning other behavior link
         public void SendChatMessage(string message)
         {
             festivalChatBox.SendChatMessage(message);
         }
 
-        private static string getLocationOfFestival()
+        private static string GetLocationOfFestival()
         {
             if (1 == Game1.weatherIcon)
             {
@@ -151,7 +148,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         private void WaitForFestivalAttendance()
         {
-            var location = Game1.getLocationFromName(getLocationOfFestival());
+            var location = Game1.getLocationFromName(GetLocationOfFestival());
             var warp = new Warp(0, 0, location.NameOrUniqueName, 0, 0, false);
             Game1.netReady.SetLocalReady("festivalStart", ready: true);
             Game1.activeClickableMenu = new ReadyCheckDialog("festivalStart", allowCancel: true, delegate (Farmer who)
@@ -171,7 +168,7 @@ namespace DedicatedServer.HostAutomatorStages
             // Wait for festival attendance
         }
 
-        private void StopWaitingForFestivalAttendance()
+        private static void StopWaitingForFestivalAttendance()
         {
             if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
             {
@@ -181,6 +178,7 @@ namespace DedicatedServer.HostAutomatorStages
 
             // Stop waiting for festival attendance
         }
+
         private void WaitForFestivalEnd()
         {
             Game1.netReady.SetLocalReady("festivalEnd", ready: true);
@@ -192,7 +190,8 @@ namespace DedicatedServer.HostAutomatorStages
 
             // Wait for festival end
         }
-        private void StopWaitingForFestivalEnd()
+
+        private static void StopWaitingForFestivalEnd()
         {
             if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
             {

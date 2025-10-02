@@ -1,6 +1,6 @@
-﻿using System;
+﻿using DedicatedServer.HostAutomatorStages;
 using StardewValley;
-using DedicatedServer.HostAutomatorStages;
+using System;
 
 namespace DedicatedServer.Utils
 {

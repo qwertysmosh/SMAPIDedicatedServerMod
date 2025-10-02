@@ -4,11 +4,12 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Menus;
+using System;
 using System.Reflection;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class TransitionSleepBehaviorLink : BehaviorLink2
+    internal class TransitionSleepBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -38,7 +39,7 @@ namespace DedicatedServer.HostAutomatorStages
                     {
                         Game1.player.isInBed.Value = true;
                         Game1.player.sleptInTemporaryBed.Value = true;
-                        info.Invoke(Game1.currentLocation, new object[] { });
+                        info.Invoke(Game1.currentLocation, Array.Empty<object>());
                     }, delegate (Farmer who)
                     {
                         if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)

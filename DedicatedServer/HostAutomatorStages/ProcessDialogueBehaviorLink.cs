@@ -1,14 +1,14 @@
 ﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Menus;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class ProcessDialogueBehaviorLink : BehaviorLink2
+    internal class ProcessDialogueBehaviorLink : BehaviorLink
     {
         #region Required in derived class
 
@@ -21,9 +21,15 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 if (Game1.activeClickableMenu is DialogueBox dialogueBox)
                 {
+                    // The variable safetyTimer is counted down by the game.
+                    // The if statement prevents multiple and too early clicks.
+                    if (0 < dialogueBox.safetyTimer)
+                    {
+                        return;
+                    }
+
                     if (false == dialogueBox.isQuestion)
                     {
-                        // Skip the non-question dialogue
                         dialogueBox.receiveLeftClick(0, 0);
                         WaitTime = (int)(60 * 0.2);
                     }
@@ -73,14 +79,26 @@ namespace DedicatedServer.HostAutomatorStages
                         }
                         else if (yesResponseIdx >= 0 && noResponseIdx >= 0)
                         {
-                            // This is the pet question. Answer based on mod config.
-                            if (DedicatedServer.config.shouldAcceptPet())
+                            if(false == hasPetSelectEvent)
                             {
-                                dialogueBox.selectedResponse = yesResponseIdx;
-                            }
-                            else
-                            {
-                                dialogueBox.selectedResponse = noResponseIdx;
+                                if (null != Game1.CurrentEvent)
+                                {
+                                    if ("897405" == Game1.CurrentEvent.id ||
+                                        "1590166" == Game1.CurrentEvent.id
+                                    ){
+                                        hasPetSelectEvent = true;
+
+                                        // This is the pet question. Answer based on mod config.
+                                        if (DedicatedServer.config.ShouldAcceptPet())
+                                        {
+                                            dialogueBox.selectedResponse = yesResponseIdx;
+                                        }
+                                        else
+                                        {
+                                            dialogueBox.selectedResponse = noResponseIdx;
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -99,59 +117,83 @@ namespace DedicatedServer.HostAutomatorStages
                 {
                     levelUpMenu.okButtonClicked();
                 }
+                else if (Game1.activeClickableMenu is LetterViewerMenu letterViewerMenu)
+                {
+                    if (letterViewerMenu.readyToClose())
+                    {
+                        var point = letterViewerMenu.upperRightCloseButton.bounds.Center;
+                        letterViewerMenu.receiveLeftClick(point.X, point.Y, true);
+                    }
+                    WaitTime = (int)(60 * 0.2);
+                }
                 else if (Game1.activeClickableMenu is ItemListMenu itemListMenu)
                 {
                     // Lost item dialog when the host faints
-                    itemListMenuInfo?.Invoke(itemListMenu, new object[] { });
+                    itemListMenuInfo?.Invoke(itemListMenu, System.Array.Empty<object>());
                     WaitTime = (int)(60 * 0.2);
                 }
                 else if (Game1.activeClickableMenu is ItemGrabMenu itemGrabMenu)
                 {
-                    // Good to test when you go into the mine and are presented with a sword
+                    // Good to test when you go into the mine and are presented with a sword, open a chest with items
 
-                    var count = itemGrabMenu.ItemsToGrabMenu.actualInventory.Count();
-
-                    if (false == ServerHost.EnsureFreeSlotNumber(count))
+                    if (false == (itemGrabMenu.context is ShippingBin))
                     {
-                        // Try again later
-                        return;
+
+                        var count = itemGrabMenu.ItemsToGrabMenu.actualInventory.Count;
+
+                        if (false == ServerHost.EnsureFreeSlotNumber(count))
+                        {
+                            // Try again later
+                            return;
+                        }
+
+                        var del = new List<Item>();
+                        foreach (var item in itemGrabMenu.ItemsToGrabMenu.actualInventory)
+                        {
+                            if (null == item) { continue; }
+
+                            Game1.player.addItemToInventoryBool(item);
+                            del.Add(item);
+                        }
+
+                        foreach (var item in del)
+                        {
+                            itemGrabMenu.ItemsToGrabMenu.actualInventory.Remove(item);
+                        }
+
+                        if (false == itemGrabMenu.areAllItemsTaken())
+                        {
+                            // Drop all remaining items from the menu
+                            itemGrabMenu.DropRemainingItems();
+                        }
+
+                        if (itemGrabMenu.readyToClose())
+                        {
+                            okClicked();
+                        }
+
+                        WaitTime = (int)(60 * 0.2);
                     }
-
-                    var del = new List<Item>();
-                    foreach (var item in itemGrabMenu.ItemsToGrabMenu.actualInventory)
-                    {
-                        if (null == item) { continue; }
-
-                        Game1.player.addItemToInventoryBool(item);
-                        del.Add(item);
-                    }
-
-                    foreach (var item in del)
-                    {
-                        itemGrabMenu.ItemsToGrabMenu.actualInventory.Remove(item);
-                    }
-
-                    if (false == itemGrabMenu.areAllItemsTaken())
-                    {
-                        // Drop all remaining items from the menu
-                        itemGrabMenu.DropRemainingItems();
-                    }
-
-                    if (itemGrabMenu.readyToClose())
-                    {
-                        okClicked();
-                    }
-
-                    WaitTime = (int)(60 * 0.2);
-                }
+                }                
             }
         }
 
         #endregion
 
-        private static MethodInfo itemListMenuInfo = typeof(ItemListMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+        public ProcessDialogueBehaviorLink()
+        {
+            if (Game1.player.eventsSeen.Contains("897405") || 
+                Game1.player.eventsSeen.Contains("1590166")
+            ){
+                hasPetSelectEvent = true;
+            }
+        }
 
-        private void okClicked()
+        private static bool hasPetSelectEvent = false;
+
+        private static readonly MethodInfo itemListMenuInfo = typeof(ItemListMenu).GetMethod("okClicked", BindingFlags.Instance | BindingFlags.NonPublic);
+                
+        private static void okClicked()
         {
             Game1.activeClickableMenu = null;
 

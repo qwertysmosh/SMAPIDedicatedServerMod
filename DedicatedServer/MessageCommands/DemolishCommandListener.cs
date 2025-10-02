@@ -12,26 +12,19 @@ using System.Linq;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class DemolishCommandListener
+    internal abstract class DemolishCommandListener
     {
-        private EventDrivenChatBox chatBox;
-
-        public DemolishCommandListener(EventDrivenChatBox chatBox)
+        public static void Enable()
         {
-            this.chatBox = chatBox;
+            DedicatedServer.chatBox.ChatReceived += chatReceived;
         }
 
-        public void Enable()
+        public static void Disable()
         {
-            chatBox.ChatReceived += chatReceived;
+            DedicatedServer.chatBox.ChatReceived -= chatReceived;
         }
 
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
-        }
-
-        private void destroyCabin(Farmer farmer, Building building, Farm f)
+        private static void destroyCabin(Farmer farmer, Building building, Farm f)
         {
             Action buildingLockFailed = delegate
             {
@@ -104,7 +97,7 @@ namespace DedicatedServer.MessageCommands
             Game1.player.team.demolishLock.RequestLock(continueDemolish, buildingLockFailed);
         }
 
-        private Action genDestroyCabinAction(Farmer farmer, Building building)
+        private static Action genDestroyCabinAction(Farmer farmer, Building building)
         {
             void destroyCabinAction()
             {
@@ -115,7 +108,7 @@ namespace DedicatedServer.MessageCommands
             return destroyCabinAction;
         }
 
-        private Action genCancelDestroyCabinAction(Farmer farmer)
+        private static Action genCancelDestroyCabinAction(Farmer farmer)
         {
             void cancelDestroyCabinAction()
             {
@@ -125,7 +118,7 @@ namespace DedicatedServer.MessageCommands
             return cancelDestroyCabinAction;
         }
 
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             var tokens = e.Message.ToLower().Split(' ');
             if (tokens.Length == 0)
@@ -143,7 +136,7 @@ namespace DedicatedServer.MessageCommands
                 
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Demolish))
                 {
-                    chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    DedicatedServer.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                     return;
                 }
 
@@ -203,7 +196,7 @@ namespace DedicatedServer.MessageCommands
                                     var responseActions = new Dictionary<string, Action>();
                                     responseActions["yes"] = genDestroyCabinAction(sourceFarmer, building);
                                     responseActions["no"] = genCancelDestroyCabinAction(sourceFarmer);
-                                    chatBox.RegisterFarmerResponseActionGroup(sourceFarmer.UniqueMultiplayerID, responseActions);
+                                    DedicatedServer.chatBox.RegisterFarmerResponseActionGroup(sourceFarmer.UniqueMultiplayerID, responseActions);
                                     WriteToPlayer(sourceFarmer, "This cabin belongs to a player. Are you sure you want to remove it? Message me \"yes\" or \"no\".");
                                     return;
                                 }
@@ -224,15 +217,15 @@ namespace DedicatedServer.MessageCommands
             }
         }
 
-        private void WriteToPlayer(Farmer farmer, string message)
+        private static void WriteToPlayer(Farmer farmer, string message)
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                chatBox.textBoxEnter($" {message}");
+                DedicatedServer.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }
