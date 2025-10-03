@@ -5,8 +5,11 @@ using DedicatedServer.Utils;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using StardewValley.Network.NetReady;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace DedicatedServer
@@ -194,14 +197,6 @@ namespace DedicatedServer
             return Game1.mailbox.Count;
         }
 
-        /// <summary>
-        /// Returns the number of open journal items
-        /// </summary>
-        //public static int JournalCount()
-        //{
-        //    return Game1.MasterPlayer.mailReceived.Count;
-        //}
-
         #endregion
 
         #region Alias with documentation
@@ -213,7 +208,8 @@ namespace DedicatedServer
         }
 
         /// <summary>
-        ///         Get whether all required players are ready to proceed.
+        ///         Get whether all required players are ready to proceed,
+        /// <br/>   including the host
         /// <br/>
         /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalStart");</c>
         /// <br/>   <c>return ReadyCheckHelper.IsReady("festivalEnd");</c>
@@ -229,7 +225,8 @@ namespace DedicatedServer
         }
 
         /// <summary>
-        ///         Get the number of players that are ready to proceed.
+        ///         Get the number of players that are ready to proceed,
+        /// <br/>   including the host
         /// </summary>
         /// <param name="checkName">The ready check ID.</param>
         /// <returns></returns>
@@ -245,7 +242,90 @@ namespace DedicatedServer
         /// <returns></returns>
         public static bool IsReadyPlayers(string checkName)
         {
-            return NumberOfPlayers <= Game1.netReady.GetNumberReady(checkName);
+            return IsReadyPlayers(checkName, OnlineFarmers());
+        }
+        
+        private enum ReadyState : byte
+        {
+            /// <summary> Not marked as ready to proceed with the check. </summary>            
+            NotReady,
+            /// <summary> Ready to proceed, but can still cancel. </summary>
+            Ready,
+            /// <summary> Ready to proceed, and can no longer cancel. </summary>            
+            Locked
+        }
+
+        /// <summary>
+        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyChecks` field
+        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.ReadySynchronizer"/>
+        /// </summary>
+        private static FieldInfo ReadyChecks = typeof(ReadySynchronizer).GetField("ReadyChecks", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        /// <summary>
+        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyStates` field
+        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.Internal.ServerReadyCheck"/>
+        /// </summary>
+        private static FieldInfo ReadyStates = null;
+
+        /// <summary>
+        ///         Accesses the internal private variables of the <see cref="StardewValley.Network.NetReady.ReadySynchronizer"/>
+        /// <br/>   class and checks whether the specified farmers are ready.
+        /// </summary>
+        /// <param name="checkName">The ready check ID.</param>
+        /// <param name="farmers">Required player</param>
+        /// <returns>
+        ///         true : If all required players are ready
+        /// <br/>   false: If one of the required player is not ready</returns>
+        public static bool IsReadyPlayers(string checkName, Dictionary<long, Farmer> farmers)
+        {
+            List<Farmer> fs = farmers.Values.ToList();
+            return IsReadyPlayers(checkName, fs);
+        }
+
+        /// <summary><inheritdoc cref="IsReadyPlayers(string, Dictionary{long, Farmer})"/></summary>
+        /// <param name="checkName"><inheritdoc cref="IsReadyPlayers(string, Dictionary{long, Farmer})"/></param>
+        /// <param name="farmers"><inheritdoc cref="IsReadyPlayers(string, Dictionary{long, Farmer})"/></param>
+        /// <returns><inheritdoc cref="IsReadyPlayers(string, Dictionary{long, Farmer})"/></returns>
+        public static bool IsReadyPlayers(string checkName, List<Farmer> farmers)
+        {
+            var farmersUniqueMultiplayerIDs = farmers.Select(f => f.UniqueMultiplayerID).ToList();
+
+            if (0 == farmersUniqueMultiplayerIDs.Count) { return false; }
+
+            var readyChecks = ReadyChecks.GetValue(Game1.netReady) as IDictionary;
+            var keys = readyChecks.Keys.Cast<string>().ToList();
+            var values = readyChecks.Values.Cast<object>().ToList();
+
+            for (int i = 0; i < readyChecks.Count; i++)
+            {
+                if (keys[i] == checkName)
+                {
+                    object ServerReadyCheckInstance = values[i];
+
+                    if (null == ReadyStates)
+                    {
+                        ReadyStates = ServerReadyCheckInstance.GetType().GetField("ReadyStates", BindingFlags.NonPublic | BindingFlags.Instance);
+                    }
+
+                    var readyStatesColection = ReadyStates.GetValue(ServerReadyCheckInstance) as IDictionary;
+                    var uniqueMultiplayerIDs = readyStatesColection.Keys.Cast<long>().ToList();
+                    var readyStates = readyStatesColection.Values.Cast<object>().Select(v => Enum.ToObject(typeof(ReadyState), v)).ToList().Cast<ReadyState>().ToList();
+
+                    for (int j = 0; j < readyStatesColection.Count; j++)
+                    {
+                        if (farmersUniqueMultiplayerIDs.Contains(uniqueMultiplayerIDs[j]))
+                        {
+                            if (ReadyState.NotReady == readyStates[j])
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion

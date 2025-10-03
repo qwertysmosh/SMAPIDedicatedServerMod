@@ -1,6 +1,5 @@
 ﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
-using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
@@ -39,7 +38,6 @@ namespace DedicatedServer.HostAutomatorStages
                 {
                     var point = shippingMenu.okButton.bounds.Center;
                     shippingMenu.receiveLeftClick(point.X, point.Y, true);
-                    DedicatedServer.monitor.Log("SkipShippingMenu-OkClicked", LogLevel.Debug);
 
                     return true;
                 }
@@ -117,8 +115,8 @@ namespace DedicatedServer.HostAutomatorStages
                     if (false == shouldRunning) { return; }
                 }
 
-#warning I think this does not work
-                while (false == DedicatedServer.IsReadyPlayers("ready_for_save"))
+                var farmers = DedicatedServer.OnlineFarmers();
+                while (false == DedicatedServer.IsReadyPlayers("ready_for_save", farmers))
                 {   // Wait until all other players have clicked "OK". 
                     await Task.Delay(100);
                     if (false == shouldRunning) { return; }
