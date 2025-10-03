@@ -10,47 +10,113 @@ namespace DedicatedServer.HostAutomatorStages
     {
         #region Required in derived class
 
-        public override int WaitTimeAutoLoad { get; set; } = 60;
+        public override int WaitTimeAutoLoad { get; set; } = 0;
         public override int WaitTime { get; set; }
 
         public override void Process()
         {
-            if (false == hasExitedFarmhouse &&
-                Game1.timeOfDay < TimeToEnterFarmhouse &&
-                null != Game1.currentLocation && 
-                Game1.currentLocation is FarmHouse)
+            switch (exitFarmHouseStates)
             {
-                hasExitedFarmhouse = true;
-                DedicatedServer.Warp(WarpPoints.FarmWarp);
-            }
-            else
-            {
-                if (true == hasExitedFarmhouse &&
-                    null == Game1.CurrentEvent &&
-                    null == Game1.activeClickableMenu &&
-                    Game1.timeOfDay >= TimeToEnterFarmhouse &&
-                    null != Game1.currentLocation && 
-                    Game1.currentLocation is Farm &&
-                    true == Game1.spawnMonstersAtNight
-                ){
-                    hasExitedFarmhouse = false;
-                    DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
-                }
+                case ExitFarmHouseStates.Uninit:
+                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    {  
+                        if (Game1.currentLocation is FarmHouse)
+                        {
+                            exitFarmHouseStates = ExitFarmHouseStates.Farmhouse;
+                        }
+                        if (Game1.currentLocation is Farm)
+                        {
+                            exitFarmHouseStates = ExitFarmHouseStates.Farm;
+                        }
+                    }
+                    break;
+
+
+                case ExitFarmHouseStates.WarpToFarmhouse:
+                    if (Game1.currentLocation is FarmHouse)
+                    {
+                        WaitTime = 120;
+                        exitFarmHouseStates = ExitFarmHouseStates.Farmhouse; 
+                    }
+                    break;
+
+
+                case ExitFarmHouseStates.Farmhouse:
+                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    {
+                        if (null == Game1.CurrentEvent &&
+                            null == Game1.activeClickableMenu &&
+                            null != Game1.currentLocation &&
+                            Game1.timeOfDay < TimeToEnterFarmhouse &&
+                            Game1.currentLocation is FarmHouse
+                        ){
+                            exitFarmHouseStates = ExitFarmHouseStates.WarpToFarm;
+                            DedicatedServer.Warp(WarpPoints.FarmWarp);
+                        }
+                    }
+                    break;
+
+
+                case ExitFarmHouseStates.WarpToFarm:
+                    if (Game1.currentLocation is Farm)
+                    {
+                        WaitTime = 120;
+                        exitFarmHouseStates = ExitFarmHouseStates.Farm;
+                    }
+                    break;
+
+
+                case ExitFarmHouseStates.Farm:
+                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    {
+                        if (null == Game1.CurrentEvent &&
+                            null == Game1.activeClickableMenu &&
+                            null != Game1.currentLocation &&
+                            Game1.timeOfDay >= TimeToEnterFarmhouse &&
+                            Game1.currentLocation is Farm
+                        ){
+                            exitFarmHouseStates = ExitFarmHouseStates.WarpToFarmhouse;
+                            DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
+                        }
+                    }
+                    break;
+
+
+                default:
+                    exitFarmHouseStates = ExitFarmHouseStates.Uninit;
+                    break;
+
             }
         }
 
-        #endregion
+#endregion
+
+        private enum ExitFarmHouseStates
+        {
+            Uninit = 0,
+            WarpToFarmhouse,
+            Farmhouse,
+            WarpToFarm,
+            Farm
+        }
+
+        private static ExitFarmHouseStates exitFarmHouseStates = ExitFarmHouseStates.Uninit;
 
         /// <summary>
         ///         After this time, the host is teleported into the house.
         /// </summary>
         protected static int TimeToEnterFarmhouse { set; get; } = 1800;
 
-        private static bool hasExitedFarmhouse = false;
+        private static void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            exitFarmHouseStates = ExitFarmHouseStates.Farmhouse;
+        }
 
-        private static void OnDayStarted(object sender, DayStartedEventArgs e) => hasExitedFarmhouse = false;
-
-        public ExitFarmHouseBehaviorLink() => Enable();
+        public ExitFarmHouseBehaviorLink()
+        {
+            exitFarmHouseStates = ExitFarmHouseStates.Uninit;
+            Enable();
+        }
 
         ~ExitFarmHouseBehaviorLink() => Dispose();
 
