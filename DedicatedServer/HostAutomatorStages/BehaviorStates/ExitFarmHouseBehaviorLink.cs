@@ -10,7 +10,7 @@ namespace DedicatedServer.HostAutomatorStages
     {
         #region Required in derived class
 
-        public override int WaitTimeAutoLoad { get; set; } = 0;
+        public override int WaitTimeAutoLoad { get; set; } = 60;
         public override int WaitTime { get; set; }
 
         public override void Process()

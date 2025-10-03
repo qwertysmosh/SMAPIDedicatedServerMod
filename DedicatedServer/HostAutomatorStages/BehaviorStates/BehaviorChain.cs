@@ -11,7 +11,9 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
 
         public static int WaitTimeAutoLoad { get; set; } = 0;
 
-        /// <summary> This is a global wait Time </summary>
+        /// <summary>
+        ///         This is a global wait Time
+        /// <br/>   If the time is set, the current behavior chain is canceled</summary>
         public static int WaitTime { get; set; } = WaitTimeAutoLoad;
 
         private static List<BehaviorLink> chain;
@@ -60,6 +62,11 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
                             {
                                 chainLink.WaitTimeReset();
                                 chainLink.Process();
+
+                                if(0 != WaitTime)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }

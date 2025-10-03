@@ -1,5 +1,7 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
+using DedicatedServer.HostAutomatorStages.BehaviorStates;
+using DedicatedServer.Utils;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
@@ -56,6 +58,9 @@ namespace DedicatedServer
             }
 
             Game1.player.warpFarmer(warp);
+
+            // Set up wait ticks to wait for possible event
+            BehaviorChain.WaitTime = 60;
         }
 
         /// <summary>
