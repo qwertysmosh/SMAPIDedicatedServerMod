@@ -79,6 +79,20 @@ namespace DedicatedServer.HostAutomatorStages
                         }
                         else if (yesResponseIdx >= 0 && noResponseIdx >= 0)
                         {
+                            if (Game1.MasterPlayer.isInBed.Value)
+                            {
+                                // It is not possible to sleep in the morning.
+                                // The time of day is only increased in increments of 10.
+                                if (610 <= Game1.timeOfDay)
+                                {
+                                    dialogueBox.selectedResponse = yesResponseIdx;
+                                }
+                                else
+                                {
+                                    dialogueBox.selectedResponse = noResponseIdx;
+                                }
+                            }
+
                             if(false == hasPetSelectEvent)
                             {
                                 if (null != Game1.CurrentEvent)
@@ -101,6 +115,12 @@ namespace DedicatedServer.HostAutomatorStages
                                 }
                             }
                         }
+
+                        // The index is used to select the button:
+                        //  `dialogueBox.selectedResponse`
+                        // An alternative is to jump on the button:
+                        //  var button = dialogueBox.allClickableComponents[0].bounds.Center;
+                        //  dialogueBox.receiveLeftClick(button.X, button.Y, true);
 
                         dialogueBox.receiveLeftClick(0, 0);
                         WaitTime = (int)(60 * 0.2);
