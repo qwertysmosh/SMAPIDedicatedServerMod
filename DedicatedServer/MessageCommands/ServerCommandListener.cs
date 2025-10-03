@@ -181,35 +181,35 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "farm":
-                        Game1.player.warpFarmer(WarpPoints.FarmWarp);
+                        DedicatedServer.Warp(WarpPoints.FarmWarp);
                         break;
 
                     case "house":
-                        Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
+                        DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
                         break;
 
                     case "mine":
-                        Game1.player.warpFarmer(WarpPoints.mineWarp);
+                        DedicatedServer.Warp(WarpPoints.mineWarp);
                         break;
 
                     case "town":
-                        Game1.player.warpFarmer(WarpPoints.townWarp);
+                        DedicatedServer.Warp(WarpPoints.townWarp);
                         break;
 
                     case "beach":
-                        Game1.player.warpFarmer(WarpPoints.beachWarp);
+                        DedicatedServer.Warp(WarpPoints.beachWarp);
                         break;
 
                     case "robin":
-                        Game1.player.warpFarmer(WarpPoints.robinWarp);
+                        DedicatedServer.Warp(WarpPoints.robinWarp);
                         break;
 
                     case "clint":
-                        Game1.player.warpFarmer(WarpPoints.clintWarp);
+                        DedicatedServer.Warp(WarpPoints.clintWarp);
                         break;
 
                     case "pierre":
-                        Game1.player.warpFarmer(WarpPoints.pierreWarp);
+                        DedicatedServer.Warp(WarpPoints.pierreWarp);
                         break;
 
                     case "location":

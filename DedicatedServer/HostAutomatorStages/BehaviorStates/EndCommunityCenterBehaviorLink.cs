@@ -17,15 +17,18 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.hasCompletedCommunityCenter() && 
                 false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) && 
                 false == isEnding && 
-                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
-            {
-                Game1.player.warpFarmer(WarpPoints.townWarp);
+                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
+            ){
                 isEnding = true;
+                DedicatedServer.Warp(WarpPoints.townWarp);
             }
-            else if (isEnding && Game1.player.eventsSeen.Contains("191393"))
-            {
-                Game1.player.warpFarmer(WarpPoints.FarmWarp);
+            else if (isEnding &&
+                null == Game1.CurrentEvent &&
+                null == Game1.activeClickableMenu && 
+                Game1.player.eventsSeen.Contains("191393")
+            ){
                 isEnding = false;
+                DedicatedServer.Warp(WarpPoints.FarmWarp);
             }
         }
 

@@ -1,6 +1,7 @@
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewValley;
+using StardewValley.Locations;
 
 namespace DedicatedServer.HostAutomatorStages
 {
@@ -20,19 +21,30 @@ namespace DedicatedServer.HostAutomatorStages
                 false == isGettingFishingRod && 
                 false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
             {
-                Game1.player.warpFarmer(WarpPoints.beachWarp);
                 isGettingFishingRod = true;
+                Game1.player.warpFarmer(WarpPoints.beachWarp);
             }
-            else if (isGettingFishingRod && 
+            else if (isGettingFishingRod &&
+                null == Game1.CurrentEvent &&
+                null == Game1.activeClickableMenu &&
+                Game1.currentLocation is Beach &&
                 Game1.player.eventsSeen.Contains("739330"))
             {
-                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isGettingFishingRod = false;
+                Game1.player.warpFarmer(WarpPoints.FarmWarp);
             }
         }
 
         #endregion
 
-        private bool isGettingFishingRod = false;
+        private static bool isGettingFishingRod = false;
+
+        public GetFishingRodBehaviorLink()
+        {
+            if (Game1.player.eventsSeen.Contains("739330"))
+            {
+                isGettingFishingRod = true;
+            }
+        }
     }
 }

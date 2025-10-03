@@ -115,13 +115,20 @@ namespace DedicatedServer.Utils
             pierreLocation.X, pierreLocation.Y,
             false, false);
 
-        public static Warp Refresh(Farmer farmer)
+        /// <summary>
+        ///         Warp to the current host
+        /// </summary>
+        public static Warp masterPlayerWarp
         {
-            return new Warp(
-                (int)farmer.Tile.X, (int)farmer.Tile.Y,
-                farmer.currentLocation.Name,
-                (int)farmer.Tile.X, (int)farmer.Tile.Y,
-                false, false);
+            get
+            {
+                Farmer farmer = Game1.MasterPlayer;
+                return new Warp(
+                    (int)farmer.Tile.X, (int)farmer.Tile.Y,
+                    farmer.currentLocation.Name,
+                    (int)farmer.Tile.X, (int)farmer.Tile.Y,
+                    false, false);
+            }
         }
     }
 }

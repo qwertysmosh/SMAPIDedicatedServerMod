@@ -21,13 +21,17 @@ namespace DedicatedServer.HostAutomatorStages
                 false == isUnlocking && 
                 false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
             {
-                Game1.player.warpFarmer(WarpPoints.townWarp);
                 isUnlocking = true;
+                DedicatedServer.Warp(WarpPoints.townWarp);
             }
-            else if (isUnlocking && Game1.player.eventsSeen.Contains("611439"))
+            else if (isUnlocking &&
+                null == Game1.CurrentEvent &&
+                null == Game1.activeClickableMenu &&
+                Game1.player.eventsSeen.Contains("611439")
+            )
             {
-                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 isUnlocking = false;
+                DedicatedServer.Warp(WarpPoints.FarmWarp);
             }
         }
 

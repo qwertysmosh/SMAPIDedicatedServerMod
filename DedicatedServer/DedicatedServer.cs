@@ -40,6 +40,35 @@ namespace DedicatedServer
             DedicatedServer.chatBox = null;
         }
 
+        #region Warp
+
+        /// <summary>
+        ///         Warps the host, you can use a warp point from <see cref="WarpPoints"/>
+        /// <br/>   The warp set up wait ticks to wait for possible event
+        /// </summary>
+        /// <param name="warp"></param>
+        public static void Warp(Warp warp)
+        {
+            if (null == warp)
+            {
+                Refresh();
+                return;
+            }
+
+            Game1.player.warpFarmer(warp);
+        }
+
+        /// <summary>
+        ///         Warps the host to the same position.
+        /// <br/>   Refresh to make bot back to visible
+        /// </summary>
+        public static void Refresh()
+        {
+            Warp(WarpPoints.masterPlayerWarp);
+        }
+
+        #endregion
+
         #region Game
 
         static MethodInfo findSaveGames = typeof(LoadGameMenu).GetMethod("FindSaveGames", BindingFlags.Static | BindingFlags.NonPublic);

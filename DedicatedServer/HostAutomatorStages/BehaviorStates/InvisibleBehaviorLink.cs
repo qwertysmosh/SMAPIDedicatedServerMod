@@ -101,12 +101,10 @@ namespace DedicatedServer.HostAutomatorStages
             if (false == Game1.displayFarmer || forcedRefresh)
             {
                 Game1.displayFarmer = true;
+
                 // Refresh to make bot back to visible
-                Game1.player.warpFarmer(new Warp(
-                    (int)Game1.player.Tile.X, (int)Game1.player.Tile.Y,
-                    Game1.player.currentLocation.Name,
-                    (int)Game1.player.Tile.X, (int)Game1.player.Tile.Y,
-                    false, false));
+                DedicatedServer.Refresh();
+
                 changed = true;
             }
 

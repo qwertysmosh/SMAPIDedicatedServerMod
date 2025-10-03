@@ -343,7 +343,7 @@ namespace DedicatedServer.Utils
 
             Game1.player.performRenovation("FarmHouse");
 
-            Game1.player.warpFarmer(WarpPoints.farmHouseWarp);
+            DedicatedServer.Warp(WarpPoints.farmHouseWarp);
         }
 #endif
     }

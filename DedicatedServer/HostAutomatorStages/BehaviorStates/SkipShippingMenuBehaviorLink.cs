@@ -50,17 +50,11 @@ namespace DedicatedServer.HostAutomatorStages
 
         #endregion
 
-        public SkipShippingMenuBehaviorLink()
-        {
-            Enable();
-        }
+        public SkipShippingMenuBehaviorLink() =>Enable();
 
         ~SkipShippingMenuBehaviorLink() => Dispose();
 
-        public static void Dispose()
-        {
-            Disable();
-        }
+        public static void Dispose() => Disable();
 
         private static void Enable()
         {
@@ -79,7 +73,7 @@ namespace DedicatedServer.HostAutomatorStages
         // The problem is that the normal update timer appears to be disabled after a certain amount of time.
         // In this case, this timer and the event take over.
 
-        public class WhileDayEndingEventArgs : EventArgs
+        private class WhileDayEndingEventArgs : EventArgs
         {
             public int Seconds { get; set; }
             public WhileDayEndingEventArgs(int seconds) => Seconds = seconds;
@@ -110,7 +104,7 @@ namespace DedicatedServer.HostAutomatorStages
                 // When sleeping, `ready_for_save` is initially set to true, so the wait loop must be performed step by step.
 
                 while (Game1.activeClickableMenu is not ShippingMenu)
-                {
+                {   // Waiting for shipping menu
                     await Task.Delay(100);
                     if (false == shouldRunning) { return; }
                 }
@@ -118,13 +112,14 @@ namespace DedicatedServer.HostAutomatorStages
                 var shippingMenu = Game1.activeClickableMenu as ShippingMenu ;
 
                 while (false == shippingMenu.CanReceiveInput())
-                {
+                {   //  Wait for the "OK" button in the shipping menu
                     await Task.Delay(100);
                     if (false == shouldRunning) { return; }
                 }
 
+#warning I think this does not work
                 while (false == DedicatedServer.IsReadyPlayers("ready_for_save"))
-                {
+                {   // Wait until all other players have clicked "OK". 
                     await Task.Delay(100);
                     if (false == shouldRunning) { return; }
                 }

@@ -1,5 +1,6 @@
 ﻿using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
 
@@ -16,26 +17,24 @@ namespace DedicatedServer.HostAutomatorStages
         {
             if (false == hasExitedFarmhouse &&
                 Game1.timeOfDay < TimeToEnterFarmhouse &&
-                Game1.currentLocation != null && Game1.currentLocation is FarmHouse)
+                null != Game1.currentLocation && 
+                Game1.currentLocation is FarmHouse)
             {
-                Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 hasExitedFarmhouse = true;
-
-                // Set up wait ticks to wait for possible event
-                BehaviorChain.WaitTime = 60;
+                DedicatedServer.Warp(WarpPoints.FarmWarp);
             }
             else
             {
                 if (true == hasExitedFarmhouse &&
+                    null == Game1.CurrentEvent &&
+                    null == Game1.activeClickableMenu &&
                     Game1.timeOfDay >= TimeToEnterFarmhouse &&
-                    Game1.currentLocation != null && Game1.currentLocation is Farm &&
-                    true == Game1.spawnMonstersAtNight)
-                {
-                    Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
+                    null != Game1.currentLocation && 
+                    Game1.currentLocation is Farm &&
+                    true == Game1.spawnMonstersAtNight
+                ){
                     hasExitedFarmhouse = false;
-
-                    // Set up wait ticks to wait for possible event
-                    BehaviorChain.WaitTime = 60;
+                    DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
                 }
             }
         }
@@ -47,6 +46,18 @@ namespace DedicatedServer.HostAutomatorStages
         /// </summary>
         protected static int TimeToEnterFarmhouse { set; get; } = 1800;
 
-        private bool hasExitedFarmhouse = false;
+        private static bool hasExitedFarmhouse = false;
+
+        private static void OnDayStarted(object sender, DayStartedEventArgs e) => hasExitedFarmhouse = false;
+
+        public ExitFarmHouseBehaviorLink() => Enable();
+
+        ~ExitFarmHouseBehaviorLink() => Dispose();
+
+        public static void Dispose() => Disable();
+
+        private static void Enable() => DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+
+        private static void Disable() => DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
     }
 }
