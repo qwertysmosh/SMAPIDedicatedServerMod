@@ -11,13 +11,9 @@
 
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
 
-> [!WARNING]
-> The current changes to the source code ensure that the code can be compiled, but nothing has been tested.  
-> The following must be tested:
+> [!IMPORTANT]
 >
-> - Crop Saver
-> - After you have sold something, the host needs some time to close the dialog,  
->   and the client only sees a black screen (they must disconnect and reconnect).
+> - The Crop Saver is disabled in this version; in a later version, the Crop Saver will start with nothing.
 
 ## Configuration File
 
