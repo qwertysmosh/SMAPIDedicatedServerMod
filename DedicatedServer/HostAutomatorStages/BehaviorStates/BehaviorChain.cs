@@ -42,13 +42,13 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
         {
             try
             {
-                if (false == shouldPause.Invoke())
+                if (0 < WaitTime)
                 {
-                    if (0 < WaitTime)
-                    {
-                        WaitTime--;
-                    }
-                    else if (0 == WaitTime)
+                    WaitTime--;
+                }
+                else if (0 >= WaitTime)
+                {
+                    if (false == shouldPause.Invoke())
                     {
                         WaitTimeReset();
 
@@ -63,7 +63,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
                                 chainLink.WaitTimeReset();
                                 chainLink.Process();
 
-                                if(0 != WaitTime)
+                                if (0 != WaitTime)
                                 {
                                     break;
                                 }

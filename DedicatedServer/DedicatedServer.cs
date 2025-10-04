@@ -3,6 +3,7 @@ using DedicatedServer.Config;
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Network.NetReady;
@@ -43,6 +44,51 @@ namespace DedicatedServer
             DedicatedServer.monitor = null;
             DedicatedServer.config = null;
             DedicatedServer.chatBox = null;
+        }
+
+        /// <summary>
+        /// Checks if the host is idle.
+        /// </summary>
+        /// <returns>
+        ///         true: The host can be interrupt
+        /// <br/>   false: The host must not be interrupt</returns>
+        public static bool IsIdle()
+        {
+            if (0 > idleLockTime &&
+                false == Game1.MasterPlayer.IsBusyDoingSomething()
+            ){ 
+                return true;
+            }
+            return false;
+        }
+
+        public static void IdleLockEnable(int ticks = 5)
+        {
+            if (0 > idleLockTime)
+            {
+                idleLockTime = ticks;
+                DedicatedServer.helper.Events.GameLoop.UpdateTicked += IdleWorker;
+            }
+        }
+
+        public static void IdleLockDisable()
+        {
+            idleLockTime = -1;
+            DedicatedServer.helper.Events.GameLoop.UpdateTicked -= IdleWorker;
+        }
+
+        private static int idleLockTime = -1;
+
+        private static void IdleWorker(object sender, UpdateTickedEventArgs e)
+        {
+            if (0 < idleLockTime)
+            {
+                idleLockTime--;
+            }
+            else
+            {
+                IdleLockDisable();
+            }
         }
 
         #region Warp

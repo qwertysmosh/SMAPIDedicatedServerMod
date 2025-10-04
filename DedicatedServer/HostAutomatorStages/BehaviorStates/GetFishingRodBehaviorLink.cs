@@ -14,25 +14,29 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            //If we don't get the fishing rod, Willy isn't available
-            if (false == isGettingFishingRod &&
-                false == Game1.MasterPlayer.IsBusyDoingSomething() &&
-                false == Game1.player.eventsSeen.Contains("739330") &&
-                Game1.currentLocation is Farm &&
-                Game1.player.hasQuest("13") && 
-                Game1.timeOfDay <= 1710 && 
-                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
-            ){
-                isGettingFishingRod = true;
-                Game1.player.warpFarmer(WarpPoints.beachWarp);
-            }
-            else if (isGettingFishingRod &&
-                false == Game1.MasterPlayer.IsBusyDoingSomething() &&
-                Game1.player.eventsSeen.Contains("739330") &&
-                Game1.currentLocation is Beach
-            ){
-                isGettingFishingRod = false;
-                Game1.player.warpFarmer(WarpPoints.FarmWarp);
+            if (false == hasSeenEvent && DedicatedServer.IsIdle())
+            {
+                //If we don't get the fishing rod, Willy isn't available
+                if (false == isGettingFishingRod &&
+                    false == Game1.player.eventsSeen.Contains("739330") &&
+                    Game1.currentLocation is Farm &&
+                    Game1.player.hasQuest("13") && 
+                    Game1.timeOfDay <= 1710 && 
+                    false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
+                ){
+                    isGettingFishingRod = true;
+                    DedicatedServer.IdleLockEnable();
+                    Game1.player.warpFarmer(WarpPoints.beachWarp);
+                }
+                else if (isGettingFishingRod &&
+                    Game1.player.eventsSeen.Contains("739330") &&
+                    Game1.currentLocation is Beach
+                ){
+                    isGettingFishingRod = false;
+                    hasSeenEvent = true;
+                    DedicatedServer.IdleLockEnable();
+                    Game1.player.warpFarmer(WarpPoints.FarmWarp);
+                }
             }
         }
 
@@ -40,11 +44,13 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static bool isGettingFishingRod = false;
 
+        private bool hasSeenEvent = false;
+
         public GetFishingRodBehaviorLink()
         {
             if (Game1.player.eventsSeen.Contains("739330"))
             {
-                isGettingFishingRod = true;
+                hasSeenEvent = true;
             }
         }
     }

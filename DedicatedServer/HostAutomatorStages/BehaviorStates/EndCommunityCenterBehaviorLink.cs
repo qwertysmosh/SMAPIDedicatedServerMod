@@ -13,27 +13,42 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (false == Game1.player.eventsSeen.Contains("191393") && 
-                Game1.player.hasCompletedCommunityCenter() && 
-                false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) && 
-                false == isEnding && 
-                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
-            ){
-                isEnding = true;
-                DedicatedServer.Warp(WarpPoints.townWarp);
-            }
-            else if (isEnding &&
-                null == Game1.CurrentEvent &&
-                null == Game1.activeClickableMenu && 
-                Game1.player.eventsSeen.Contains("191393")
-            ){
-                isEnding = false;
-                DedicatedServer.Warp(WarpPoints.FarmWarp);
-            }
+            if (false == hasSeenEvent && DedicatedServer.IsIdle())
+            {
+                if (false == isEnding && 
+                    false == Game1.player.eventsSeen.Contains("191393") &&
+                    Game1.player.hasCompletedCommunityCenter() &&
+                    false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) &&
+                    false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
+                ){
+                    isEnding = true;
+                    DedicatedServer.IdleLockEnable();
+                    DedicatedServer.Warp(WarpPoints.townWarp);
+                }
+                else if (true == isEnding &&
+                    true == Game1.player.eventsSeen.Contains("191393")
+                )
+                {
+                    isEnding = false;
+                    hasSeenEvent = true;
+                    DedicatedServer.IdleLockEnable();
+                    DedicatedServer.Warp(WarpPoints.FarmWarp);
+                }
+            }   
         }
 
         #endregion
 
         private bool isEnding = false;
+
+        private bool hasSeenEvent = false;
+
+        public EndCommunityCenterBehaviorLink()
+        {
+            if (Game1.player.eventsSeen.Contains("191393"))
+            {
+                hasSeenEvent = true;
+            }
+        }
     }
 }

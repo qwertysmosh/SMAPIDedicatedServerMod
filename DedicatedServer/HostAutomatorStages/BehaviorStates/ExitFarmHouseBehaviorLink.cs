@@ -18,7 +18,7 @@ namespace DedicatedServer.HostAutomatorStages
             switch (exitFarmHouseStates)
             {
                 case ExitFarmHouseStates.Uninit:
-                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    if (DedicatedServer.IsIdle())
                     {  
                         if (Game1.currentLocation is FarmHouse)
                         {
@@ -35,14 +35,13 @@ namespace DedicatedServer.HostAutomatorStages
                 case ExitFarmHouseStates.WarpToFarmhouse:
                     if (Game1.currentLocation is FarmHouse)
                     {
-                        WaitTime = 120;
                         exitFarmHouseStates = ExitFarmHouseStates.Farmhouse; 
                     }
                     break;
 
 
                 case ExitFarmHouseStates.Farmhouse:
-                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    if (DedicatedServer.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
                             null == Game1.activeClickableMenu &&
@@ -51,6 +50,7 @@ namespace DedicatedServer.HostAutomatorStages
                             Game1.currentLocation is FarmHouse
                         ){
                             exitFarmHouseStates = ExitFarmHouseStates.WarpToFarm;
+                            DedicatedServer.IdleLockEnable();
                             DedicatedServer.Warp(WarpPoints.FarmWarp);
                         }
                     }
@@ -60,14 +60,13 @@ namespace DedicatedServer.HostAutomatorStages
                 case ExitFarmHouseStates.WarpToFarm:
                     if (Game1.currentLocation is Farm)
                     {
-                        WaitTime = 120;
                         exitFarmHouseStates = ExitFarmHouseStates.Farm;
                     }
                     break;
 
 
                 case ExitFarmHouseStates.Farm:
-                    if (false == Game1.MasterPlayer.IsBusyDoingSomething())
+                    if (DedicatedServer.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
                             null == Game1.activeClickableMenu &&
@@ -76,6 +75,7 @@ namespace DedicatedServer.HostAutomatorStages
                             Game1.currentLocation is Farm
                         ){
                             exitFarmHouseStates = ExitFarmHouseStates.WarpToFarmhouse;
+                            DedicatedServer.IdleLockEnable();
                             DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
                         }
                     }

@@ -14,9 +14,10 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
         {
             if (false == hasCheckedForMails &&
                 null == Game1.CurrentEvent &&
-                null == Game1.activeClickableMenu &&
+                DedicatedServer.IsIdle() &&
                 Game1.currentLocation is Farm
             ){
+                DedicatedServer.IdleLockEnable();
                 DedicatedServer.OpenMailboxIfHasMail();
                 hasCheckedForMails = true;
             }

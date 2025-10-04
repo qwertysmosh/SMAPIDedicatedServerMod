@@ -1,6 +1,7 @@
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.Utils;
 using StardewValley;
+using StardewValley.Locations;
 
 namespace DedicatedServer.HostAutomatorStages
 {
@@ -13,30 +14,45 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (false == Game1.player.eventsSeen.Contains("611439") && 
-                Game1.stats.DaysPlayed > 4 && 
-                Game1.timeOfDay >= 800 && 
-                Game1.timeOfDay <= 1300 && 
-                false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) && 
-                false == isUnlocking && 
-                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
+            if (false == hasSeenEvent && DedicatedServer.IsIdle())
             {
-                isUnlocking = true;
-                DedicatedServer.Warp(WarpPoints.townWarp);
-            }
-            else if (isUnlocking &&
-                null == Game1.CurrentEvent &&
-                null == Game1.activeClickableMenu &&
-                Game1.player.eventsSeen.Contains("611439")
-            )
-            {
-                isUnlocking = false;
-                DedicatedServer.Warp(WarpPoints.FarmWarp);
+                if (false == isUnlocking &&
+                    false == Game1.player.eventsSeen.Contains("611439") &&
+                    Game1.currentLocation is Farm &&
+                    Game1.stats.DaysPlayed > 4 &&
+                    Game1.timeOfDay >= 800 &&
+                    Game1.timeOfDay <= 1300 &&
+                    false == Game1.IsRainingHere(Game1.getLocationFromName("Town")) &&
+                    false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
+                ){
+                    isUnlocking = true;
+                    DedicatedServer.IdleLockEnable();
+                    DedicatedServer.Warp(WarpPoints.townWarp);
+                }
+                else if (isUnlocking &&
+                    Game1.player.eventsSeen.Contains("611439") &&
+                    Game1.currentLocation is Town
+                ){
+                    isUnlocking = false;
+                    hasSeenEvent = true;
+                    DedicatedServer.IdleLockEnable();
+                    DedicatedServer.Warp(WarpPoints.FarmWarp);
+                }
             }
         }
 
         #endregion
 
         private bool isUnlocking = false;
+
+        private bool hasSeenEvent = false;
+
+        public UnlockCommunityCenterBehaviorLink()
+        {
+            if (Game1.player.eventsSeen.Contains("611439"))
+            {
+                hasSeenEvent = true;
+            }
+        }
     }
 }
