@@ -8,10 +8,12 @@ namespace DedicatedServer.Utils
     {
         private static readonly Farm farmLocation = Game1.getLocationFromName("Farm") as Farm;
         private static readonly FarmHouse farmHouseLocation = Game1.getLocationFromName("FarmHouse") as FarmHouse;
+        private static readonly Forest forestLocation = Game1.getLocationFromName("Forest") as Forest;
         private static readonly Town townLocation = Game1.getLocationFromName("Town") as Town;
         private static readonly Mine mineLocation = Game1.getLocationFromName("Mine") as Mine;
         private static readonly Beach beachLocation = Game1.getLocationFromName("Beach") as Beach;
         private static readonly Mountain mountainLocation = Game1.getLocationFromName("Mountain") as Mountain;
+        private static readonly CommunityCenter communityCenterLocation = Game1.getLocationFromName("CommunityCenter") as CommunityCenter;
 
         private static Point FarmEntryLocation => farmLocation.GetMainFarmHouseEntry();
         private static Point FarmHouseEntryLocation => farmHouseLocation.getEntryLocation();
@@ -22,6 +24,8 @@ namespace DedicatedServer.Utils
         private static readonly Point robinLocation = new Point(12, 26);
         private static readonly Point clintLocation = new Point(94, 82);
         private static readonly Point pierreLocation = new Point(43, 57);
+        private static readonly Point communityCenterEntranceLocation = new Point(33, 22);
+        private static readonly Point wizzardLocation = new Point(5, 27);
 
         /// <summary>
         ///         Warppoint on the farm
@@ -113,6 +117,24 @@ namespace DedicatedServer.Utils
             pierreLocation.X, pierreLocation.Y,
             townLocation.NameOrUniqueName,
             pierreLocation.X, pierreLocation.Y,
+            false, false);
+
+        /// <summary>
+        ///         Warp to the Community Center
+        /// </summary>
+        public static readonly Warp communityCenterWarp = new Warp(
+            communityCenterEntranceLocation.X, communityCenterEntranceLocation.Y,
+            communityCenterLocation.NameOrUniqueName,
+            communityCenterEntranceLocation.X, communityCenterEntranceLocation.Y,
+            false, false);
+
+        /// <summary>
+        ///         Warp in front of the wizard's tower
+        /// </summary>
+        public static readonly Warp wizzardWarp = new Warp(
+            wizzardLocation.X, wizzardLocation.Y,
+            forestLocation.NameOrUniqueName,
+            wizzardLocation.X, wizzardLocation.Y,
             false, false);
 
         /// <summary>
