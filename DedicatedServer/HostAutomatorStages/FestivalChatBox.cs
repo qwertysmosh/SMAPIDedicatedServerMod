@@ -14,7 +14,6 @@ namespace DedicatedServer.HostAutomatorStages
 
         public FestivalChatBox()
         {
-            this.otherPlayers = DedicatedServer.OnlineFarmers(); 
         }
 
         public bool IsEnabled()
@@ -28,6 +27,7 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 enabled = true;
                 votes.Clear();
+                otherPlayers = DedicatedServer.OnlineFarmers();
                 DedicatedServer.chatBox.textBoxEnter(entryMessage);
                 DedicatedServer.chatBox.ChatReceived += onChatReceived;
             }
@@ -39,6 +39,7 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 enabled = false;
                 votes.Clear();
+                otherPlayers.Clear();
                 DedicatedServer.chatBox.ChatReceived -= onChatReceived;
             }
         }
