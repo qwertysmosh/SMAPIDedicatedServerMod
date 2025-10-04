@@ -14,6 +14,8 @@ namespace DedicatedServer
 
         // TODO: Make the host icon on the map invisible to everyone else
 
+        // TODO: See the warnings
+
         private int waitCounter;
         private ModConfig config;
         private IModHelper helper;

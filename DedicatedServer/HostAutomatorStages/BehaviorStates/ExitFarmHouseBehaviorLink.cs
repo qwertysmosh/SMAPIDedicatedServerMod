@@ -44,8 +44,6 @@ namespace DedicatedServer.HostAutomatorStages
                     if (DedicatedServer.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
-                            null == Game1.activeClickableMenu &&
-                            null != Game1.currentLocation &&
                             Game1.timeOfDay < TimeToEnterFarmhouse &&
                             Game1.currentLocation is FarmHouse
                         ){
@@ -69,8 +67,6 @@ namespace DedicatedServer.HostAutomatorStages
                     if (DedicatedServer.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
-                            null == Game1.activeClickableMenu &&
-                            null != Game1.currentLocation &&
                             Game1.timeOfDay >= TimeToEnterFarmhouse &&
                             Game1.currentLocation is Farm
                         ){

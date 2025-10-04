@@ -27,8 +27,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else if (true == isEnding &&
                     true == Game1.player.eventsSeen.Contains("191393")
-                )
-                {
+                ){
                     isEnding = false;
                     hasSeenEvent = true;
                     DedicatedServer.IdleLockEnable();

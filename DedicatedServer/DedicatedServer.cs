@@ -46,6 +46,8 @@ namespace DedicatedServer
             DedicatedServer.chatBox = null;
         }
 
+        #region Idle Check
+
         /// <summary>
         /// Checks if the host is idle.
         /// </summary>
@@ -55,6 +57,7 @@ namespace DedicatedServer
         public static bool IsIdle()
         {
             if (0 > idleLockTime &&
+                null != Game1.currentLocation &&
                 false == Game1.MasterPlayer.IsBusyDoingSomething()
             ){ 
                 return true;
@@ -91,6 +94,8 @@ namespace DedicatedServer
             }
         }
 
+        #endregion
+
         #region Warp
 
         /// <summary>
@@ -124,8 +129,6 @@ namespace DedicatedServer
         #endregion
 
         #region Game
-
-        static MethodInfo findSaveGames = typeof(LoadGameMenu).GetMethod("FindSaveGames", BindingFlags.Static | BindingFlags.NonPublic);
 
         /// <summary>
         ///         List of farmers of saved games
@@ -161,6 +164,8 @@ namespace DedicatedServer
         {
             return GetFarmerOfSaveGameOrDefault(farmName, GetSaveGameFarmers());
         }
+
+        private static MethodInfo findSaveGames = typeof(LoadGameMenu).GetMethod("FindSaveGames", BindingFlags.Static | BindingFlags.NonPublic);
 
         #endregion
 
@@ -290,28 +295,6 @@ namespace DedicatedServer
         {
             return IsReadyPlayers(checkName, OnlineFarmers());
         }
-        
-        private enum ReadyState : byte
-        {
-            /// <summary> Not marked as ready to proceed with the check. </summary>            
-            NotReady,
-            /// <summary> Ready to proceed, but can still cancel. </summary>
-            Ready,
-            /// <summary> Ready to proceed, and can no longer cancel. </summary>            
-            Locked
-        }
-
-        /// <summary>
-        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyChecks` field
-        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.ReadySynchronizer"/>
-        /// </summary>
-        private static FieldInfo ReadyChecks = typeof(ReadySynchronizer).GetField("ReadyChecks", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        /// <summary>
-        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyStates` field
-        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.Internal.ServerReadyCheck"/>
-        /// </summary>
-        private static FieldInfo ReadyStates = null;
 
         /// <summary>
         ///         Accesses the internal private variables of the <see cref="StardewValley.Network.NetReady.ReadySynchronizer"/>
@@ -373,6 +356,29 @@ namespace DedicatedServer
 
             return false;
         }
+
+        private enum ReadyState : byte
+        {
+            /// <summary> Not marked as ready to proceed with the check. </summary>            
+            NotReady,
+            /// <summary> Ready to proceed, but can still cancel. </summary>
+            Ready,
+            /// <summary> Ready to proceed, and can no longer cancel. </summary>            
+            Locked
+        }
+
+        /// <summary>
+        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyChecks` field
+        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.ReadySynchronizer"/>
+        /// </summary>
+        private static FieldInfo ReadyChecks = typeof(ReadySynchronizer).GetField("ReadyChecks", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        /// <summary>
+        ///         Information about the `(<see cref="BindingFlags.NonPublic"/> | <see cref="BindingFlags.Instance"/>)` `ReadyStates` field
+        /// <br/>   of the class <see cref="StardewValley.Network.NetReady.Internal.ServerReadyCheck"/>
+        /// <br/>   Since the class does not change, the variable only needs to be defined once.
+        /// </summary>
+        private static FieldInfo ReadyStates = null;
 
         #endregion
     }

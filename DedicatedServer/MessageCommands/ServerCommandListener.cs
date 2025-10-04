@@ -290,7 +290,7 @@ namespace DedicatedServer.MessageCommands
                         var a = Utility.getAllPets();
                         break;
 
-                    case "pp":
+                    case "pp": // Preventing the pause
                         HostAutomation.PreventPauseUntilNextDay();
                         break;
 
