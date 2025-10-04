@@ -1,29 +1,21 @@
 ﻿using DedicatedServer.Utils;
 using StardewModdingAPI.Events;
-using StardewValley.Locations;
-using StardewValley.Monsters;
 using StardewValley;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using StardewModdingAPI;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class RestartDayWorker
+    internal abstract class RestartDayWorker
     {
-        private static IModHelper helper = null;
-
         private static int time;
         private static bool keepsCurrentDay;
         private static bool quit;
         private static Action<int> action;
 
-        public RestartDayWorker(IModHelper helper)
+        public static void Reset()
         {
-            RestartDayWorker.helper = helper;
+            DisableOnSaved();
+            DisableOnOneSecondUpdateTicked();
         }
 
         /// <summary>
@@ -66,8 +58,7 @@ namespace DedicatedServer.HostAutomatorStages
             RestartDayWorker.quit = quit;
             RestartDayWorker.action = action;
 
-            AddOnOneSecondUpdateTicked(SavesGameRestartsDayWorker);
-
+            EnableOnOneSecondUpdateTicked();
         }
 
         /// <summary>
@@ -84,7 +75,7 @@ namespace DedicatedServer.HostAutomatorStages
                 return;
             }
 
-            RemoveOnOneSecondUpdateTicked(SavesGameRestartsDayWorker);
+            DisableOnOneSecondUpdateTicked();
 
             if (keepsCurrentDay)
             {
@@ -100,35 +91,35 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.server.kick(farmer.UniqueMultiplayerID);
             }
 
-            Game1.player.warpFarmer(WarpPoints.FarmHouseWarp);
+            DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
 
             Game1.player.isInBed.Value = true;
             Game1.currentLocation.answerDialogueAction("Sleep_Yes", null);
 
             if (quit)
             {
-                AddOnSaved(OnSavedQuit);
+                EnableOnSaved();
             }
         }
 
-        private static void AddOnSaved(EventHandler<SavedEventArgs> handler)
+        private static void EnableOnSaved()
         {
-            helper.Events.GameLoop.Saved += handler;
+            DedicatedServer.helper.Events.GameLoop.Saved += OnSavedQuit;
         }
 
-        private static void RemoveOnSaved(EventHandler<SavedEventArgs> handler)
+        private static void DisableOnSaved()
         {
-            helper.Events.GameLoop.Saved -= handler;
+            DedicatedServer.helper.Events.GameLoop.Saved -= OnSavedQuit;
         }
 
-        private static void AddOnOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
+        private static void EnableOnOneSecondUpdateTicked()
         {
-            helper.Events.GameLoop.OneSecondUpdateTicked += handler;
+            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked += SavesGameRestartsDayWorker;
         }
 
-        private static void RemoveOnOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
+        private static void DisableOnOneSecondUpdateTicked()
         {
-            helper.Events.GameLoop.OneSecondUpdateTicked -= handler;
+            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked -= SavesGameRestartsDayWorker;
         }
 
         /// <summary>
@@ -138,7 +129,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <param name="e"></param>
         private static void OnSavedQuit(object sender, SavedEventArgs e)
         {
-            RemoveOnSaved(OnSavedQuit);
+            DisableOnSaved();
 
             Game1.quit = true;
         }

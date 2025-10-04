@@ -2,13 +2,19 @@
 
 <div align="center">
 
-  [![Stardew Valley 1.6.8](https://img.shields.io/badge/Stardew_Valley-1.6.8-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
-  [![SMAPI 4.0.8](https://img.shields.io/badge/SMAPI-4.0.8-5cb811)](https://smapi.io/ "Link to SMAPI")
-  [![Docker Version](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ")
+  [![Shields](https://img.shields.io/badge/Stardew_Valley-1.6.15-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
+  [![Shields](https://img.shields.io/badge/SMAPI-4.3.2-5cb811)](https://smapi.io/ "Link to SMAPI")
+   ![Shields](https://img.shields.io/badge/.NET-6.0-512BD4)
+  [![Shields](https://img.shields.io/badge/forked_from-_-blue)](https://github.com/ObjectManagerManager/SMAPIDedicatedServerMod "Link to the Original Repository")
+<!-- [![Shields](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ") -->
 
 </div>
 
 This mod provides a dedicated (headless) server for Stardew Valley, powered by SMAPI. It turns the host farmer into an automated bot to facilitate multiplayer gameplay.
+
+> [!IMPORTANT]
+>
+> - The Crop Saver is disabled in this version; in a later version, the Crop Saver will start with nothing.
 
 ## Configuration File
 
@@ -33,9 +39,20 @@ Upon running SMAPI with the mod installed for the first time, a `config.json` fi
 
 ### Host Automation Options
 
-- `AcceptPet`: Set to `true` or `false` to determine if the farm pet should be accepted.
-- `PetSpecies`: The desired pet species. Options are "dog" or "cat". Irrelevant if `AcceptPet` is `false`.
-- `PetBreed`: An integer in {0, 1, 2} specifying the pet breed index. 0 selects the leftmost breed; 1 selects the middle breed; 2 selects the rightmost breed. Irrelevant if `AcceptPet` is `false`.
+- `PetBreed`: An integer in [0, 9] specifying the pet breed index.  
+  0 selects the leftmost breed; 9 selects the rightmost breed:  
+  <picture> <img alt="Index 0" src="./Docs/PetBreed/0.png" height="30" /> </picture>
+  <picture> <img alt="Index 1" src="./Docs/PetBreed/1.png" height="30" /> </picture>
+  <picture> <img alt="Index 2" src="./Docs/PetBreed/2.png" height="30" /> </picture>
+  <picture> <img alt="Index 3" src="./Docs/PetBreed/3.png" height="30" /> </picture>
+  <picture> <img alt="Index 4" src="./Docs/PetBreed/4.png" height="30" /> </picture>
+  <picture> <img alt="Index 5" src="./Docs/PetBreed/5.png" height="30" /> </picture>
+  <picture> <img alt="Index 6" src="./Docs/PetBreed/6.png" height="30" /> </picture>
+  <picture> <img alt="Index 7" src="./Docs/PetBreed/7.png" height="30" /> </picture>
+  <picture> <img alt="Index 8" src="./Docs/PetBreed/8.png" height="30" /> </picture>
+  <picture> <img alt="Index 9" src="./Docs/PetBreed/9.png" height="30" /> </picture>  
+  The index clearly shows whether a dog or a cat is desired.  
+  If no pet is desired, the value should be set to `-1`.
 - `PetName`: The desired pet name. Irrelevant if `AcceptPet` is `false`.
 - `MushroomsOrBats`: Choose between the mushroom or bat cave. Options are "mushrooms" or "bats" (case insensitive).
 - `PurchaseJojaMembership`: Set to `true` or `false` to determine if the automated host should "purchase" (acquire for free) a Joja membership when available, committing to the Joja route. Defaults to `false`.
@@ -105,18 +122,13 @@ All these commands only work if you are the host. This allows you to take contro
 - `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
   Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
-## Use an 1.5 Game with 1.6 Server
+## Version Update
 
-I don't know if it is possible or what will happen if you use a 1.5 savegame with this 1.6 server.
-If you want to do it, you need to do the following steps:
+When updating to a new version, please note the following points:
 
-- Back up your game data first
-- If you have an old version from before 1.6, you must delete the file
-  `AdditionalCropData` in the game directory. GropSaver then only works
-  for all plants planted from this point onwards.
-- If you use an old `config.json` file, the server will not start.
-  Delete the file and the file will be created with the default configuration.
-  Stop the server, change it according to your wishes and start the server.
+- Back up your game data first!
+- If a new mod version is used, do not just replace the `DedicatedServer.dll`.
+Remove all data from the folder. An old `config.json` cannot be used to start the game.
 
 ## Running the Server on Linux Without GUI
 
@@ -136,11 +148,16 @@ kill -SIGINT ....
 
 ## Development
 
-If Stardew Valley was not installed in the default path, the installation path must be added to the project file `DedicatedServer.csproj`. Add the path with the tag `GamePath` to the `PropertyGroup`. Depending on the path, it should look something like this:
+After cloning the repository and performing the first (probably incorrect) build, the SMAPI readme file can be opened. It describes how to create the `stardewvalley.targets` file in the user's home directory in order to select a specific version when multiple versions are installed.
+([Linux](https://superuser.com/a/409223),
+[macOS](https://www.cnet.com/how-to/how-to-find-your-macs-home-folder-and-add-it-to-finder/) or
+[Windows](https://www.computerhope.com/issues/ch000109.htm).)  
+The file must contain the following:
 
-```text
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <GamePath>D:\SteamLibrary\steamapps\common\Stardew Valley</GamePath>
-  </PropertyGroup>
+```xml
+<Project>
+    <PropertyGroup>
+        <GamePath>C:/Program Files (x86)/Steam/steamapps/common/Stardew Valley</GamePath>
+    </PropertyGroup>
+</Project>
 ```

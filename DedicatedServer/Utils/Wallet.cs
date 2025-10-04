@@ -1,19 +1,10 @@
-﻿using System;
-using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using StardewValley;
+﻿using StardewValley;
+using System;
 
 namespace DedicatedServer.Utils
 {
-    internal class Wallet
+    internal abstract class Wallet
     {
-        private static EventDrivenChatBox chatBox;
-
-        public Wallet(EventDrivenChatBox chatBox)
-        {
-            Wallet.chatBox = chatBox;
-        }
-
         public static bool IsSeparate => Game1.player.team.useSeparateWallets.Value;
 
         public static bool IsChangeTonight => Game1.player.changeWalletTypeTonight.Value;
@@ -84,13 +75,12 @@ namespace DedicatedServer.Utils
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                chatBox.textBoxEnter($" {message}");
+                DedicatedServer.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
-
     }
 }

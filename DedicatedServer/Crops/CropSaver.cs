@@ -1,10 +1,10 @@
 ﻿using DedicatedServer.Config;
+using DedicatedServer.Helpers;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -86,13 +86,13 @@ namespace DedicatedServer.Crops
             /**
              * Loads the cropDictionary and beginningOfDayCrops.
              */
-            string str = SaveGame.FilterFileName(Game1.GetSaveGameName());
-            string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
-            string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-            if (Game1.savePathOverride != "")
-            {
-                save_directory = Game1.savePathOverride;
-            }
+            string save_directory = SaveGameHelper.Path;
+
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //}
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
 
             // Deserialize crop data from temp save file
@@ -141,24 +141,24 @@ namespace DedicatedServer.Crops
              */
 
             // Determine save paths
-            string tmpString = "_STARDEWVALLEYSAVETMP";
-            bool save_backups_and_metadata = true;
-            string str = SaveGame.FilterFileName(Game1.GetSaveGameName());
-            string filenameNoTmpString = str + "_" + Game1.uniqueIDForThisGame;
-            string filenameWithTmpString = str + "_" + Game1.uniqueIDForThisGame + tmpString;
-            string save_directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "StardewValley", "Saves", filenameNoTmpString + Path.DirectorySeparatorChar);
-            if (Game1.savePathOverride != "")
-            {
-                save_directory = Game1.savePathOverride;
-                if (Game1.savePathOverride != "")
-                {
-                    save_backups_and_metadata = false;
-                }
-            }
+            string tmpString = SaveGame.TempNameSuffix;
+            string save_directory = SaveGameHelper.Path;
+
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //    if (Game1.savePathOverride != "")
+            //    {
+            //        save_backups_and_metadata = false;
+            //    }
+            //}
             SaveGame.ensureFolderStructureExists();
             string tmpSaveFile = Path.Combine(save_directory, "AdditionalCropData" + tmpString);
             string saveFile = Path.Combine(save_directory, "AdditionalCropData");
-            string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            //string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
 
             // Serialize crop data to temp save file
             TextWriter writer = null;
@@ -174,24 +174,26 @@ namespace DedicatedServer.Crops
             cropSaveDataSerializer.Serialize(writer, new CropSaveData {cropDictionary = cropDictionary, beginningOfDayCrops = beginningOfDayCrops});
             writer.Close();
 
-            // If appropriate, move old crop data file to backup
-            if (save_backups_and_metadata)
-            {
-                try
-                {
-                    if (File.Exists(backupSaveFile))
-                    {
-                        File.Delete(backupSaveFile);
-                    }
-                }
-                catch (Exception) {}
-
-                try
-                {
-                    File.Move(saveFile, backupSaveFile);
-                }
-                catch (Exception) {}
-            }
+#warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
+            //// If appropriate, move old crop data file to backup
+            //if (save_backups_and_metadata)
+            //{
+            //    try
+            //    {
+            //        if (File.Exists(backupSaveFile))
+            //        {
+            //            File.Delete(backupSaveFile);
+            //        }
+            //    }
+            //    catch (Exception) {}
+            //
+            //    try
+            //    {
+            //        File.Move(saveFile, backupSaveFile);
+            //    }
+            //    catch (Exception) {}
+            //}
 
             // Delete previous save file if it still exists (hasn't been moved to
             // backup)

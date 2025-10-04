@@ -1,15 +1,11 @@
-﻿using System;
+﻿using DedicatedServer.HostAutomatorStages;
 using StardewValley;
-using DedicatedServer.HostAutomatorStages;
+using System;
 
 namespace DedicatedServer.Utils
 {
     internal abstract class HostAutomation : ProcessPauseBehaviorLink
     {
-        private HostAutomation() : base(null)
-        {
-        }
-
         public static new event EventHandler ResetAction
         {
             add { ProcessPauseBehaviorLink.ResetAction += value; }
