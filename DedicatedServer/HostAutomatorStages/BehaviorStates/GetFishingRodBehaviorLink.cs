@@ -15,21 +15,22 @@ namespace DedicatedServer.HostAutomatorStages
         public override void Process()
         {
             //If we don't get the fishing rod, Willy isn't available
-            if (false == Game1.player.eventsSeen.Contains("739330") && 
+            if (false == isGettingFishingRod &&
+                false == Game1.MasterPlayer.IsBusyDoingSomething() &&
+                false == Game1.player.eventsSeen.Contains("739330") &&
+                Game1.currentLocation is Farm &&
                 Game1.player.hasQuest("13") && 
                 Game1.timeOfDay <= 1710 && 
-                false == isGettingFishingRod && 
-                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season))
-            {
+                false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
+            ){
                 isGettingFishingRod = true;
                 Game1.player.warpFarmer(WarpPoints.beachWarp);
             }
             else if (isGettingFishingRod &&
-                null == Game1.CurrentEvent &&
-                null == Game1.activeClickableMenu &&
-                Game1.currentLocation is Beach &&
-                Game1.player.eventsSeen.Contains("739330"))
-            {
+                false == Game1.MasterPlayer.IsBusyDoingSomething() &&
+                Game1.player.eventsSeen.Contains("739330") &&
+                Game1.currentLocation is Beach
+            ){
                 isGettingFishingRod = false;
                 Game1.player.warpFarmer(WarpPoints.FarmWarp);
             }
