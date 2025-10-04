@@ -5,7 +5,8 @@
   [![Shields](https://img.shields.io/badge/Stardew_Valley-1.6.15-153C86)](https://www.stardewvalley.net/ "Link to Stardew Valley")
   [![Shields](https://img.shields.io/badge/SMAPI-4.3.2-5cb811)](https://smapi.io/ "Link to SMAPI")
    ![Shields](https://img.shields.io/badge/.NET-6.0-512BD4)
-  [![Shields](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ")
+  [![Shields](https://img.shields.io/badge/forked_from-_-blue)](https://github.com/ObjectManagerManager/SMAPIDedicatedServerMod "Link to the Original Repository")
+<!-- [![Shields](https://img.shields.io/badge/Docker_Version-_-2496ED)](https://github.com/Chris82111/StardewValleyViaDocker "Link to StardewValleyViaDocker ") -->
 
 </div>
 
@@ -121,18 +122,13 @@ All these commands only work if you are the host. This allows you to take contro
 - `LetMePlay`: Lets the player take over the host. All host functions are switched off. The `TakeOver` command must be entered to hand over the controller. \
   Please note that the host automation accepts gifts from events and NPCs and deletes items from the inventory if necessary.
 
-## Use an 1.5 Game with 1.6 Server
+## Version Update
 
-I don't know if it is possible or what will happen if you use a 1.5 savegame with this 1.6 server.
-If you want to do it, you need to do the following steps:
+When updating to a new version, please note the following points:
 
-- Back up your game data first
-- If you have an old version from before 1.6, you must delete the file
-  `AdditionalCropData` in the game directory. GropSaver then only works
-  for all plants planted from this point onwards.
-- If you use an old `config.json` file, the server will not start.
-  Delete the file and the file will be created with the default configuration.
-  Stop the server, change it according to your wishes and start the server.
+- Back up your game data first!
+- If a new mod version is used, do not just replace the `DedicatedServer.dll`.
+Remove all data from the folder. An old `config.json` cannot be used to start the game.
 
 ## Running the Server on Linux Without GUI
 
