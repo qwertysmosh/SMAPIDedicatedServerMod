@@ -54,7 +54,7 @@ namespace DedicatedServer.Utils
 
         public static void Init()
         {
-            if (DedicatedServer.config.TryActivatingInviteCode)
+            if (MainController.config.TryActivatingInviteCode)
             {
                 TryActivatingInviteCode();
             }
@@ -96,7 +96,7 @@ namespace DedicatedServer.Utils
             string inviteCode = InviteCode;
             try
             {
-                DedicatedServer.helper.Data.WriteJsonFile(inviteCodeSaveFile, inviteCode);
+                MainController.helper.Data.WriteJsonFile(inviteCodeSaveFile, inviteCode);
             }
             catch { }
         }
@@ -212,8 +212,8 @@ namespace DedicatedServer.Utils
             {
                 Game1.spawnMonstersAtNight = value;
                 Game1.game1.SetNewGameOption("SpawnMonstersAtNight", value);
-                DedicatedServer.config.SpawnMonstersOnFarmAtNight = value;
-                DedicatedServer.helper.WriteConfig(DedicatedServer.config);
+                MainController.config.SpawnMonstersOnFarmAtNight = value;
+                MainController.helper.WriteConfig(MainController.config);
             }
         }
 
@@ -260,12 +260,12 @@ namespace DedicatedServer.Utils
         }
         private static void Enable()
         {
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked += TryActivatingInviteCodeWorker;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked += TryActivatingInviteCodeWorker;
         }
 
         private static void Disable()
         {
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked -= TryActivatingInviteCodeWorker;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked -= TryActivatingInviteCodeWorker;
         }
 
         private static void TryActivatingInviteCodeWorker(object sender, OneSecondUpdateTickedEventArgs e)
@@ -286,14 +286,14 @@ namespace DedicatedServer.Utils
                     {
                         SaveInviteCode();
                         tryActivatingState = TryActivatingStates.None;
-                        DedicatedServer.chatBox.textBoxEnter($"Could receive the invitation code {InviteCode}" + TextColor.Green);
+                        MainController.chatBox.textBoxEnter($"Could receive the invitation code {InviteCode}" + TextColor.Green);
                         return;
                     }
                     if(0 == time)
                     {
                         tryActivatingState = TryActivatingStates.DisableServer;
                     }
-                    DedicatedServer.chatBox.textBoxEnter($"Attention: Server will shut down in {time} seconds" + TextColor.Yellow);
+                    MainController.chatBox.textBoxEnter($"Attention: Server will shut down in {time} seconds" + TextColor.Yellow);
                     break;
 
                 case TryActivatingStates.DisableServer:
@@ -307,7 +307,7 @@ namespace DedicatedServer.Utils
                     {
                         tryActivatingState = TryActivatingStates.EnableServer;
                     }
-                    DedicatedServer.chatBox.textBoxEnter($"Attention: The server is started in {time} seconds" + TextColor.Yellow);
+                    MainController.chatBox.textBoxEnter($"Attention: The server is started in {time} seconds" + TextColor.Yellow);
                     break;
 
                 case TryActivatingStates.EnableServer:

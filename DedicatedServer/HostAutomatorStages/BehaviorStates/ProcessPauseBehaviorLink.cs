@@ -139,7 +139,7 @@ namespace DedicatedServer.HostAutomatorStages
                     break;
 
                 case internalStates.WaitingForPlayersToLeave:
-                    if (0 == DedicatedServer.NumberOfPlayers && // If no other player is online
+                    if (0 == MainController.NumberOfPlayers && // If no other player is online
                         false == Game1.isFestival() // if it is not a festival
                     )
                     {
@@ -158,7 +158,7 @@ namespace DedicatedServer.HostAutomatorStages
                         IsPaused = true;
                     }
 
-                    if (0 < DedicatedServer.NumberOfPlayers ||
+                    if (0 < MainController.NumberOfPlayers ||
                         true == Game1.isFestival()
                     )
                     {
@@ -199,14 +199,14 @@ namespace DedicatedServer.HostAutomatorStages
             if (false == addedHandler)
             {
                 addedHandler = true;
-                DedicatedServer.helper.Events.GameLoop.DayStarted += handler;
+                MainController.helper.Events.GameLoop.DayStarted += handler;
             }
         }
 
         private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
             addedHandler = false;
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= handler;
+            MainController.helper.Events.GameLoop.DayStarted -= handler;
         }
 
         private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)

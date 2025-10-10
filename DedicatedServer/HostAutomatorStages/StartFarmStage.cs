@@ -32,7 +32,7 @@ namespace DedicatedServer.HostAutomatorStages
             this.monitor = monitor;
             this.config = config;
 
-            DedicatedServer.InitStaticVariables(helper, monitor, config);
+            MainController.InitStaticVariables(helper, monitor, config);
 
 #warning TODO: The crop saver is currently disabled
             //if (config.EnableCropSaver)
@@ -125,7 +125,7 @@ namespace DedicatedServer.HostAutomatorStages
                 return;
             }
 
-            Farmer hostedFarmer = DedicatedServer.GetFarmerOfSaveGameOrDefault(config.FarmName);
+            Farmer hostedFarmer = MainController.GetFarmerOfSaveGameOrDefault(config.FarmName);
 
             if (null == hostedFarmer)
             {
@@ -373,7 +373,7 @@ namespace DedicatedServer.HostAutomatorStages
             var chatBox = new EventDrivenChatBox();
             Game1.chatBox = chatBox;
             Game1.onScreenMenus.Add(chatBox);
-            DedicatedServer.InitChatBox(chatBox);
+            MainController.InitChatBox(chatBox);
 
             // Update the player limits (remove them)
             // This breaks the game since there are loops which iterate in the range
@@ -495,7 +495,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void Exit(int statusCode)
         {
-            DedicatedServer.Exit(statusCode);
+            MainController.Exit(statusCode);
         }
     }
 }

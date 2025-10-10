@@ -208,12 +208,12 @@ namespace DedicatedServer.MessageCommands
 
         public static void Enable()
         {
-            DedicatedServer.chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
         public static void Disable()
         {
-            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
         #region DEBUG_SKIP_DAYS
@@ -227,14 +227,14 @@ namespace DedicatedServer.MessageCommands
         {
             ServerCommandListener.dayOfMonth = dayOfMonth;
             ServerCommandListener.season = season;
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked += SkipDays;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked += SkipDays;
             SkipDays(null, null);
         }
 
         private static void DisableSkipDays()
         {
             dayOfMonth = -1;
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked -= SkipDays;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked -= SkipDays;
             Sleeping.ShouldSleepOverwrite = false;
         }
 
@@ -309,7 +309,7 @@ namespace DedicatedServer.MessageCommands
                         foreach(var inventoryItems in Game1.player.Items)
                         {
                             var itemId = inventoryItems?.ItemId;
-                            DedicatedServer.chatBox.textBoxEnter($"itemId: {itemId}");
+                            MainController.chatBox.textBoxEnter($"itemId: {itemId}");
                         }
                         break;
 
@@ -511,7 +511,7 @@ namespace DedicatedServer.MessageCommands
 
                     case "menu":
                         var menu = Game1.activeClickableMenu;
-                        DedicatedServer.chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
+                        MainController.chatBox.textBoxEnter($" Menu is {(menu?.ToString() ?? "")}" + TextColor.Green);
                         break;
                                             
                     case "multiplayer":
@@ -527,49 +527,49 @@ namespace DedicatedServer.MessageCommands
                         break;
 
                     case "farm":
-                        DedicatedServer.Warp(WarpPoints.FarmWarp);
+                        MainController.Warp(WarpPoints.FarmWarp);
                         break;
 
                     case "house":
-                        DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
+                        MainController.Warp(WarpPoints.FarmHouseWarp);
                         break;
 
                     case "mine":
-                        DedicatedServer.Warp(WarpPoints.mineWarp);
+                        MainController.Warp(WarpPoints.mineWarp);
                         break;
 
                     case "town":
-                        DedicatedServer.Warp(WarpPoints.townWarp);
+                        MainController.Warp(WarpPoints.townWarp);
                         break;
 
                     case "beach":
-                        DedicatedServer.Warp(WarpPoints.beachWarp);
+                        MainController.Warp(WarpPoints.beachWarp);
                         break;
 
                     case "robin":
-                        DedicatedServer.Warp(WarpPoints.robinWarp);
+                        MainController.Warp(WarpPoints.robinWarp);
                         break;
 
                     case "clint":
-                        DedicatedServer.Warp(WarpPoints.clintWarp);
+                        MainController.Warp(WarpPoints.clintWarp);
                         break;
 
                     case "pierre":
-                        DedicatedServer.Warp(WarpPoints.pierreWarp);
+                        MainController.Warp(WarpPoints.pierreWarp);
                         break;
 
                     case "communitycenter":
-                        DedicatedServer.Warp(WarpPoints.communityCenterWarp);
+                        MainController.Warp(WarpPoints.communityCenterWarp);
                         break;
 
                     case "wizzard":
-                        DedicatedServer.Warp(WarpPoints.wizzardWarp);
+                        MainController.Warp(WarpPoints.wizzardWarp);
                         break;
 
                     case "location":
                         var location = Game1.player.Tile;
-                        DedicatedServer.chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
-                        DedicatedServer.chatBox.textBoxEnter("x: " + location.X + ", y:" + location.Y);
+                        MainController.chatBox.textBoxEnter("location: " + Game1.player.currentLocation.ToString());
+                        MainController.chatBox.textBoxEnter("x: " + location.X + ", y:" + location.Y);
                         break;
 
 #endif
@@ -788,7 +788,7 @@ namespace DedicatedServer.MessageCommands
                 return;
             }
             
-            RestartDay.ForceSleep((seconds) => DedicatedServer.chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
+            RestartDay.ForceSleep((seconds) => MainController.chatBox.textBoxEnter($"Attention: Server will start the next day in {seconds} seconds" + TextColor.Orange));
         }
 
         private static void ForceResetDay(Farmer farmer)
@@ -865,15 +865,15 @@ namespace DedicatedServer.MessageCommands
 
             if (MoveBuildPermission.parameter.Any(param.Equals))
             {
-                if (DedicatedServer.config.MoveBuildPermission == param)
+                if (MainController.config.MoveBuildPermission == param)
                 {
-                    WriteToPlayer(farmer, "Parameter for MoveBuildPermission is already " + DedicatedServer.config.MoveBuildPermission + TextColor.Orange);
+                    WriteToPlayer(farmer, "Parameter for MoveBuildPermission is already " + MainController.config.MoveBuildPermission + TextColor.Orange);
                 }
                 else
                 {
-                    DedicatedServer.config.MoveBuildPermission = param;
-                    MoveBuildPermission.Change(DedicatedServer.config.MoveBuildPermission);
-                    DedicatedServer.helper.WriteConfig(DedicatedServer.config);
+                    MainController.config.MoveBuildPermission = param;
+                    MoveBuildPermission.Change(MainController.config.MoveBuildPermission);
+                    MainController.helper.WriteConfig(MainController.config);
                 }
             }
             else
@@ -886,11 +886,11 @@ namespace DedicatedServer.MessageCommands
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                DedicatedServer.chatBox.textBoxEnter($" {message}");
+                MainController.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                MainController.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

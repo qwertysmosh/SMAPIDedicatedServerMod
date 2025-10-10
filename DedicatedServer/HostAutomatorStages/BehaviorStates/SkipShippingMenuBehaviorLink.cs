@@ -56,14 +56,14 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void Enable()
         {
-            DedicatedServer.helper.Events.GameLoop.DayEnding += OnDayEnding;
-            DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+            MainController.helper.Events.GameLoop.DayEnding += OnDayEnding;
+            MainController.helper.Events.GameLoop.DayStarted += OnDayStarted;
         }
 
         private static void Disable()
         {
-            DedicatedServer.helper.Events.GameLoop.DayEnding -= OnDayEnding;
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
+            MainController.helper.Events.GameLoop.DayEnding -= OnDayEnding;
+            MainController.helper.Events.GameLoop.DayStarted -= OnDayStarted;
         }
 
         #region Additional Timer
@@ -88,7 +88,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void Skip(object sender, WhileDayEndingEventArgs e)
         {
-            DedicatedServer.chatBox.textBoxEnter($"The shipping menu has not responded for {e.Seconds} seconds." + TextColor.Red);
+            MainController.chatBox.textBoxEnter($"The shipping menu has not responded for {e.Seconds} seconds." + TextColor.Red);
             SkipShippingMenu();
         }
 
@@ -115,8 +115,8 @@ namespace DedicatedServer.HostAutomatorStages
                     if (false == shouldRunning) { return; }
                 }
 
-                var farmers = DedicatedServer.OnlineFarmers();
-                while (false == DedicatedServer.IsReadyPlayers("ready_for_save", farmers))
+                var farmers = MainController.OnlineFarmers();
+                while (false == MainController.IsReadyPlayers("ready_for_save", farmers))
                 {   // Wait until all other players have clicked "OK". 
                     await Task.Delay(100);
                     if (false == shouldRunning) { return; }

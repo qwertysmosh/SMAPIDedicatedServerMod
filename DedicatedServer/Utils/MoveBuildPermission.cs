@@ -28,7 +28,7 @@ namespace DedicatedServer.Utils
 
         public static void Init()
         {
-            Change(DedicatedServer.config.MoveBuildPermission);
+            Change(MainController.config.MoveBuildPermission);
         }
 
         /// <summary>
@@ -46,16 +46,16 @@ namespace DedicatedServer.Utils
             {
                 case "on":
                     buildPermission = RemoteBuildingPermissions.On;
-                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
+                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
                     break;
                 case "owned":
                 case "ownedbuildings":
                     buildPermission = RemoteBuildingPermissions.OwnedBuildings;
-                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
+                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
                     break;
                 default:
                     buildPermission = RemoteBuildingPermissions.Off;
-                    DedicatedServer.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
+                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
                     break;
             }
 
@@ -71,7 +71,7 @@ namespace DedicatedServer.Utils
 
         public static void WriteMoveBuildPermission()
         {
-            DedicatedServer.chatBox.textBoxEnter(
+            MainController.chatBox.textBoxEnter(
                 " " + moveBuildPermission + ": " +
                 moveBuildPermissionStrings[(int)FarmhandsCanMoveBuildings] + 
                 TextColor.Green);

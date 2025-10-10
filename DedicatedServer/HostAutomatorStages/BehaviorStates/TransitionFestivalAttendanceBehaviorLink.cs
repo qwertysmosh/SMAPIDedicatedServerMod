@@ -17,24 +17,24 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (Utils.Festivals.ShouldAttend(DedicatedServer.NumberOfPlayers) && 
+            if (Utils.Festivals.ShouldAttend(MainController.NumberOfPlayers) && 
                 false == Utils.Festivals.IsWaitingToAttend())
             {
                 WaitForFestivalAttendance();
             }
             else if (
-                false == Utils.Festivals.ShouldAttend(DedicatedServer.NumberOfPlayers) && 
+                false == Utils.Festivals.ShouldAttend(MainController.NumberOfPlayers) && 
                 Utils.Festivals.IsWaitingToAttend())
             {
                 StopWaitingForFestivalAttendance();
             }
-            else if(Utils.Festivals.ShouldLeave(DedicatedServer.NumberOfPlayers) &&
+            else if(Utils.Festivals.ShouldLeave(MainController.NumberOfPlayers) &&
                 false == Utils.Festivals.IsWaitingToLeave())
             {
                 WaitForFestivalEnd();
             }
             else if (
-                false == Utils.Festivals.ShouldLeave(DedicatedServer.NumberOfPlayers) &&
+                false == Utils.Festivals.ShouldLeave(MainController.NumberOfPlayers) &&
                 Utils.Festivals.IsWaitingToLeave())
             {
                 StopWaitingForFestivalEnd();
@@ -85,7 +85,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public TransitionFestivalAttendanceBehaviorLink()
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted += NewDay;
+            MainController.helper.Events.GameLoop.DayStarted += NewDay;
 
             festivalChatBox = new FestivalChatBox();
         }
@@ -94,7 +94,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public void Dispose()
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= NewDay;
+            MainController.helper.Events.GameLoop.DayStarted -= NewDay;
             DisableFestivalChatBox();
         }
 
@@ -103,10 +103,10 @@ namespace DedicatedServer.HostAutomatorStages
             if (festivalChatBox.IsEnabled())
             {
                 int numFestivalStartVotes = festivalChatBox.NumVoted();
-                if (numFestivalStartVotes != this.numFestivalStartVotes || DedicatedServer.NumberOfPlayers != numFestivalStartVotesRequired)
+                if (numFestivalStartVotes != this.numFestivalStartVotes || MainController.NumberOfPlayers != numFestivalStartVotesRequired)
                 {
                     this.numFestivalStartVotes = numFestivalStartVotes;
-                    numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
+                    numFestivalStartVotesRequired = MainController.NumberOfPlayers;
                     return Tuple.Create(numFestivalStartVotes, numFestivalStartVotesRequired);
                 }
             }
@@ -117,7 +117,7 @@ namespace DedicatedServer.HostAutomatorStages
         {
             festivalChatBox.Enable();
             numFestivalStartVotes = 0;
-            numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
+            numFestivalStartVotesRequired = MainController.NumberOfPlayers;
         }
 
         public void DisableFestivalChatBox()
@@ -128,7 +128,7 @@ namespace DedicatedServer.HostAutomatorStages
         public void NewDay(object sender, DayStartedEventArgs e)
         {
             numFestivalStartVotes = 0;
-            numFestivalStartVotesRequired = DedicatedServer.NumberOfPlayers;
+            numFestivalStartVotesRequired = MainController.NumberOfPlayers;
         }
 
         public void SendChatMessage(string message)

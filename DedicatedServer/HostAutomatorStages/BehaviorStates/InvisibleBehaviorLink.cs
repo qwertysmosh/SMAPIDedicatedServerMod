@@ -103,7 +103,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.displayFarmer = true;
 
                 // Refresh to make bot back to visible
-                DedicatedServer.Refresh();
+                MainController.Refresh();
 
                 changed = true;
             }

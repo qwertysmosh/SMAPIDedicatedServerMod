@@ -14,11 +14,11 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
         {
             if (false == hasCheckedForMails &&
                 null == Game1.CurrentEvent &&
-                DedicatedServer.IsIdle() &&
+                MainController.IsIdle() &&
                 Game1.currentLocation is Farm
             ){
-                DedicatedServer.IdleLockEnable();
-                DedicatedServer.OpenMailboxIfHasMail();
+                MainController.IdleLockEnable();
+                MainController.OpenMailboxIfHasMail();
                 hasCheckedForMails = true;
             }
         }
@@ -33,9 +33,9 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
 
         public void Dispose() => Disable();
 
-        public static void Enable() => DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+        public static void Enable() => MainController.helper.Events.GameLoop.DayStarted += OnDayStarted;
 
-        public static void Disable() => DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
+        public static void Disable() => MainController.helper.Events.GameLoop.DayStarted -= OnDayStarted;
 
         public static void OnDayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
         {

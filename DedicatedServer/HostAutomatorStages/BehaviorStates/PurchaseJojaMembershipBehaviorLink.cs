@@ -19,7 +19,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.mailForTomorrow.Contains("JojaMember%&NL&%") || 
                 Game1.player.mailReceived.Contains("JojaMember");
 
-            if (ccAvailable && DedicatedServer.config.PurchaseJojaMembership && false == purchased)
+            if (ccAvailable && MainController.config.PurchaseJojaMembership && false == purchased)
             {
                 // Then purchase it
                 Game1.addMailForTomorrow("JojaMember", noLetter: true, sendToEveryone: true);

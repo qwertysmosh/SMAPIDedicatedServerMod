@@ -18,7 +18,7 @@ namespace DedicatedServer.HostAutomatorStages
             switch (exitFarmHouseStates)
             {
                 case ExitFarmHouseStates.Uninit:
-                    if (DedicatedServer.IsIdle())
+                    if (MainController.IsIdle())
                     {  
                         if (Game1.currentLocation is FarmHouse)
                         {
@@ -41,15 +41,15 @@ namespace DedicatedServer.HostAutomatorStages
 
 
                 case ExitFarmHouseStates.Farmhouse:
-                    if (DedicatedServer.IsIdle())
+                    if (MainController.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
                             Game1.timeOfDay < TimeToEnterFarmhouse &&
                             Game1.currentLocation is FarmHouse
                         ){
                             exitFarmHouseStates = ExitFarmHouseStates.WarpToFarm;
-                            DedicatedServer.IdleLockEnable();
-                            DedicatedServer.Warp(WarpPoints.FarmWarp);
+                            MainController.IdleLockEnable();
+                            MainController.Warp(WarpPoints.FarmWarp);
                         }
                     }
                     break;
@@ -64,15 +64,15 @@ namespace DedicatedServer.HostAutomatorStages
 
 
                 case ExitFarmHouseStates.Farm:
-                    if (DedicatedServer.IsIdle())
+                    if (MainController.IsIdle())
                     {
                         if (null == Game1.CurrentEvent &&
                             Game1.timeOfDay >= TimeToEnterFarmhouse &&
                             Game1.currentLocation is Farm
                         ){
                             exitFarmHouseStates = ExitFarmHouseStates.WarpToFarmhouse;
-                            DedicatedServer.IdleLockEnable();
-                            DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
+                            MainController.IdleLockEnable();
+                            MainController.Warp(WarpPoints.FarmHouseWarp);
                         }
                     }
                     break;
@@ -118,8 +118,8 @@ namespace DedicatedServer.HostAutomatorStages
 
         public static void Dispose() => Disable();
 
-        private static void Enable() => DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+        private static void Enable() => MainController.helper.Events.GameLoop.DayStarted += OnDayStarted;
 
-        private static void Disable() => DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
+        private static void Disable() => MainController.helper.Events.GameLoop.DayStarted -= OnDayStarted;
     }
 }

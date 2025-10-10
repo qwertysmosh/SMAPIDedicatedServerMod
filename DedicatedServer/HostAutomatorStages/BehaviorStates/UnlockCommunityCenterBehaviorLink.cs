@@ -14,7 +14,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (false == hasSeenEvent && DedicatedServer.IsIdle())
+            if (false == hasSeenEvent && MainController.IsIdle())
             {
                 if (false == isUnlocking &&
                     false == Game1.player.eventsSeen.Contains("611439") &&
@@ -26,8 +26,8 @@ namespace DedicatedServer.HostAutomatorStages
                     false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
                 ){
                     isUnlocking = true;
-                    DedicatedServer.IdleLockEnable();
-                    DedicatedServer.Warp(WarpPoints.townWarp);
+                    MainController.IdleLockEnable();
+                    MainController.Warp(WarpPoints.townWarp);
                 }
                 else if (isUnlocking &&
                     Game1.player.eventsSeen.Contains("611439") &&
@@ -35,8 +35,8 @@ namespace DedicatedServer.HostAutomatorStages
                 ){
                     isUnlocking = false;
                     hasSeenEvent = true;
-                    DedicatedServer.IdleLockEnable();
-                    DedicatedServer.Warp(WarpPoints.FarmWarp);
+                    MainController.IdleLockEnable();
+                    MainController.Warp(WarpPoints.FarmWarp);
                 }
             }
         }

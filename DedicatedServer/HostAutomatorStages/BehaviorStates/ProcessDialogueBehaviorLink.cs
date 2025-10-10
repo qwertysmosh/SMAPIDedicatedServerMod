@@ -68,11 +68,11 @@ namespace DedicatedServer.HostAutomatorStages
                         if (mushroomsResponseIdx >= 0 && batsResponseIdx >= 0)
                         {
                             // This is the cave question. Answer based on mod config.
-                            if (DedicatedServer.config.MushroomsOrBats.ToLower() == "mushrooms")
+                            if (MainController.config.MushroomsOrBats.ToLower() == "mushrooms")
                             {
                                 dialogueBox.selectedResponse = mushroomsResponseIdx;
                             }
-                            else if (DedicatedServer.config.MushroomsOrBats.ToLower() == "bats")
+                            else if (MainController.config.MushroomsOrBats.ToLower() == "bats")
                             {
                                 dialogueBox.selectedResponse = batsResponseIdx;
                             }
@@ -103,7 +103,7 @@ namespace DedicatedServer.HostAutomatorStages
                                         hasPetSelectEvent = true;
 
                                         // This is the pet question. Answer based on mod config.
-                                        if (DedicatedServer.config.ShouldAcceptPet())
+                                        if (MainController.config.ShouldAcceptPet())
                                         {
                                             dialogueBox.selectedResponse = yesResponseIdx;
                                         }
@@ -129,7 +129,7 @@ namespace DedicatedServer.HostAutomatorStages
                 else if (Game1.activeClickableMenu is NamingMenu namingMenu)
                 {
                     TextBox textBox = namingMenu.textBox;
-                    textBox.Text = DedicatedServer.config.PetName;
+                    textBox.Text = MainController.config.PetName;
                     textBox.RecieveCommandInput('\r');
                     WaitTime = (int)(60 * 0.2);
                 }

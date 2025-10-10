@@ -147,12 +147,12 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void AddOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted += handler;
+            MainController.helper.Events.GameLoop.DayStarted += handler;
         }
 
         private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= handler;
+            MainController.helper.Events.GameLoop.DayStarted -= handler;
         }
 
         /// <summary>

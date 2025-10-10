@@ -27,9 +27,9 @@ namespace DedicatedServer.HostAutomatorStages
             {
                 enabled = true;
                 votes.Clear();
-                otherPlayers = DedicatedServer.OnlineFarmers();
-                DedicatedServer.chatBox.textBoxEnter(entryMessage);
-                DedicatedServer.chatBox.ChatReceived += onChatReceived;
+                otherPlayers = MainController.OnlineFarmers();
+                MainController.chatBox.textBoxEnter(entryMessage);
+                MainController.chatBox.ChatReceived += onChatReceived;
             }
         }
 
@@ -40,7 +40,7 @@ namespace DedicatedServer.HostAutomatorStages
                 enabled = false;
                 votes.Clear();
                 otherPlayers.Clear();
-                DedicatedServer.chatBox.ChatReceived -= onChatReceived;
+                MainController.chatBox.ChatReceived -= onChatReceived;
             }
         }
 
@@ -76,7 +76,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public void SendChatMessage(string message)
         {
-            DedicatedServer.chatBox.textBoxEnter(message);
+            MainController.chatBox.textBoxEnter(message);
         }
     }
 }
