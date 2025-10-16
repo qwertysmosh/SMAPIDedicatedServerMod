@@ -282,6 +282,33 @@ namespace DedicatedServer.MessageCommands
                     #region DEBUG_COMMANDS
                     #if USE_DEBUG
 
+                    case "crop":
+#warning TODO: Crop saver is this necessary
+                        DedicatedServer.Crops.CropSaver.CropTest();
+                        break;
+
+                    case "timereset":
+                        if (Game1.dayOfMonth > 1)
+                        {
+                            Game1.stats.DaysPlayed--;
+                            Game1.dayOfMonth--;
+                        }
+                        break;
+
+                    case "setday23":
+                        if(23 > Game1.dayOfMonth)
+                        {
+                            int days = 23 - Game1.dayOfMonth;
+                            Game1.stats.DaysPlayed += (uint)days;
+                            Game1.dayOfMonth += days;
+                        }
+                        break;
+
+                    case "seed":
+                        Game1.player.addItemToInventory(new StardewValley.Object("472", 10)); // parsnip
+                        Game1.player.addItemToInventory(new StardewValley.Object("473", 10)); // bean
+                        break;
+
                     case "skipdays":
                         EnableSkipDays(24, Season.Winter);
                         break;

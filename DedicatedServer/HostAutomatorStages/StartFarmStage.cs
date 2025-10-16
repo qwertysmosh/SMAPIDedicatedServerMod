@@ -1,5 +1,6 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
+using DedicatedServer.Crops;
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.MessageCommands;
 using DedicatedServer.Utils;
@@ -20,7 +21,7 @@ namespace DedicatedServer.HostAutomatorStages
         private readonly ModConfig config;
 
 #warning TODO: The crop saver is currently disabled
-        //private CropSaver cropSaver = null;
+        private CropSaver cropSaver = null;
 
         private ReadyCheckHelper readyCheckHelper = null;
         private InvincibleWorker invincibleWorker = null;
@@ -37,8 +38,8 @@ namespace DedicatedServer.HostAutomatorStages
 #warning TODO: The crop saver is currently disabled
             //if (config.EnableCropSaver)
             //{
-            //    cropSaver = new CropSaver(helper, monitor, config);
-            //    cropSaver.Enable();
+                cropSaver = new CropSaver(helper, monitor, config);
+                cropSaver.Enable();
             //}
 
             EnableReturnToTitle();
@@ -76,6 +77,10 @@ namespace DedicatedServer.HostAutomatorStages
 
             // HostHouseUpgrade // Disable/Reset is not necessary
             // Wallet // Disable/Reset is not necessary
+
+#warning TODO: The crop saver is currently disabled
+            cropSaver?.Disable();
+            cropSaver = null;
 
             readyCheckHelper?.Disable();
             readyCheckHelper = null;
