@@ -282,11 +282,6 @@ namespace DedicatedServer.MessageCommands
                     #region DEBUG_COMMANDS
                     #if USE_DEBUG
 
-                    case "crop":
-#warning TODO: Crop saver is this necessary
-                        DedicatedServer.Crops.CropSaver.CropTest();
-                        break;
-
                     case "timereset":
                         if (Game1.dayOfMonth > 1)
                         {
@@ -295,10 +290,11 @@ namespace DedicatedServer.MessageCommands
                         }
                         break;
 
-                    case "setday23":
-                        if(23 > Game1.dayOfMonth)
+                    case "settoday":
+                        int days = int.TryParse(param, out int result) ? result : 0;
+                        if (days > Game1.dayOfMonth)
                         {
-                            int days = 23 - Game1.dayOfMonth;
+                            days = days - Game1.dayOfMonth;
                             Game1.stats.DaysPlayed += (uint)days;
                             Game1.dayOfMonth += days;
                         }
@@ -346,6 +342,7 @@ namespace DedicatedServer.MessageCommands
                         Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.iridiumID, 999));
                         Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.woodID, 999));
                         Game1.player.addItemToInventory(new StardewValley.Object(StardewValley.Object.stoneID, 999));
+                        Game1.player.addItemToInventory(new StardewValley.Object(iridiumSprinkler, 1));
                         break;
 
                     case "iridiumsprinkler":

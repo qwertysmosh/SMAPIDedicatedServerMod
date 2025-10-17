@@ -8,7 +8,7 @@ using System.Linq;
 namespace DedicatedServer.Crops
 {
     /// <summary>
-    /// The plant goes through the phases of the array `Crop.GetDays().DaysInPhase` until it is mature.
+    /// The plant goes through the phases of the array `Crop.GetData().DaysInPhase` until it is mature.
     /// In each phase `Crop.currentPhase`, the plant remains for as long as `crop.dayOfCurrentPhase` is the value of the array.
     /// </summary>
     internal class CropInfo
@@ -71,9 +71,9 @@ namespace DedicatedServer.Crops
         {
             get
             {
-                // `Crop.currentPhase`: The index of the array `Crop.phaseDays`, which has one more element than the array `Crop.GetDays().DaysInPhase`, namely the value `Crop.finalPhaseLength`.
-                // `Crop.GetDays().DaysInPhase`: Array whose number of elements represents the number of phases. Each element stores the number of days in the respective phase.
-                // Since the index `Crop.currentPhase` can count one more element than the array `Crop.GetDays().DaysInPhase` has, the index can be compared with the number of elements.
+                // `Crop.currentPhase`: The index of the array `Crop.phaseDays`, which has one more element than the array `Crop.GetData().DaysInPhase`, namely the value `Crop.finalPhaseLength`.
+                // `Crop.GetData().DaysInPhase`: Array whose number of elements represents the number of phases. Each element stores the number of days in the respective phase.
+                // Since the index `Crop.currentPhase` can count one more element than the array `Crop.GetData().DaysInPhase` has, the index can be compared with the number of elements.
                 return Crop.currentPhase.Value >= CropData.DaysInPhase.Count;
             }
         }
@@ -97,10 +97,12 @@ namespace DedicatedServer.Crops
                     }
                     else
                     {
-                        // `Crop.dayOfCurrentPhase` counts down when `Crop.safeFullyGrown` is true.
-                        // If it has a value of 0, then it has fruit.
-                        // It is reset to `Crop.GetDays().RegrowDays` when harvested.
-#warning TODO: The description is wrong I net to change the condition to >= !!!
+                        // For a fruit that ripens multiple times, `Crop.fullyGrown` is set
+                        // to true after it is harvested for the first time.
+                        // `Crop.dayOfCurrentPhase` counts down when `Crop.fullyGrown` is true.
+                        // If the value is 0, then it has fruit for the first time.
+                        // The value continues to decrease with each new day.
+                        // It is reset to `Crop.GetData().RegrowDays` when harvested.
                         return 0 >= this.Crop.dayOfCurrentPhase.Value;
                     }
                 }
@@ -127,6 +129,13 @@ namespace DedicatedServer.Crops
 
         }
 
+        /// <summary>
+        ///         Returns the number of days the fruit has been ripe or -1
+        /// </summary>
+        /// <returns>
+        ///         n: Number of days the fruit has been ripe
+        /// <br/>  -1: If there is no fruit
+        /// </returns>
         public int GetMaturityDays()
         {
             if (false == IsFruitAvailable)
@@ -134,7 +143,17 @@ namespace DedicatedServer.Crops
                 return -1;
             }
 
-            return this.Crop.dayOfCurrentPhase.Value;
+            if (this.Crop.fullyGrown.Value)
+            {
+                // For a fruit that ripens multiple times, `Crop.fullyGrown` is set
+                // to true after it is harvested for the first time.
+                // Then `Crop.dayOfCurrentPhase` begins counting down.
+                return -this.Crop.dayOfCurrentPhase.Value;
+            }
+            else
+            {
+                return this.Crop.dayOfCurrentPhase.Value;
+            }
         }
 
         /// <summary>
@@ -147,6 +166,11 @@ namespace DedicatedServer.Crops
         {
             if (Crop.fullyGrown.Value)
             {
+                if(0 >= this.Crop.dayOfCurrentPhase.Value)
+                {
+                    return FullDaysToMaturity;
+                }
+
                 return FullDaysToMaturity - this.Crop.dayOfCurrentPhase.Value;
             }
             else
@@ -159,9 +183,9 @@ namespace DedicatedServer.Crops
                         daysStage += CropData.DaysInPhase[i];
                     }
 
-                    // The description is only correct as long as `Crop.safeFullyGrown` is false.
+                    // The description is only correct as long as `Crop.fullyGrown` is false.
                     // This is the current day in the individual phase. This number is smaller than
-                    // the number in the array `Crop.GetDays().DaysInPhase`, because reaching the
+                    // the number in the array `Crop.GetData().DaysInPhase`, because reaching the
                     // number means reaching the next phase.
                     daysStage += Crop.dayOfCurrentPhase.Value;
 
@@ -172,6 +196,10 @@ namespace DedicatedServer.Crops
             }
         }
 
+        /// <summary>
+        ///         Get all crops that are not located at <see cref="IslandLocation"/>.
+        /// </summary>
+        /// <returns></returns>
         public static List<CropInfo> GetAllCropInfo()
         {
             var list = new List<CropInfo>();

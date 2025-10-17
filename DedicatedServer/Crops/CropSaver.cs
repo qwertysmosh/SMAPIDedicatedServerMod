@@ -1,32 +1,22 @@
-﻿using DedicatedServer.Config;
-using StardewModdingAPI;
-using StardewValley;
+﻿using StardewValley;
 using System;
 using System.Collections.Generic;
 
 namespace DedicatedServer.Crops
 {
-    // Plants that ripen on the first day are not saved.
-    public class CropSaver
+    /// <summary>
+    ///         Plants that ripen on the first day are not saved.
+    /// </summary>
+    public abstract class CropSaver
     {
         private static readonly List<Season> AllSeasons = new List<Season>() { Season.Spring, Season.Summer, Season.Fall, Season.Winter };
 
-#warning TODO: Crop saver is this necessary
-        private IModHelper helper;
-        private IMonitor monitor;
-        private ModConfig config;
+        private static List<CropDataInfo> cropDataInfoList = null;
 
-        private List<CropDataInfo> cropDataInfoList = null;
+        private static bool enabled = false;
 
-#warning TODO: Crop saver to static
-        public CropSaver(IModHelper helper, IMonitor monitor, ModConfig config)
-        {
-            this.helper = helper;
-            this.monitor = monitor;
-            this.config = config;
-        }
+#if false
 
-#warning TODO: Crop saver is this necessary
         public static void CropTest()
         {
             var list = CropInfo.GetAllCropInfo();
@@ -42,16 +32,34 @@ namespace DedicatedServer.Crops
             }
         }
 
-        public void Enable()
+#endif
+
+        public static bool Init()
         {
-            helper.Events.GameLoop.DayStarted += onDayStart;
-            helper.Events.GameLoop.DayEnding += onDayEnd;
+            if (MainController.config.EnableCropSaver)
+            {
+                Enable();
+                return true;
+            }
+
+            return false;
         }
 
-        public void Disable()
+        public static void Enable()
         {
-            helper.Events.GameLoop.DayStarted -= onDayStart;
-            helper.Events.GameLoop.DayEnding -= onDayEnd;
+            if (false == enabled)
+            {
+                enabled = true;
+                MainController.helper.Events.GameLoop.DayStarted += onDayStart;
+                MainController.helper.Events.GameLoop.DayEnding += onDayEnd;
+            }
+        }
+
+        public static void Disable()
+        {
+            enabled = false;
+            MainController.helper.Events.GameLoop.DayStarted -= onDayStart;
+            MainController.helper.Events.GameLoop.DayEnding -= onDayEnd;
         }
 
         private static List<CropDataInfo> GetCropDataTag(List<CropInfo> cropInfoList)
@@ -69,7 +77,7 @@ namespace DedicatedServer.Crops
             return cropDataTagList;
         }
 
-        private void SetAllSeasons()
+        private static void SetAllSeasons()
         {
             var cropInfoList = CropInfo.GetAllCropInfo();
 
@@ -121,7 +129,7 @@ namespace DedicatedServer.Crops
             }
         }
 
-        private void ResetSeason()
+        private static void ResetSeason()
         {
             if (null == cropDataInfoList)
             {
@@ -137,7 +145,7 @@ namespace DedicatedServer.Crops
             cropDataInfoList = null;
         }
 
-        private void onDayEnd(object sender, EventArgs e)
+        private static void onDayEnd(object sender, EventArgs e)
         {
             if (28 == Game1.Date.DayOfMonth)
             {
@@ -145,7 +153,7 @@ namespace DedicatedServer.Crops
             }
         }
 
-        private void onDayStart(object sender, EventArgs e)
+        private static void onDayStart(object sender, EventArgs e)
         {
             if (1 == Game1.Date.DayOfMonth)
             {
