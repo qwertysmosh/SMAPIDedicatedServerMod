@@ -1,5 +1,6 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
+using DedicatedServer.Crops;
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.MessageCommands;
 using DedicatedServer.Utils;
@@ -19,9 +20,6 @@ namespace DedicatedServer.HostAutomatorStages
         private readonly IMonitor monitor;
         private readonly ModConfig config;
 
-#warning TODO: The crop saver is currently disabled
-        //private CropSaver cropSaver = null;
-
         private ReadyCheckHelper readyCheckHelper = null;
         private InvincibleWorker invincibleWorker = null;
         private PasswordValidation passwordValidation = null;
@@ -32,14 +30,7 @@ namespace DedicatedServer.HostAutomatorStages
             this.monitor = monitor;
             this.config = config;
 
-            DedicatedServer.InitStaticVariables(helper, monitor, config);
-
-#warning TODO: The crop saver is currently disabled
-            //if (config.EnableCropSaver)
-            //{
-            //    cropSaver = new CropSaver(helper, monitor, config);
-            //    cropSaver.Enable();
-            //}
+            MainController.InitStaticVariables(helper, monitor, config);
 
             EnableReturnToTitle();
             EnableExecute();
@@ -71,6 +62,7 @@ namespace DedicatedServer.HostAutomatorStages
             SleepWorker.Reset();
             RestartDayWorker.Reset();
 
+            CropSaver.Disable();
             MultiplayerOptions.Reset();
             // MoveBuildPermission // Disable/Reset is not necessary
 
@@ -125,7 +117,7 @@ namespace DedicatedServer.HostAutomatorStages
                 return;
             }
 
-            Farmer hostedFarmer = DedicatedServer.GetFarmerOfSaveGameOrDefault(config.FarmName);
+            Farmer hostedFarmer = MainController.GetFarmerOfSaveGameOrDefault(config.FarmName);
 
             if (null == hostedFarmer)
             {
@@ -373,7 +365,7 @@ namespace DedicatedServer.HostAutomatorStages
             var chatBox = new EventDrivenChatBox();
             Game1.chatBox = chatBox;
             Game1.onScreenMenus.Add(chatBox);
-            DedicatedServer.InitChatBox(chatBox);
+            MainController.InitChatBox(chatBox);
 
             // Update the player limits (remove them)
             // This breaks the game since there are loops which iterate in the range
@@ -419,6 +411,7 @@ namespace DedicatedServer.HostAutomatorStages
             SleepWorker.Reset();
             RestartDayWorker.Reset();
 
+            CropSaver.Init();
             MultiplayerOptions.Init();
             MoveBuildPermission.Init();
 
@@ -495,7 +488,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void Exit(int statusCode)
         {
-            DedicatedServer.Exit(statusCode);
+            MainController.Exit(statusCode);
         }
     }
 }

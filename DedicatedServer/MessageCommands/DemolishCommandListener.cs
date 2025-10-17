@@ -16,12 +16,12 @@ namespace DedicatedServer.MessageCommands
     {
         public static void Enable()
         {
-            DedicatedServer.chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
         public static void Disable()
         {
-            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
         private static void destroyCabin(Farmer farmer, Building building, Farm f)
@@ -136,7 +136,7 @@ namespace DedicatedServer.MessageCommands
                 
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Demolish))
                 {
-                    DedicatedServer.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    MainController.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                     return;
                 }
 
@@ -196,7 +196,7 @@ namespace DedicatedServer.MessageCommands
                                     var responseActions = new Dictionary<string, Action>();
                                     responseActions["yes"] = genDestroyCabinAction(sourceFarmer, building);
                                     responseActions["no"] = genCancelDestroyCabinAction(sourceFarmer);
-                                    DedicatedServer.chatBox.RegisterFarmerResponseActionGroup(sourceFarmer.UniqueMultiplayerID, responseActions);
+                                    MainController.chatBox.RegisterFarmerResponseActionGroup(sourceFarmer.UniqueMultiplayerID, responseActions);
                                     WriteToPlayer(sourceFarmer, "This cabin belongs to a player. Are you sure you want to remove it? Message me \"yes\" or \"no\".");
                                     return;
                                 }
@@ -221,11 +221,11 @@ namespace DedicatedServer.MessageCommands
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                DedicatedServer.chatBox.textBoxEnter($" {message}");
+                MainController.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                MainController.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

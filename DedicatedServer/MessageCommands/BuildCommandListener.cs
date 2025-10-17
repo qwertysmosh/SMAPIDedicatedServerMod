@@ -14,12 +14,12 @@ namespace DedicatedServer.MessageCommands
     {
         public static void Enable()
         {
-            DedicatedServer.chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
         public static void Disable()
         {
-            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
         private static Dictionary<string, Action<Farmer>> buildingActions = new Dictionary<string, Action<Farmer>>
@@ -168,11 +168,11 @@ namespace DedicatedServer.MessageCommands
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                DedicatedServer.chatBox.textBoxEnter($" {message}");
+                MainController.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                MainController.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

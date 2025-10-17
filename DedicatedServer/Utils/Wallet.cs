@@ -75,11 +75,11 @@ namespace DedicatedServer.Utils
         {
             if (null == farmer || farmer.UniqueMultiplayerID == Game1.player.UniqueMultiplayerID)
             {
-                DedicatedServer.chatBox.textBoxEnter($" {message}");
+                MainController.chatBox.textBoxEnter($" {message}");
             }
             else
             {
-                DedicatedServer.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
+                MainController.chatBox.textBoxEnter($"/message {farmer.Name} {message}");
             }
         }
     }

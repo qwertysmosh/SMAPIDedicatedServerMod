@@ -28,14 +28,14 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
 
         public static void Enable()
         {
-            DedicatedServer.helper.Events.GameLoop.UpdateTicked += Execute;
-            DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStartedWorker;
+            MainController.helper.Events.GameLoop.UpdateTicked += Execute;
+            MainController.helper.Events.GameLoop.DayStarted += OnDayStartedWorker;
         }
 
         public static void Disable()
         {
-            DedicatedServer.helper.Events.GameLoop.UpdateTicked -= Execute;
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStartedWorker;
+            MainController.helper.Events.GameLoop.UpdateTicked -= Execute;
+            MainController.helper.Events.GameLoop.DayStarted -= OnDayStartedWorker;
         }
 
         private static void Execute(object sender, UpdateTickedEventArgs e)
@@ -74,7 +74,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
             }
             catch (Exception exception)
             {
-                DedicatedServer.monitor.Log(
+                MainController.monitor.Log(
                     $"Error in {typeof(BehaviorChain).Name} class:\n\n{exception}",
                     LogLevel.Error);
             }

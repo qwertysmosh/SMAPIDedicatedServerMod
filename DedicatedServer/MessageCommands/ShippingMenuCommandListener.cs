@@ -10,12 +10,12 @@ namespace DedicatedServer.MessageCommands
     {
         public static void Enable()
         {
-            DedicatedServer.chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
         public static void Disable()
         {
-            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
         private static void chatReceived(object sender, ChatEventArgs e)
@@ -35,7 +35,7 @@ namespace DedicatedServer.MessageCommands
                 case "okay":
                     if (SkipShippingMenuBehaviorLink.SkipShippingMenu())
                     {
-                        DedicatedServer.chatBox.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
+                        MainController.chatBox.textBoxEnter("Ok button of the shipping menu clicked." + TextColor.Purple);
                     }
                     break;
                 default:

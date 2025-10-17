@@ -9,12 +9,12 @@ namespace DedicatedServer.MessageCommands
     {
         public static void Enable()
         {
-            DedicatedServer.chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
         public static void Disable()
         {
-            DedicatedServer.chatBox.ChatReceived -= chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
         private static void chatReceived(object sender, ChatEventArgs e)
@@ -34,7 +34,7 @@ namespace DedicatedServer.MessageCommands
             {
                 if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Pause))
                 {
-                    DedicatedServer.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
+                    MainController.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                     return;
                 }
 
@@ -42,10 +42,10 @@ namespace DedicatedServer.MessageCommands
 
                 if (Game1.netWorldState.Value.IsPaused)
                 {
-                    DedicatedServer.chatBox.globalInfoMessage("Paused");
+                    MainController.chatBox.globalInfoMessage("Paused");
                     return;
                 }
-                DedicatedServer.chatBox.globalInfoMessage("Resumed");
+                MainController.chatBox.globalInfoMessage("Resumed");
             }
         }
     }

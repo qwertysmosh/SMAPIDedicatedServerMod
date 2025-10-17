@@ -15,7 +15,7 @@ using System.Reflection;
 
 namespace DedicatedServer
 {
-    internal static class DedicatedServer
+    internal static class MainController
     {
         private static FieldInfo multiplayerFieldInfo = typeof(Game1).GetField("multiplayer", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -28,22 +28,22 @@ namespace DedicatedServer
 
         public static void InitStaticVariables(IModHelper helper, IMonitor monitor, ModConfig config)
         {
-            DedicatedServer.helper = helper;
-            DedicatedServer.monitor = monitor;
-            DedicatedServer.config = config;
+            MainController.helper = helper;
+            MainController.monitor = monitor;
+            MainController.config = config;
         }
 
         public static void InitChatBox(EventDrivenChatBox chatBox)
         {
-            DedicatedServer.chatBox = chatBox;
+            MainController.chatBox = chatBox;
         }
 
         public static void Dispose()
         {
-            DedicatedServer.helper = null;
-            DedicatedServer.monitor = null;
-            DedicatedServer.config = null;
-            DedicatedServer.chatBox = null;
+            MainController.helper = null;
+            MainController.monitor = null;
+            MainController.config = null;
+            MainController.chatBox = null;
         }
 
         #region Idle Check
@@ -70,14 +70,14 @@ namespace DedicatedServer
             if (0 > idleLockTime)
             {
                 idleLockTime = ticks;
-                DedicatedServer.helper.Events.GameLoop.UpdateTicked += IdleWorker;
+                MainController.helper.Events.GameLoop.UpdateTicked += IdleWorker;
             }
         }
 
         public static void IdleLockDisable()
         {
             idleLockTime = -1;
-            DedicatedServer.helper.Events.GameLoop.UpdateTicked -= IdleWorker;
+            MainController.helper.Events.GameLoop.UpdateTicked -= IdleWorker;
         }
 
         private static int idleLockTime = -1;

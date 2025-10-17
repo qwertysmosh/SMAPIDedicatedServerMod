@@ -27,7 +27,7 @@ namespace DedicatedServer.HostAutomatorStages
 
                 if (Game1.currentLocation is FarmHouse)
                 {
-                    DedicatedServer.monitor.Log($"The host lies down in bed", LogLevel.Debug);
+                    MainController.monitor.Log($"The host lies down in bed", LogLevel.Debug);
 
                     Game1.player.isInBed.Value = true;
                     Game1.player.sleptInTemporaryBed.Value = true;
@@ -57,15 +57,15 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
-                    DedicatedServer.monitor.Log($"Warp to sleep", LogLevel.Debug);
+                    MainController.monitor.Log($"Warp to sleep", LogLevel.Debug);
 
-                    DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
+                    MainController.Warp(WarpPoints.FarmHouseWarp);
                     WaitTime = 60;
                 }
             }
             else if (!Utils.Sleeping.ShouldSleep() && Utils.Sleeping.IsSleeping())
             {
-                DedicatedServer.monitor.Log($"Cancel sleep", LogLevel.Debug);
+                MainController.monitor.Log($"Cancel sleep", LogLevel.Debug);
 
                 if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
                 {

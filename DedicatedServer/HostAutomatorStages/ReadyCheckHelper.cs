@@ -7,12 +7,12 @@ namespace DedicatedServer.HostAutomatorStages
     {
         public void Enable()
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted += OnDayStarted;
+            MainController.helper.Events.GameLoop.DayStarted += OnDayStarted;
         }
 
         public void Disable()
         {
-            DedicatedServer.helper.Events.GameLoop.DayStarted -= OnDayStarted;
+            MainController.helper.Events.GameLoop.DayStarted -= OnDayStarted;
         }
 
         public void OnDayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
@@ -24,7 +24,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.player.eventsSeen.Add("295672");
             }
 
-            if (DedicatedServer.config.UpgradeHouseLevelBasedOnFarmhand)
+            if (MainController.config.UpgradeHouseLevelBasedOnFarmhand)
             {
                 HostHouseUpgrade.NeedsUpgrade();
             }

@@ -109,7 +109,7 @@ namespace DedicatedServer.Utils
 
                 if (daysMin != int.MaxValue && daysMin >= 0)
                 {
-                    DedicatedServer.chatBox.textBoxEnter($"The host will upgrade his house in {daysMin} days.");
+                    MainController.chatBox.textBoxEnter($"The host will upgrade his house in {daysMin} days.");
                     DaysUntilHouseUpgrade(Game1.player, daysMin);
                     upgradeIsBeingExecuted = true;
                 }
@@ -119,7 +119,7 @@ namespace DedicatedServer.Utils
                     // delayed upgrade (if ModConfig.UpgradeHostHouseWithFarmhand was deactivated)
                     if (levelMax > Game1.player.HouseUpgradeLevel)
                     {
-                        DedicatedServer.chatBox.textBoxEnter("The host will upgrade his house the next day.");
+                        MainController.chatBox.textBoxEnter("The host will upgrade his house the next day.");
                         DaysUntilHouseUpgrade(Game1.player, 1);
                         upgradeIsBeingExecuted = true;
                     }
@@ -279,7 +279,7 @@ namespace DedicatedServer.Utils
 
             if (IsHostUpgrading)
             {
-                DedicatedServer.chatBox.textBoxEnter($"An upgrade is being performed, wait until the update is complete.");
+                MainController.chatBox.textBoxEnter($"An upgrade is being performed, wait until the update is complete.");
                 return;
             }
 
@@ -293,7 +293,7 @@ namespace DedicatedServer.Utils
 
             if (oldLevel == targetLevel)
             {
-                DedicatedServer.chatBox.textBoxEnter($"The house has the level you want.");
+                MainController.chatBox.textBoxEnter($"The house has the level you want.");
                 return;
             }
 
@@ -313,7 +313,7 @@ namespace DedicatedServer.Utils
 
                 if(2 == targetLevel && HasCellar(homeOfFarmer))
                 {
-                    DedicatedServer.chatBox.textBoxEnter($"Can not remove cellar" + TextColor.Red);
+                    MainController.chatBox.textBoxEnter($"Can not remove cellar" + TextColor.Red);
                 }
 
                 AddBed(targetLevel, homeOfFarmer);

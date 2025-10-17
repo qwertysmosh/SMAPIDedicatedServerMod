@@ -14,7 +14,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         public override void Process()
         {
-            if (false == hasSeenEvent && DedicatedServer.IsIdle())
+            if (false == hasSeenEvent && MainController.IsIdle())
             {
                 //If we don't get the fishing rod, Willy isn't available
                 if (false == isGettingFishingRod &&
@@ -25,7 +25,7 @@ namespace DedicatedServer.HostAutomatorStages
                     false == Utility.isFestivalDay(Game1.Date.DayOfMonth, Game1.Date.Season)
                 ){
                     isGettingFishingRod = true;
-                    DedicatedServer.IdleLockEnable();
+                    MainController.IdleLockEnable();
                     Game1.player.warpFarmer(WarpPoints.beachWarp);
                 }
                 else if (isGettingFishingRod &&
@@ -34,7 +34,7 @@ namespace DedicatedServer.HostAutomatorStages
                 ){
                     isGettingFishingRod = false;
                     hasSeenEvent = true;
-                    DedicatedServer.IdleLockEnable();
+                    MainController.IdleLockEnable();
                     Game1.player.warpFarmer(WarpPoints.FarmWarp);
                 }
             }

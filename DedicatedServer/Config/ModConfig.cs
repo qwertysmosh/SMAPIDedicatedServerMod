@@ -79,7 +79,7 @@
         ///         If this option is set to true, the upgrade level of the host's farmhouse
         /// <br/>   changes to the same, highest upgrade level of all farmers.
         /// <br/>   
-        /// <br/>   With <see cref="DedicatedServer.Utils.HostHouseUpgrade.ManualUpdate(string)"/> 
+        /// <br/>   With <see cref="MainController.Utils.HostHouseUpgrade.ManualUpdate(string)"/> 
         /// <br/>   you can downgrade or upgrade it manually. As long as this property is set to true,
         /// <br/>   the house is automatically upgraded again.
         /// </summary>

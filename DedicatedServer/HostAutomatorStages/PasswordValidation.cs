@@ -79,7 +79,7 @@ namespace DedicatedServer.HostAutomatorStages
                 return true;
             }
 
-            if (null != property && false == property(DedicatedServer.config.PasswordProtected))
+            if (null != property && false == property(MainController.config.PasswordProtected))
             {
                 return true;
             }

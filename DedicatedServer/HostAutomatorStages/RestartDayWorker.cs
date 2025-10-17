@@ -91,7 +91,7 @@ namespace DedicatedServer.HostAutomatorStages
                 Game1.server.kick(farmer.UniqueMultiplayerID);
             }
 
-            DedicatedServer.Warp(WarpPoints.FarmHouseWarp);
+            MainController.Warp(WarpPoints.FarmHouseWarp);
 
             Game1.player.isInBed.Value = true;
             Game1.currentLocation.answerDialogueAction("Sleep_Yes", null);
@@ -104,22 +104,22 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void EnableOnSaved()
         {
-            DedicatedServer.helper.Events.GameLoop.Saved += OnSavedQuit;
+            MainController.helper.Events.GameLoop.Saved += OnSavedQuit;
         }
 
         private static void DisableOnSaved()
         {
-            DedicatedServer.helper.Events.GameLoop.Saved -= OnSavedQuit;
+            MainController.helper.Events.GameLoop.Saved -= OnSavedQuit;
         }
 
         private static void EnableOnOneSecondUpdateTicked()
         {
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked += SavesGameRestartsDayWorker;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked += SavesGameRestartsDayWorker;
         }
 
         private static void DisableOnOneSecondUpdateTicked()
         {
-            DedicatedServer.helper.Events.GameLoop.OneSecondUpdateTicked -= SavesGameRestartsDayWorker;
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked -= SavesGameRestartsDayWorker;
         }
 
         /// <summary>

@@ -17,11 +17,11 @@ namespace DedicatedServer.Utils
         }
         public static bool IsWaitingToAttend()
         {
-            return DedicatedServer.IsReady("festivalStart");
+            return MainController.IsReady("festivalStart");
         }
         public static bool OthersWaitingToAttend(int numOtherPlayers)
         {
-            return DedicatedServer.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
+            return MainController.GetNumberReady("festivalStart") == (numOtherPlayers + (IsWaitingToAttend() ? 1 : 0));
         }
         private static bool isTodayBeachNightMarket()
         {
@@ -34,11 +34,11 @@ namespace DedicatedServer.Utils
 
         public static bool IsWaitingToLeave()
         {
-            return DedicatedServer.IsReady("festivalEnd");
+            return MainController.IsReady("festivalEnd");
         }
         public static bool OthersWaitingToLeave(int numOtherPlayers)
         {
-            return DedicatedServer.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
+            return MainController.GetNumberReady("festivalEnd") == (numOtherPlayers + (IsWaitingToLeave() ? 1 : 0));
         }
         public static bool ShouldLeave(int numOtherPlayers)
         {
