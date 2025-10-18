@@ -1,10 +1,10 @@
 {
   "Name": "DedicatedServer",
-  "Author": "ObjectManagerManager",
-  "Version": "1.0.2",
+  "Author": "Chris82111",
+  "Version": "1.2.2",
   "Description": "Description",
-  "UniqueID": "objectmanagermanager.DedicatedServer",
+  "UniqueID": "com.chris82111.dedicatedserver",
   "EntryDll": "DedicatedServer.dll",
-  "MinimumApiVersion": "3.0.0",
+  "MinimumApiVersion": "4.3.2",
   "UpdateKeys": []
 }

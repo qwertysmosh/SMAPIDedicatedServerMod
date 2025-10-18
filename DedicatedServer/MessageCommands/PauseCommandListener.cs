@@ -1,45 +1,51 @@
 ﻿using DedicatedServer.Chat;
+using DedicatedServer.HostAutomatorStages;
 using StardewValley;
+using StardewValley.Menus;
 
 namespace DedicatedServer.MessageCommands
 {
-    internal class PauseCommandListener
+    internal abstract class PauseCommandListener
     {
-        private EventDrivenChatBox chatBox;
-
-        public PauseCommandListener(EventDrivenChatBox chatBox)
+        public static void Enable()
         {
-            this.chatBox = chatBox;
+            MainController.chatBox.ChatReceived += chatReceived;
         }
 
-        public void Enable()
+        public static void Disable()
         {
-            chatBox.ChatReceived += chatReceived;
+            MainController.chatBox.ChatReceived -= chatReceived;
         }
 
-        public void Disable()
-        {
-            chatBox.ChatReceived -= chatReceived;
-        }
-
-        private void chatReceived(object sender, ChatEventArgs e)
+        private static void chatReceived(object sender, ChatEventArgs e)
         {
             var tokens = e.Message.ToLower().Split(' ');
             if (tokens.Length == 0)
             {
                 return;
             }
-            // Private message chatKind is 3
-            if (e.ChatKind == 3 && tokens[0] == "pause")
-            {
 
-                Game1.netWorldState.Value.IsPaused = !Game1.netWorldState.Value.IsPaused;
-                if (Game1.netWorldState.Value.IsPaused)
+            if (Game1.player.UniqueMultiplayerID != e.SourceFarmerId)
+            {
+                if (ChatBox.privateMessage != e.ChatKind) { return; }
+            }
+
+            if (tokens[0] == "pause")
+            {
+                if (false == PasswordValidation.IsAuthorized(e.SourceFarmerId, p => p.Pause))
                 {
-                    chatBox.globalInfoMessage("Paused");
+                    MainController.chatBox.textBoxEnter(PasswordValidation.notAuthorizedMessage);
                     return;
                 }
-                chatBox.globalInfoMessage("Resumed");
+
+                Game1.netWorldState.Value.IsPaused = !Game1.netWorldState.Value.IsPaused;
+
+                if (Game1.netWorldState.Value.IsPaused)
+                {
+                    MainController.chatBox.globalInfoMessage("Paused");
+                    return;
+                }
+                MainController.chatBox.globalInfoMessage("Resumed");
             }
         }
     }

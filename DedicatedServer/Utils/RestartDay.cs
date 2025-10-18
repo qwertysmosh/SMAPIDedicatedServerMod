@@ -1,19 +1,10 @@
 ﻿using DedicatedServer.HostAutomatorStages;
-using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.Utils
 {
     internal abstract class RestartDay : RestartDayWorker
     {
-        private RestartDay() : base(null)
-        {
-        }
-
         /// <summary>
         ///         Kicks all players and starts the next day
         /// </summary>

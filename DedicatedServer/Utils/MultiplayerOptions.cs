@@ -1,32 +1,13 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Config;
-using Microsoft.VisualBasic.FileIO;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
+﻿using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.Menus;
-using StardewValley.Monsters;
-using StardewValley.Network;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using static StardewValley.Polygon;
-using static System.Collections.Specialized.BitVector32;
 
 namespace DedicatedServer.Utils
 {
     /// <summary>
     /// Offers multiplayer options and multiplayer support functions
     /// </summary>
-    internal class MultiplayerOptions
+    internal static class MultiplayerOptions
     {
         /// <summary>
         ///         The server mode option that you see in the game settings,
@@ -63,25 +44,25 @@ namespace DedicatedServer.Utils
             MultiplayerServer = 2
         }
         
-        private static IModHelper helper;
+        //private static IModHelper helper;
 
-        private static ModConfig config;
+        //private static ModConfig config;
 
-        private static EventDrivenChatBox chatBox;
+        //private static EventDrivenChatBox chatBox;
 
         public const string inviteCodeSaveFile = "invite_code.txt";
 
-        /// <summary>
-        /// Cclass requires helper of type <see cref="IModHelper"/>
-        /// </summary>
-        /// <param name="helper">The helper must be initialized.</param>
-        public MultiplayerOptions(IModHelper helper, ModConfig config, EventDrivenChatBox chatBox)
+        public static void Init()
         {
-            MultiplayerOptions.helper = helper;
-            MultiplayerOptions.config = config;
-            MultiplayerOptions.chatBox = chatBox;
+            if (MainController.config.TryActivatingInviteCode)
+            {
+                TryActivatingInviteCode();
+            }
+        }
 
-            TryActivatingInviteCode();
+        public static void Reset()
+        {
+            Disable();
         }
 
         /// <summary>
@@ -115,7 +96,7 @@ namespace DedicatedServer.Utils
             string inviteCode = InviteCode;
             try
             {
-                helper?.Data.WriteJsonFile(inviteCodeSaveFile, inviteCode);
+                MainController.helper.Data.WriteJsonFile(inviteCodeSaveFile, inviteCode);
             }
             catch { }
         }
@@ -231,11 +212,10 @@ namespace DedicatedServer.Utils
             {
                 Game1.spawnMonstersAtNight = value;
                 Game1.game1.SetNewGameOption("SpawnMonstersAtNight", value);
-                config.SpawnMonstersOnFarmAtNight = value;
-                helper.WriteConfig(config);
+                MainController.config.SpawnMonstersOnFarmAtNight = value;
+                MainController.helper.WriteConfig(MainController.config);
             }
         }
-
 
         #region TRY_ACTIVATING_INVITE_CODE
 
@@ -253,7 +233,7 @@ namespace DedicatedServer.Utils
 
         private static TryActivatingStates tryActivatingState;
 
-        private static int[] tryActivatingWaitTimes = { 9, 3, 9 };
+        private static readonly int[] tryActivatingWaitTimes = { 9, 3, 9 };
 
         /// <summary>
         ///         Attempts to obtain the invitation code.
@@ -267,16 +247,25 @@ namespace DedicatedServer.Utils
         /// <returns>
         ///         true : if the handler has been started
         /// <br/>   false: the handler is already running and could not be started.</returns>
-        public bool TryActivatingInviteCode()
+        public static bool TryActivatingInviteCode()
         {
-            if (0 < MultiplayerOptions.time) { return false; }
+            if (TryActivatingStates.None != tryActivatingState) { return false; }
 
             MultiplayerOptions.time = tryActivatingWaitTimes[0];
             tryActivatingState = TryActivatingStates.WaitForInviteCode;
 
-            AddOnOneSecondUpdateTicked(TryActivatingInviteCodeWorker);
+            Enable();
 
             return true;
+        }
+        private static void Enable()
+        {
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked += TryActivatingInviteCodeWorker;
+        }
+
+        private static void Disable()
+        {
+            MainController.helper.Events.GameLoop.OneSecondUpdateTicked -= TryActivatingInviteCodeWorker;
         }
 
         private static void TryActivatingInviteCodeWorker(object sender, OneSecondUpdateTickedEventArgs e)
@@ -289,7 +278,7 @@ namespace DedicatedServer.Utils
             switch (tryActivatingState)
             {
                 case TryActivatingStates.None:
-                    RemoveOnOneSecondUpdateTicked(TryActivatingInviteCodeWorker);
+                    Disable();
                     return;
 
                 case TryActivatingStates.WaitForInviteCode:
@@ -297,14 +286,14 @@ namespace DedicatedServer.Utils
                     {
                         SaveInviteCode();
                         tryActivatingState = TryActivatingStates.None;
-                        chatBox.textBoxEnter($"Could receive the invitation code {InviteCode}" + TextColor.Green);
+                        MainController.chatBox.textBoxEnter($"Could receive the invitation code {InviteCode}" + TextColor.Green);
                         return;
                     }
                     if(0 == time)
                     {
                         tryActivatingState = TryActivatingStates.DisableServer;
                     }
-                    chatBox.textBoxEnter($"Attention: Server will shut down in {time} seconds" + TextColor.Yellow);
+                    MainController.chatBox.textBoxEnter($"Attention: Server will shut down in {time} seconds" + TextColor.Yellow);
                     break;
 
                 case TryActivatingStates.DisableServer:
@@ -318,7 +307,7 @@ namespace DedicatedServer.Utils
                     {
                         tryActivatingState = TryActivatingStates.EnableServer;
                     }
-                    chatBox.textBoxEnter($"Attention: The server is started in {time} seconds" + TextColor.Yellow);
+                    MainController.chatBox.textBoxEnter($"Attention: The server is started in {time} seconds" + TextColor.Yellow);
                     break;
 
                 case TryActivatingStates.EnableServer:
@@ -344,16 +333,6 @@ namespace DedicatedServer.Utils
                     // chatBox.textBoxEnter($"Attention: Try to get the invitation code, remaining time {time} seconds" + TextColor.Yellow);
                     break;
             }
-        }
-
-        private static void AddOnOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked += handler;
-        }
-
-        private static void RemoveOnOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked -= handler;
         }
 
         #endregion

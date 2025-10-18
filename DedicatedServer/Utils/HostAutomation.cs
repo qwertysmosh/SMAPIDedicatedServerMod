@@ -1,15 +1,17 @@
 ﻿using DedicatedServer.HostAutomatorStages;
 using StardewValley;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.Utils
 {
     internal abstract class HostAutomation : ProcessPauseBehaviorLink
     {
+        public static new event EventHandler ResetAction
+        {
+            add { ProcessPauseBehaviorLink.ResetAction += value; }
+            remove { ProcessPauseBehaviorLink.ResetAction -= value; }
+        }
+
         /// <summary>
         /// Alias for <c>Game1.netWorldState.Value.IsPaused</c>
         /// </summary>
@@ -18,13 +20,29 @@ namespace DedicatedServer.Utils
             get { return Game1.netWorldState.Value.IsPaused; }
             set { Game1.netWorldState.Value.IsPaused = value; }
         }
+
         /// <summary>
-        /// <inheritdoc cref = "ProcessPauseBehaviorLink.preventPause"/>
+        /// <inheritdoc cref = "ProcessPauseBehaviorLink.PreventPauseUntilNextDay"/>
         /// </summary>
-        public static bool PreventPause
+        public static new void PreventPauseUntilNextDay()
         {
-            get { return ProcessPauseBehaviorLink.preventPause; }
-            set { ProcessPauseBehaviorLink.preventPause = value; }
+            ProcessPauseBehaviorLink.PreventPauseUntilNextDay();
+        }
+
+        /// <summary>
+        /// <inheritdoc cref = "ProcessPauseBehaviorLink.PauseDisabledUntilNextDay"/>
+        /// </summary>
+        public static new void PauseDisabledUntilNextDay()
+        {
+            ProcessPauseBehaviorLink.PauseDisabledUntilNextDay();
+        }
+
+        /// <summary>
+        /// <inheritdoc cref = "ProcessPauseBehaviorLink.Reset"/>
+        /// </summary>
+        public static new void Reset()
+        {
+            ProcessPauseBehaviorLink.Reset();
         }
 
         /// <summary>
@@ -45,29 +63,12 @@ namespace DedicatedServer.Utils
         public static void LetMePlay()
         {
             EnableHostAutomation = false;
-            PreventPause = true;
+            PauseDisabledUntilNextDay();
+
             Invincible.InvincibilityOverwrite = false;
             Sleeping.ShouldSleepOverwrite = false;
-        }
-
-        /// <summary>
-        ///         The player returns control to the host, all host functions are switched on.   
-        /// </summary>
-        public static void TakeOver()
-        {
-            EnableHostAutomation = true;
-            PreventPause = false;
-            Invincible.InvincibilityOverwrite = null;
-        }
-
-        /// <summary>
-        ///         Lets the player take over the host but all host functions are switched on.
-        /// <br/>   The main reason for this setting is debugging
-        /// </summary>
-        public static void LetMeControl()
-        {
-            EnableHostAutomation = true;
-            PreventPause = true;
+            Invisible.InvisibleOverwrite = false;
+            Invisible.SetVisibleDisplayOnChanges();
         }
     }
 }

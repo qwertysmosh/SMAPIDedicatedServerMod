@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DedicatedServer.Config
+﻿namespace DedicatedServer.Config
 {
     public class ModConfig
     {
@@ -29,17 +27,16 @@ namespace DedicatedServer.Config
         // Options are "normal" or "remixed".
         public string MineRewards { get; set; } = "normal";
 
-        public bool SpawnMonstersOnFarmAtNight { get; set; } = false;
-
         public ulong? RandomSeed { get; set; } = null;
 
-        public bool AcceptPet = true; // By default, accept the pet (of course).
-        
-        // Nullable. Must not be null if AcceptPet is true. Options are "dog" or "cat".
-        public string PetSpecies { get; set; } = "dog";
+        public const int PetBreedMax = 9;
+        public const int FirstDogIndex = 5;
+        public bool ShouldAcceptPet() { return 0 <= this.PetBreed && PetBreedMax >= this.PetBreed; }
+        public int GetPetBreedIndex() { return (ModConfig.FirstDogIndex <= this.PetBreed) ? this.PetBreed - ModConfig.FirstDogIndex : this.PetBreed; }
 
-        // Nullable. Must not be null if AcceptPet is true. Options are 0, 1, or 2.
-        public int? PetBreed { get; set; } = 0;
+        // If no pet is desired, an invalid value, e.g. -1, must be set.
+        // The options are 0 to 4 for cats and 5 to 9 for dogs.
+        public int PetBreed { get; set; } = 0;
 
         // Nullable. Must not be null if AcceptPet is true. Any string.
         public string PetName { get; set; } = "Stella";
@@ -54,11 +51,146 @@ namespace DedicatedServer.Config
         // committing to the Joja route and removing the community center.
         public bool PurchaseJojaMembership = false;
 
-        // Changes farmhands permissions to move buildings from the Carpenter's Shop.
-        // Is set each time the server is started and can be changed in the game.
-        // "off" to entirely disable moving buildings.
-        // "owned" to allow farmhands to move buildings that they purchased.
-        // "on" to allow moving all buildings.
+        /// <summary>
+        ///         Setting whether monsters spawn on the farm
+        /// <br/>   
+        /// <br/>   true : The monsters will appear
+        /// <br/>   false: No monsters will appear
+        /// </summary>
+        public bool SpawnMonstersOnFarmAtNight { get; set; } = false;
+
+        /// <summary>
+        ///         Changes farmhands permissions to move buildings from the Carpenter's Shop.
+        /// <br/>   
+        /// <br/>   Is set each time the server is started and can be changed in the game.
+        /// <br/>   "off" to entirely disable moving buildings.
+        /// <br/>   "owned" to allow farmhands to move buildings that they purchased.
+        /// <br/>   "on" to allow moving all buildings.
+        /// </summary>
         public string MoveBuildPermission { get; set; } = "off";
+
+        /// <summary>
+        ///         Sets whether an attempt should be made to generate an
+        /// <br/>   invitation code when the server is restarted.
+        /// </summary>
+        public bool TryActivatingInviteCode { get; set; } = true;
+
+        /// <summary>
+        ///         If this option is set to true, the upgrade level of the host's farmhouse
+        /// <br/>   changes to the same, highest upgrade level of all farmers.
+        /// <br/>   
+        /// <br/>   With <see cref="MainController.Utils.HostHouseUpgrade.ManualUpdate(string)"/> 
+        /// <br/>   you can downgrade or upgrade it manually. As long as this property is set to true,
+        /// <br/>   the house is automatically upgraded again.
+        /// </summary>
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = false;
+
+        /// <summary>
+        ///         Password used to log in
+        /// <br/>
+        /// <br/>   Must be changed to a secure password
+        /// <br/>   - An empty string means no password
+        /// <br/>   - Any check fails if the value is set to null
+        /// </summary>
+        public string Password { get; set; } = null;
+
+        /// <summary>
+        /// <inheritdoc cref = "PasswordProtectedCommands"/>
+        /// </summary>
+        public PasswordProtectedCommands PasswordProtected { get; set; } = new PasswordProtectedCommands();
+    }
+
+    /// <summary>
+    ///         The properties of the class, which are named exactly the same
+    /// <br/>   as the chat commands, allow the password protection of individual
+    /// <br/>   functions to be switched on (true) and off (false).
+    /// </summary>
+    public class PasswordProtectedCommands
+    {
+        /// <summary>
+        /// <see cref="MessageCommands.PauseCommandListener"/>
+        /// </summary>
+        public bool Pause { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.BuildCommandListener"/>
+        /// </summary>
+        public bool Build { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.DemolishCommandListener"/>
+        /// </summary>
+        public bool Demolish { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool LetMePlay { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool TakeOver { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool SafeInviteCode { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool InviteCode { get; set; } = true;
+        
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceInviteCode { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool Invisible { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool Sleep { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceSleep { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceResetDay { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool ForceShutdown { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool Wallet { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool SpawnMonster { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool MoveBuildPermission { get; set; } = true;
+
+        /// <summary>
+        /// <seealso cref="MessageCommands.ServerCommandListener"/>
+        /// </summary>
+        public bool UpgradeHouseLevelBasedOnFarmhand { get; set; } = true;
+        
     }
 }

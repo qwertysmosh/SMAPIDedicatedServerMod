@@ -1,30 +1,42 @@
-﻿using DedicatedServer.Chat;
-using DedicatedServer.Utils;
-using StardewModdingAPI;
+﻿using DedicatedServer.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.Monsters;
+using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
-    internal class SleepWorker
-    {
-        private static IModHelper helper = null;
+    // Check if all players are ready:
+    // `Game1.netReady.IsReady("sleep");`
+    // 
+    // Get number of ready players:
+    // `Game1.netReady.GetNumberReady("sleep");`
+    // 
+    // Get number of required players.
+    // Returns 0 until the first player sleeps.
+    // Returns the number of players required from the time a player goes to sleep until the new day:
+    // `Game1.netReady.GetNumberRequired("sleep")}");`
+    // 
+    // In Bed region without sleeping:
+    // `Game1.player.isInBed.Value.ToString();`
+    // 
+    // According to the `Game1.player.team.sleepAnnounceMode` the value will not refresh: 
+    // `Game1.player.team.announcedSleepingFarmers.ToList().Select(f => f.UniqueMultiplayerID).ToList().Contains(Game1.player.UniqueMultiplayerID);`
 
+    internal abstract class SleepWorker
+    {
         private static bool _ShouldSleepOverwrite = false;
 
-        public SleepWorker(IModHelper helper)
+        public static void Reset()
         {
-            SleepWorker.helper = helper;
+            ShouldSleepOverwrite = false;
+            RemoveOnDayStarted(OnDayStartedWorker);
         }
 
         /// <summary>
         ///         Checks whether the host is sleeping
+        /// <br/>
+        /// <br/>   Tested, this function worked a little longer than the <see cref="helper.Events.GameLoop.DayEnding"/> event.
         /// </summary>
         /// <returns>
         ///         true : The host is sleeping
@@ -32,32 +44,70 @@ namespace DedicatedServer.HostAutomatorStages
         /// </returns>
         public static bool IsSleeping()
         {
-            return ReadyCheckHelper.IsReady("sleep", Game1.player);
+            if (Game1.netReady.IsReady("sleep"))
+            {
+                return true;
+            }
+
+            if (Game1.player.isInBed.Value)
+            {
+                if (Game1.activeClickableMenu is ReadyCheckDialog rcd)
+                {
+                    if ("sleep" == rcd.checkName.ToLower())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
-        ///         Checks whether all players are asleep
+        ///         Checks whether all players without the host are asleep
         /// </summary>
-        /// <param name="numOtherPlayers">Number of players</param>
+        /// <param name="allowHostOnly">
+        ///         If true, the function returns true if only the host is
+        /// <br/>   on the server and at least one player has previously
+        /// <br/>   gone to bed that day. </param>
         /// <returns>
-        ///         true : All players are sleeping
+        ///         true : All other players are sleeping
         /// <br/>   false: Not all players are sleeping
         /// </returns>
-        public static bool OthersInBed(int numOtherPlayers)
+        public static bool OthersInBed(bool allowHostOnly = false)
         {
-            return Game1.player.team.GetNumberReady("sleep") == (numOtherPlayers + (IsSleeping() ? 1 : 0));
+            int requiredPlayer = Game1.netReady.GetNumberRequired("sleep");
+
+            // 0 Nobody went to bed that day
+            // 1 Only the host is on the server
+            if (1 >= requiredPlayer)
+            {
+                if(allowHostOnly)
+                {
+                    if (1 <= requiredPlayer)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else
+            {
+                int readyPlayer = Game1.netReady.GetNumberReady("sleep");
+                int hostPlayer = (true == IsSleeping()) ? 0 : 1;
+                return readyPlayer >= (requiredPlayer - hostPlayer);
+            }            
         }
 
         /// <summary>
         ///         Checks whether the host should go to bed
         /// </summary>
-        /// <param name="numOtherPlayers">Number of players</param>
         /// <returns>
         ///         true : The host should go to bed
         /// <br/>   false: The host should not go to bed</returns>
-        public static bool ShouldSleep(int numOtherPlayers)
+        public static bool ShouldSleep()
         {
-            return (numOtherPlayers > 0 && (Game1.timeOfDay >= 2530 || OthersInBed(numOtherPlayers))) || ShouldSleepOverwrite;
+            return (Game1.timeOfDay >= 2530) || ShouldSleepOverwrite || OthersInBed(true);
         }
 
         /// <summary>
@@ -80,14 +130,13 @@ namespace DedicatedServer.HostAutomatorStages
                     if (HostAutomation.EnableHostAutomation)
                     {
                         AddOnDayStarted(OnDayStartedWorker);
-                        HostAutomation.PreventPause = true;
+                        HostAutomation.PreventPauseUntilNextDay();
                         _ShouldSleepOverwrite = true;
                     }
                 }
                 else
                 {
                     _ShouldSleepOverwrite = false;
-                    AddOneSecondUpdateTicked(OnOneSecondUpdateTicked);
                 }
             }
             get
@@ -98,44 +147,12 @@ namespace DedicatedServer.HostAutomatorStages
 
         private static void AddOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            helper.Events.GameLoop.DayStarted += handler;
+            MainController.helper.Events.GameLoop.DayStarted += handler;
         }
 
         private static void RemoveOnDayStarted(EventHandler<DayStartedEventArgs> handler)
         {
-            helper.Events.GameLoop.DayStarted -= handler;
-        }
-
-        private static void AddOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked += handler;
-        }
-
-        private static void RemoveOneSecondUpdateTicked(EventHandler<OneSecondUpdateTickedEventArgs> handler)
-        {
-            helper.Events.GameLoop.OneSecondUpdateTicked -= handler;
-        }
-
-        /// <summary>
-        ///         Waits until the host is back on his feet before the handler
-        /// <br/>   <see cref="OnDayStartedWorker"/> is removed.
-        /// <br/>   
-        /// <br/>   Deactivating Sleep restores the normal behavior of the mod,
-        /// <br/>   when the host is not controlled by a player.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void OnOneSecondUpdateTicked(object sender, OneSecondUpdateTickedEventArgs e)
-        {
-            if (false == IsSleeping())
-            {
-                RemoveOneSecondUpdateTicked(OnOneSecondUpdateTicked);
-                RemoveOnDayStarted(OnDayStartedWorker);
-                if (HostAutomation.EnableHostAutomation)
-                {
-                    HostAutomation.TakeOver();
-                }
-            }
+            MainController.helper.Events.GameLoop.DayStarted -= handler;
         }
 
         /// <summary>
@@ -145,7 +162,7 @@ namespace DedicatedServer.HostAutomatorStages
         /// <param name="e"></param>
         private static void OnDayStartedWorker(object sender, DayStartedEventArgs e)
         {
-            ShouldSleepOverwrite = false;
+            Reset();
         }
     }
 }
