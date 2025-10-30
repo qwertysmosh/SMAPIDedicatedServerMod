@@ -4,7 +4,10 @@
     {
         public string FarmName { get; set; } = "Stardew";
 
-        // Options are 0, 1, 2, or 3.
+        // Options are 1-32.
+        public int MaxPlayers { get; set; } = 8;
+
+        // Options are 0-10.
         public int StartingCabins { get; set; } = 1;
 
         // Options are "nearby" or "separate"
@@ -46,6 +49,9 @@
 
         // Enables the crop saver
         public bool EnableCropSaver = true;
+
+        // Enables the chest locker
+        public bool EnableChestLocker = true;
 
         // Configures the automated host to purchase a Joja membership once available,
         // committing to the Joja route and removing the community center.
