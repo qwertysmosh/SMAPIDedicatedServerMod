@@ -17,6 +17,12 @@ namespace DedicatedServer
 {
     internal static class MainController
     {
+        private static void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         private static FieldInfo multiplayerFieldInfo = typeof(Game1).GetField("multiplayer", BindingFlags.NonPublic | BindingFlags.Static);
 
         private static Multiplayer multiplayer = null;
@@ -254,7 +260,7 @@ namespace DedicatedServer
 
         public static void Exit(int statusCode)
         {
-            monitor.Log("Exiting...", LogLevel.Error);
+            DebugLog("Exiting...", LogLevel.Error);
             Environment.Exit(statusCode);
         }
 
