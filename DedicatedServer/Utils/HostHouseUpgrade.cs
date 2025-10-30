@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Netcode;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -14,6 +15,12 @@ namespace DedicatedServer.Utils
 {
     internal class HostHouseUpgrade
     {
+        private static void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            DedicatedServer.monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         private static readonly string defaultBed = BedFurniture.DEFAULT_BED_INDEX;
         private static readonly string doubleBed = BedFurniture.DOUBLE_BED_INDEX;
         private static readonly string childBed = BedFurniture.CHILD_BED_INDEX;
@@ -328,7 +335,7 @@ namespace DedicatedServer.Utils
         // it can be placed outside the room boundaries when upgrading
         public static void UpgradeToLevel(int targetLevel)
         {
-            monitor.Log($"The host's farmhouse will upgraded to {targetLevel}", LogLevel.Debug);
+            DebugLog($"The host's farmhouse will be upgraded to {targetLevel}", LogLevel.Debug);
 
             // The house level is only increased by 1 every day
             targetLevel = Game1.player.HouseUpgradeLevel + 1;
