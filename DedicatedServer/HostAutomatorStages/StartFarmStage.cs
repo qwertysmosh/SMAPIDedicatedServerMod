@@ -1,6 +1,7 @@
 ﻿using DedicatedServer.Chat;
 using DedicatedServer.Config;
 using DedicatedServer.Crops;
+using DedicatedServer.Chests;
 using DedicatedServer.HostAutomatorStages.BehaviorStates;
 using DedicatedServer.MessageCommands;
 using DedicatedServer.Utils;
@@ -8,22 +9,92 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DedicatedServer.HostAutomatorStages
 {
     internal class StartFarmStage
     {
+        private void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         private readonly bool allowRestartOfModAfterTitleMenu = true;
 
         private readonly IModHelper helper;
         private readonly IMonitor monitor;
         private readonly ModConfig config;
 
+        private CropSaver cropSaver = null;
+        private ChestLocker chestLocker = null;
         private ReadyCheckHelper readyCheckHelper = null;
         private InvincibleWorker invincibleWorker = null;
         private PasswordValidation passwordValidation = null;
 
+        // Get connected player count
+        private int GetConnectedPlayerCount()
+        {
+            // Contains other connected players besides host player, add 1 for host player
+            return Game1.otherFarmers.Count + 1;
+        }
+
+        // Get farmer name
+        private string GetFarmerName(long playerID)
+        {
+            Farmer farmer = Game1.getAllFarmers().FirstOrDefault(f => f.UniqueMultiplayerID == playerID);
+
+            if (farmer != null)
+            {
+                // If newcomer
+                if (string.IsNullOrWhiteSpace(farmer.Name))
+                    return "Newcomer";
+
+                // Otherwise, log farmer name
+                return farmer.Name;
+            }
+
+            // If no farmer found, fallback
+            return playerID.ToString();
+        }
+
+        private void HookMultiplayerEvents()
+        {
+            helper.Events.Multiplayer.PeerConnected += OnPlayerConnected;
+            helper.Events.Multiplayer.PeerDisconnected += OnPlayerDisconnected;
+        }
+
+        private void UnhookMultiplayerEvents()
+        {
+            helper.Events.Multiplayer.PeerConnected -= OnPlayerConnected;
+            helper.Events.Multiplayer.PeerDisconnected -= OnPlayerDisconnected;
+        }
+
+        private void OnPlayerConnected(object sender, PeerConnectedEventArgs e)
+        {
+            string playerName = GetFarmerName(e.Peer.PlayerID);
+            int connectedPlayers = GetConnectedPlayerCount();
+            int maxPlayers = Game1.netWorldState.Value.CurrentPlayerLimit;
+            DebugLog($"{playerName} has joined. {connectedPlayers}/{maxPlayers}", LogLevel.Info);
+        }
+
+        private async void OnPlayerDisconnected(object sender, PeerDisconnectedEventArgs e)
+        {
+            // Wait 1 second
+            await Task.Delay(1000);
+
+            string playerName = GetFarmerName(e.Peer.PlayerID);
+            int connectedPlayers = GetConnectedPlayerCount();
+            int maxPlayers = Game1.netWorldState.Value.CurrentPlayerLimit;
+
+            DebugLog($"{playerName} has left. {connectedPlayers}/{maxPlayers}", LogLevel.Info);
+        }
+
+        // Start Farm Stage
         public StartFarmStage(IModHelper helper, IMonitor monitor, ModConfig config)
         {
             this.helper = helper;
@@ -31,6 +102,17 @@ namespace DedicatedServer.HostAutomatorStages
             this.config = config;
 
             MainController.InitStaticVariables(helper, monitor, config);
+
+            if (config.EnableCropSaver)
+            {
+                cropSaver = new CropSaver(helper, monitor, config);
+                cropSaver.Enable();
+            }
+
+            if (config.EnableChestLocker) {
+                chestLocker = new ChestLocker(helper, config);
+                chestLocker.Enable();
+            }
 
             EnableReturnToTitle();
             EnableExecute();
@@ -40,12 +122,14 @@ namespace DedicatedServer.HostAutomatorStages
         ~StartFarmStage()
         {
             Dispose();
+            UnhookMultiplayerEvents();
         }
 
         public void Dispose()
         {
             DisableReturnToTitle();
             DisableExecute();
+
             if (false == allowRestartOfModAfterTitleMenu)
             {
                 DisableSaveLoaded();
@@ -133,15 +217,15 @@ namespace DedicatedServer.HostAutomatorStages
 
         private void CreateNewGame()
         {
-            monitor.Log($"Failed to find farm slot. Creating new farm \"{config.FarmName}\" and hosting on co-op", LogLevel.Debug);
+            DebugLog($"Failed to find farm slot. Creating new farm \"{config.FarmName}\" and hosting on co-op", LogLevel.Debug);
 
             // Mechanism pulled from CoopMenu.HostNewFarmSlot; CharacterCustomization class; and AdvancedGameOptions class
             Game1.resetPlayer();
 
             // Starting cabins
-            if (config.StartingCabins < 0 || config.StartingCabins > 3)
+            if (config.StartingCabins < 0 || config.StartingCabins > 10)
             {
-                LogConfigError("Starting cabins must be an integer in [0, 3]");
+                LogConfigError("Starting cabins must be an integer in [0-10]");
                 Exit(-1);
             }
             Game1.startingCabins = config.StartingCabins;
@@ -326,7 +410,7 @@ namespace DedicatedServer.HostAutomatorStages
 
         private void LoadExistingGame(Farmer hostedFarmer)
         {
-            monitor.Log($"Hosting {hostedFarmer.slotName} on co-op", LogLevel.Debug);
+            DebugLog($"Hosting {hostedFarmer.slotName} on co-op", LogLevel.Debug);
 
             // Mechanisms pulled from CoopMenu.HostFileSlot
             Game1.multiplayerMode = 2;
@@ -367,39 +451,15 @@ namespace DedicatedServer.HostAutomatorStages
             Game1.onScreenMenus.Add(chatBox);
             MainController.InitChatBox(chatBox);
 
-            // Update the player limits (remove them)
-            // This breaks the game since there are loops which iterate in the range
-            // (1, ..., HighestPlayerLimit). I think the only loops regarding this
-            // value are around loading / creating cellar maps on world load...
-            // maybe we just have to sacrifice cellar-per-player. Or maybe we have to
-            // update the value dynamically, and load new cellars whenever a new player
-            // joins? Unclear...
-            Game1.netWorldState.Value.CurrentPlayerLimit = 16; // 32, int.MaxValue
+           // Max player limit
+            if (config.MaxPlayers < 1 || config.MaxPlayers > 32)
+            {
+                LogConfigError("Max players must be an integer in [1-32].");
+                Exit(-1);
+            }
+            Game1.netWorldState.Value.CurrentPlayerLimit = config.MaxPlayers;
 
-            // NOTE: It will be very difficult, if not impossible, to remove the
-            // cabin-per-player requirement. This requirement is very much built in
-            // to much of the multiplayer networking connect / disconnect logic, and,
-            // more importantly, every cabin has a SINGLE "farmhand" assigned to it.
-            // Indeed, it's a 1-to-1 relationship---multiple farmers can't be assigned
-            // to the same cabin. And this is a property of the cabin interface, so
-            // it can't even be extended / modified. The most viable way to remove the
-            // cabin-per-player requirement would be to create "invisible cabins"
-            // which all sit on top of the farmhouse (for instance). They'd have
-            // to be invisible (so that only the farmhouse is rendered), and
-            // somehow they'd have to be made so that you can't collide with them
-            // (though maybe this could be solved naturally by placing it to overlap
-            // with the farmhouse in just the right position). Whenever a player enters
-            // one of these cabins automatically (e.g., by warping home after passing out),
-            // they'd have to be warped out of it immediately back into the farmhouse, since
-            // these cabins should NOT be enterable in general (this part might be impossible
-            // to do seamlessly, but it could theoretically be done in some manner). The mailbox
-            // for the farmhouse would have to somehow be used instead of the cabin's mailbox (this
-            // part might be totally impossible). And there would always have to be at least one
-            // unclaimed invisible cabin at all times (every time one is claimed by a joining player,
-            // create a new one). This would require a lot of work, and the mailbox part might
-            // be totally impossible.
-
-            //We set bot mining lvl to 10 so he doesn't lvlup passively
+            // We set bot mining lvl to 10 so he doesn't lvlup passively
             Game1.player.miningLevel.Value = 10;
 
             BuildCommandListener.Enable();
@@ -479,11 +539,12 @@ namespace DedicatedServer.HostAutomatorStages
             );
 
             BehaviorChain.Enable();
+            HookMultiplayerEvents();
         }
 
         private void LogConfigError(string error)
         {
-            monitor.Log($"Error in DedicatedServer mod config file. {error}", LogLevel.Error);
+            DebugLog($"Error in DedicatedServer mod config file. {error}", LogLevel.Error);
         }
 
         private static void Exit(int statusCode)
