@@ -11,6 +11,12 @@ namespace DedicatedServer.HostAutomatorStages
 {
     internal class TransitionSleepBehaviorLink : BehaviorLink
     {
+        private static void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            DedicatedServer.monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         #region Required in derived class
 
         public override int WaitTimeAutoLoad { get; set; } = (int)(60 * 0.2);
@@ -27,7 +33,7 @@ namespace DedicatedServer.HostAutomatorStages
 
                 if (Game1.currentLocation is FarmHouse)
                 {
-                    MainController.monitor.Log($"The host lies down in bed", LogLevel.Debug);
+                    DebugLog($"Host asleep", LogLevel.Debug);
 
                     Game1.player.isInBed.Value = true;
                     Game1.player.sleptInTemporaryBed.Value = true;
@@ -57,7 +63,7 @@ namespace DedicatedServer.HostAutomatorStages
                 }
                 else
                 {
-                    MainController.monitor.Log($"Warp to sleep", LogLevel.Debug);
+                    DebugLog($"Host warped to sleep", LogLevel.Debug);
 
                     MainController.Warp(WarpPoints.FarmHouseWarp);
                     WaitTime = 60;
@@ -65,7 +71,7 @@ namespace DedicatedServer.HostAutomatorStages
             }
             else if (!Utils.Sleeping.ShouldSleep() && Utils.Sleeping.IsSleeping())
             {
-                MainController.monitor.Log($"Cancel sleep", LogLevel.Debug);
+                DebugLog($"Cancel sleep", LogLevel.Debug);
 
                 if (Game1.activeClickableMenu != null && Game1.activeClickableMenu is ReadyCheckDialog rcd)
                 {
