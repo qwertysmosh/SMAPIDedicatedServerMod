@@ -146,7 +146,7 @@ namespace DedicatedServer.HostAutomatorStages
             SleepWorker.Reset();
             RestartDayWorker.Reset();
 
-            CropSaver.Disable();
+            cropSaver.Disable();
             MultiplayerOptions.Reset();
             // MoveBuildPermission // Disable/Reset is not necessary
 
@@ -471,7 +471,7 @@ namespace DedicatedServer.HostAutomatorStages
             SleepWorker.Reset();
             RestartDayWorker.Reset();
 
-            CropSaver.Init();
+            cropSaver.Init();
             MultiplayerOptions.Init();
             MoveBuildPermission.Init();
 
