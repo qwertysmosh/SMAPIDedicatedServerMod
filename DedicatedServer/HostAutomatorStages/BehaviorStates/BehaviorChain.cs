@@ -7,6 +7,12 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
 {
     internal static class BehaviorChain
     {
+        private static void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            DedicatedServer.monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         private const int waitTimeStartOfDay = 60;
 
         public static int WaitTimeAutoLoad { get; set; } = 0;
@@ -74,7 +80,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
             }
             catch (Exception exception)
             {
-                MainController.monitor.Log(
+                DebugLog(
                     $"Error in {typeof(BehaviorChain).Name} class:\n\n{exception}",
                     LogLevel.Error);
             }
