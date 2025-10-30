@@ -25,6 +25,8 @@ namespace DedicatedServer.Crops
         private Dictionary<string, List<Season>> harvestItemIdSeasonDictionary = new Dictionary<string, List<Season>>();
         private List<Season> allSeasonsList = new List<Season>() { Season.Winter, Season.Spring, Season.Summer, Season.Fall };
 
+        private static bool enabled = false;
+
         public struct CropSaveData
         {
             public SerializableDictionary<CropLocation, CropData> cropDictionary { get; set; }
@@ -70,12 +72,36 @@ namespace DedicatedServer.Crops
             this.config = config;
         }
 
+        public bool Init()
+        {
+            if (MainController.config.EnableCropSaver)
+            {
+                Enable();
+                return true;
+            }
+
+            return false;
+        }
+
         public void Enable()
         {
-            helper.Events.GameLoop.DayStarted += onDayStarted;
-            helper.Events.GameLoop.DayEnding += onDayEnding;
-            helper.Events.GameLoop.Saving += onSaving;
-            helper.Events.GameLoop.SaveLoaded += onLoaded;
+            if (false == enabled)
+            {
+                enabled = true;
+                MainController.helper.Events.GameLoop.DayStarted += onDayStarted;
+                MainController.helper.Events.GameLoop.DayEnding += onDayEnding;
+                MainController.helper.Events.GameLoop.Saving += onSaving;
+                MainController.helper.Events.GameLoop.SaveLoaded += onLoaded;
+            }
+        }
+
+       public void Disable()
+        {
+            enabled = false;
+            MainController.helper.Events.GameLoop.DayStarted -= onDayStarted;
+            MainController.helper.Events.GameLoop.DayEnding -= onDayEnding;
+            MainController.helper.Events.GameLoop.Saving -= onSaving;
+            MainController.helper.Events.GameLoop.SaveLoaded -= onLoaded;
         }
 
         private void onLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
