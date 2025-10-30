@@ -10,7 +10,7 @@ namespace DedicatedServer.HostAutomatorStages.BehaviorStates
         private static void DebugLog(string message, LogLevel level)
         {
             var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
-            DedicatedServer.monitor.Log($"[{timestamp}] {message}", level);
+            MainController.monitor.Log($"[{timestamp}] {message}", level);
         }
 
         private const int waitTimeStartOfDay = 60;
