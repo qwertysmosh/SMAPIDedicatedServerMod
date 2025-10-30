@@ -1,163 +1,503 @@
-﻿using StardewValley;
-using System;
+﻿using DedicatedServer.Config;
+using DedicatedServer.Helpers;
+using StardewModdingAPI;
+using StardewValley;
+using StardewValley.Extensions;
+using StardewValley.Locations;
+using StardewValley.TerrainFeatures;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace DedicatedServer.Crops
 {
-    /// <summary>
-    ///         Plants that ripen on the first day are not saved.
-    /// </summary>
-    public abstract class CropSaver
+    // Plants that ripen on the first day are not saved.
+    public class CropSaver
     {
-        private static readonly List<Season> AllSeasons = new List<Season>() { Season.Spring, Season.Summer, Season.Fall, Season.Winter };
+        private IModHelper helper;
+        private IMonitor monitor;
+        private ModConfig config;
+        private SerializableDictionary<CropLocation, CropData> cropDictionary = new SerializableDictionary<CropLocation, CropData>();
+        private SerializableDictionary<CropLocation, CropComparisonData> beginningOfDayCrops = new SerializableDictionary<CropLocation, CropComparisonData>();
+        private XmlSerializer cropSaveDataSerializer = new XmlSerializer(typeof(CropSaveData));
 
-        private static List<CropDataInfo> cropDataInfoList = null;
+        private Dictionary<string, List<Season>> harvestItemIdSeasonDictionary = new Dictionary<string, List<Season>>();
+        private List<Season> allSeasonsList = new List<Season>() { Season.Winter, Season.Spring, Season.Summer, Season.Fall };
 
-        private static bool enabled = false;
-
-#if false
-
-        public static void CropTest()
+        public struct CropSaveData
         {
-            var list = CropInfo.GetAllCropInfo();
+            public SerializableDictionary<CropLocation, CropData> cropDictionary { get; set; }
+            public SerializableDictionary<CropLocation, CropComparisonData> beginningOfDayCrops { get; set; }
+        }
 
-            foreach (var c in list)
+        public struct CropLocation
+        {
+            public string LocationName { get; set; }
+            public int TileX { get; set; }
+            public int TileY { get; set; }
+        }
+
+        public struct CropGrowthStage
+        {
+            public int CurrentPhase { get; set; }
+            public int DayOfCurrentPhase { get; set; }
+            public bool FullyGrown { get; set; }
+            public List<int> PhaseDays { get; set; }
+            public bool OriginalRegrowAfterHarvest { get; set; }
+        }
+
+        public struct CropComparisonData
+        {
+            public CropGrowthStage CropGrowthStage { get; set; }
+            public int RowInSpriteSheet { get; set; }
+            public bool Dead { get; set; }
+            public bool ForageCrop { get; set; }
+            public string WhichForageCrop { get; set; }
+        }
+
+        public class CropData
+        {
+            public List<Season> OriginalSeasonsToGrowIn { get; set; }
+            public bool OriginalRegrowAfterHarvest { get; set; }
+            public string HarvestItemId { get; set; }
+        }
+
+        public CropSaver(IModHelper helper, IMonitor monitor, ModConfig config)
+        {
+            this.helper = helper;
+            this.monitor = monitor;
+            this.config = config;
+        }
+
+        public void Enable()
+        {
+            helper.Events.GameLoop.DayStarted += onDayStarted;
+            helper.Events.GameLoop.DayEnding += onDayEnding;
+            helper.Events.GameLoop.Saving += onSaving;
+            helper.Events.GameLoop.SaveLoaded += onLoaded;
+        }
+
+        private void onLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
+        {
+            /**
+             * Loads the cropDictionary and beginningOfDayCrops.
+             */
+            string save_directory = SaveGameHelper.Path;
+
+            #warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //}
+            string saveFile = Path.Combine(save_directory, "AdditionalCropData");
+
+            // Deserialize crop data from temp save file
+            Stream fstream = null;
+            try
             {
-                MainController.chatBox.textBoxEnter(
-                    $"n:{c.SeedName} is {(c.IsFruitAvailable ? "fruit" : "empty")}, " +
-                    $"d:{c.GetDays()}/{c.FullDaysToMaturity}, " +
-                    $"m:{c.GetMaturityDays()}, " +
-                    $"Dead:{c.IsDead}, " +
-                    $"s:{c.Crop.IsInSeason(c.Crop.currentLocation)}");
+                fstream = new FileStream(saveFile, FileMode.Open);
+                CropSaveData cropSaveData = (CropSaveData)cropSaveDataSerializer.Deserialize(fstream);
+                fstream.Close();
+                beginningOfDayCrops = cropSaveData.beginningOfDayCrops;
+                cropDictionary = cropSaveData.cropDictionary;
+            } catch (IOException)
+            {
+                fstream?.Close();
             }
-        }
 
-#endif
-
-        public static bool Init()
-        {
-            if (MainController.config.EnableCropSaver)
+            // crop.GetData().Seasons is a cached value that does not change until the game is restarted.
+            // As this is a server, this should not happen. This code deals with the case
+            foreach (var pair in cropDictionary)
             {
-                Enable();
-                return true;
-            }
+                string harvestItemId = pair.Value.HarvestItemId;
 
-            return false;
-        }
-
-        public static void Enable()
-        {
-            if (false == enabled)
-            {
-                enabled = true;
-                MainController.helper.Events.GameLoop.DayStarted += onDayStart;
-                MainController.helper.Events.GameLoop.DayEnding += onDayEnd;
-            }
-        }
-
-        public static void Disable()
-        {
-            enabled = false;
-            MainController.helper.Events.GameLoop.DayStarted -= onDayStart;
-            MainController.helper.Events.GameLoop.DayEnding -= onDayEnd;
-        }
-
-        private static List<CropDataInfo> GetCropDataTag(List<CropInfo> cropInfoList)
-        {
-            var cropDataTagList = new List<CropDataInfo>();
-            foreach (var cropInfo in cropInfoList)
-            {
-                if (cropInfo.IsFruitAvailable &&
-                    false == cropDataTagList.Exists(c => c.SeedId == cropInfo.SeedId)
-                )
+                if(false == harvestItemIdSeasonDictionary.ContainsKey(harvestItemId))
                 {
-                    cropDataTagList.Add(new CropDataInfo(cropInfo));
-                }
-            }
-            return cropDataTagList;
-        }
+                    harvestItemIdSeasonDictionary.Add(harvestItemId, pair.Value.OriginalSeasonsToGrowIn);
 
-        private static void SetAllSeasons()
-        {
-            var cropInfoList = CropInfo.GetAllCropInfo();
+                    var crop = Game1.cropData.Values
+                        .Where(x => x.HarvestItemId == harvestItemId)
+                        .FirstOrDefault();
 
-            foreach (var crop in cropInfoList)
-            {
-                if (false == crop.IsFruitAvailable)
-                {
-                    crop.Crop.Kill();
-                }
-            }
-
-            cropDataInfoList = GetCropDataTag(cropInfoList);
-
-            foreach (var cropData in cropDataInfoList)
-            {
-                cropData.CropData.Seasons = AllSeasons;
-                cropData.CropData.RegrowDays = -1;
-#if false
-                var id = "com.GitHub.Chris82111.DedicatedServer.PlantRuleOutOfSeason";
-
-                var plantableRule = new PlantableRule();
-                plantableRule.Id = id;
-                plantableRule.Result = PlantableResult.Deny;
-                plantableRule.DeniedMessage = "Out of season.";
-
-                var rules = cropData.CropData.PlantableLocationRules;
-
-                if (null == rules)
-                {
-                    rules = new List<PlantableRule>
+                    if (null != crop)
                     {
-                        plantableRule
-                    };
+                        crop.Seasons = allSeasonsList;
+                    }
                 }
-                else if (0 == rules.Count)
+            }
+        }
+
+        private void onSaving(object sender, StardewModdingAPI.Events.SavingEventArgs e)
+        {
+            /**
+             * Saves the cropDictionary and beginningOfDayCrops. In most cases, the day is started
+             * immediately after loading, which in-turn clears beginningOfDayCrops. However, in case
+             * some other mod is installed which allows mid-day saving and loading, it's a good idea
+             * to save both dictionaries anyways.
+             */
+
+            // Determine save paths
+            string tmpString = SaveGame.TempNameSuffix;
+            string save_directory = SaveGameHelper.Path;
+
+            #warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
+            //if (Game1.savePathOverride != "")
+            //{
+            //    save_directory = Game1.savePathOverride;
+            //    if (Game1.savePathOverride != "")
+            //    {
+            //        save_backups_and_metadata = false;
+            //    }
+            //}
+            SaveGame.ensureFolderStructureExists();
+            string tmpSaveFile = Path.Combine(save_directory, "AdditionalCropData" + tmpString);
+            string saveFile = Path.Combine(save_directory, "AdditionalCropData");
+
+            #warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            //string backupSaveFile = Path.Combine(save_directory, "AdditionalCropData_old");
+
+            // Serialize crop data to temp save file
+            TextWriter writer = null;
+            try
+            {
+                writer = new StreamWriter(tmpSaveFile);
+            }
+            catch (IOException)
+            {
+                writer?.Close();
+            }
+
+            cropSaveDataSerializer.Serialize(writer, new CropSaveData {cropDictionary = cropDictionary, beginningOfDayCrops = beginningOfDayCrops});
+            writer.Close();
+
+            #warning TODO: Crop saver, the logic is removed, but tests still need to be performed to determine whether it was necessary.
+            // `Game1.savePathOverride` is no longer available in `1.6.15`.
+            //// If appropriate, move old crop data file to backup
+            //if (save_backups_and_metadata)
+            //{
+            //    try
+            //    {
+            //        if (File.Exists(backupSaveFile))
+            //        {
+            //            File.Delete(backupSaveFile);
+            //        }
+            //    }
+            //    catch (Exception) {}
+            //
+            //    try
+            //    {
+            //        File.Move(saveFile, backupSaveFile);
+            //    }
+            //    catch (Exception) {}
+            //}
+
+            // Delete previous save file if it still exists (hasn't been moved to
+            // backup)
+            if (File.Exists(saveFile))
+            {
+                File.Delete(saveFile);
+            }
+
+            // Move new temp save file to non-temp save file
+            try
+            {
+                File.Move(tmpSaveFile, saveFile);
+            }
+            catch (IOException ex)
+            {
+                Game1.debugOutput = Game1.parseText(ex.Message);
+            }
+        }
+
+        private static bool sameCrop(CropComparisonData first, CropComparisonData second)
+        {
+            // Two crops are considered "different" if they have different sprite sheet rows (i.e., they're
+            // different crop types); one of them is dead while the other is alive; one is a forage crop
+            // while the other is not; the two crops are different types of forage crops; their phases
+            // of growth are different; or their current days of growth are different, except when
+            // one of them is harvestable and the other is fully grown and harvested. A crop is considered
+            // harvestable when it's in the last stage of growth, and its either set to not "FullyGrown", or
+            // its day of current phase is less than or equal to zero (after the first harvest, its day of
+            // current phase works downward). A crop is considered harvested when it's in the final phase
+            // and the above sub-conditions aren't satisfied (it's set to FullyGrown and its day of current
+            // phase is positive)
+            var differentSprites = first.RowInSpriteSheet != second.RowInSpriteSheet;
+            
+            var differentDeads = first.Dead != second.Dead;
+            
+            var differentForages = first.ForageCrop != second.ForageCrop;
+            
+            var differentForageTypes = first.WhichForageCrop != second.WhichForageCrop;
+            
+            var differentPhases = first.CropGrowthStage.CurrentPhase != second.CropGrowthStage.CurrentPhase;
+
+            var differentDays = first.CropGrowthStage.DayOfCurrentPhase != second.CropGrowthStage.DayOfCurrentPhase;
+            var firstGrown = first.CropGrowthStage.CurrentPhase >= first.CropGrowthStage.PhaseDays.Count - 1;
+            var secondGrown = second.CropGrowthStage.CurrentPhase >= second.CropGrowthStage.PhaseDays.Count - 1;
+            var firstHarvestable = firstGrown && (first.CropGrowthStage.DayOfCurrentPhase <= 0 || !first.CropGrowthStage.FullyGrown);
+            var secondHarvestable = secondGrown && (second.CropGrowthStage.DayOfCurrentPhase <= 0 || !second.CropGrowthStage.FullyGrown);
+            var firstRegrown = firstGrown && !firstHarvestable;
+            var secondRegrown = secondGrown && !secondHarvestable;
+            var harvestableAndRegrown = (firstHarvestable && secondRegrown) || (firstRegrown && secondHarvestable);
+            var differentMeaningfulDays = differentDays && !harvestableAndRegrown;
+
+            return !differentSprites && !differentDeads && !differentForages && !differentForageTypes && !differentPhases && !differentMeaningfulDays;
+        }
+
+        private void onDayEnding(object sender, StardewModdingAPI.Events.DayEndingEventArgs e)
+        {
+            // In order to check for crops that have been destroyed and need to be removed from
+            // the cropDictionary all together, we need to keep track of which crop locations
+            // from the cropDictionary are found during the iteration over all crops in all
+            // locations. Any which are not found must no longer exist (and have not been
+            // replaced) and can be removed.
+            var locationSet = new HashSet<CropLocation>();
+            foreach (var location in Game1.locations)
+            {
+                if (location.IsOutdoors && !location.SeedsIgnoreSeasonsHere() && !(location is IslandLocation))
                 {
-                    rules.Add(plantableRule);
+                    // Found an outdoor location where seeds don't ignore seasons. Find all the
+                    // crops here to cache necessary data for protecting them.
+                    foreach (var pair in location.terrainFeatures.Pairs)
+                    {
+                        var tileLocation = pair.Key;
+                        var terrainFeature = pair.Value;
+                        if (terrainFeature is HoeDirt)
+                        {
+                            var hoeDirt = terrainFeature as HoeDirt;
+                            var crop = hoeDirt.crop;
+                            if (crop != null)
+                            {
+                                // Found a crop. Construct a CropLocation key
+                                var cropLocation = new CropLocation
+                                {
+                                    LocationName = location.NameOrUniqueName,
+                                    TileX = (int)tileLocation.X,
+                                    TileY = (int)tileLocation.Y
+                                };
+                                
+                                // Mark it as found via the locationSet, so we know not to remove
+                                // the corresponding cropDictionary entry if one exists
+                                locationSet.Add(cropLocation);
+
+                                // Construct its growth stage so we can compare it to beginningOfDayCrops
+                                // to see if it was newly-planted.
+                                var cropGrowthStage = new CropGrowthStage
+                                {
+                                    CurrentPhase = crop.currentPhase.Value,
+                                    DayOfCurrentPhase = crop.dayOfCurrentPhase.Value,
+                                    FullyGrown = crop.fullyGrown.Value,
+                                    PhaseDays = crop.phaseDays.ToList(),
+                                    OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest()
+                                };
+
+                                var cropComparisonData = new CropComparisonData
+                                {
+                                    CropGrowthStage = cropGrowthStage,
+                                    RowInSpriteSheet = crop.rowInSpriteSheet.Value,
+                                    Dead = crop.dead.Value,
+                                    ForageCrop = crop.forageCrop.Value,
+                                    WhichForageCrop = crop.whichForageCrop.Value
+                                };
+
+                                // Determine if this crop was planted today or was pre-existing, based on whether
+                                // or not it's different from the crop at this location at the beginning of the day.
+                                if (!beginningOfDayCrops.ContainsKey(cropLocation) || !sameCrop(beginningOfDayCrops[cropLocation], cropComparisonData))
+                                {
+                                    // No crop was found at this location at the beginning of the day, or the comparison data
+                                    // is different. Consider it a new crop, and add a new CropData for it in the cropDictionary.
+
+                                    var id = crop.GetData().HarvestItemId;
+
+                                    List<Season> seasons = null;
+
+                                    if (harvestItemIdSeasonDictionary.ContainsKey(id))
+                                    {
+                                        seasons = harvestItemIdSeasonDictionary[id];
+                                    }
+                                    else
+                                    {
+                                        seasons = new List<Season>(crop.GetData().Seasons);
+                                        harvestItemIdSeasonDictionary.Add(id, seasons);
+                                    }
+
+                                    var cd = new CropData
+                                    {
+                                        OriginalSeasonsToGrowIn = seasons,
+                                        OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest(),
+                                        HarvestItemId = id,
+                                    };
+
+                                    cropDictionary[cropLocation] = cd;
+
+                                    // Make sure that the crop is set to survive in all seasons, so that it
+                                    // only dies if it's harvested for the last time
+                                    crop.GetData().Seasons = allSeasonsList;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Lastly, if there were any CropLocations in the cropDictionary that we DIDN'T see throughout the entire
+            // iteration, then they must've been destroyed, AND they weren't replaced with a new crop at the same location.
+            // In such a case, we can remove it from the cropDictionary.
+            var locationSetComplement = new HashSet<CropLocation>();
+            var cropDataRestore = new Dictionary<string, List<Season>>();
+            var existingHarvestItems = new List<string>();
+            foreach (var kvp in cropDictionary)
+            {
+                string harvestItemId = kvp.Value.HarvestItemId;
+                if (false == locationSet.Contains(kvp.Key))
+                {
+                    locationSetComplement.Add(kvp.Key);
+
+                    cropDataRestore.TryAdd(harvestItemId, kvp.Value.OriginalSeasonsToGrowIn);
                 }
                 else
                 {
-                    var item = rules.FirstOrDefault(rule => rule.Id == id);
+                    existingHarvestItems.Add(harvestItemId);
+                }
+            }
+            foreach (var cropLocation in locationSetComplement)
+            {
+                cropDictionary.Remove(cropLocation);
+            }
 
-                    if (null != item)
+            existingHarvestItems = existingHarvestItems.Distinct().ToList();
+
+            // <see cref="cropDataRestore"/> has been filled with items from one location,
+            // but it is not guaranteed that another plant of this type will be present.
+            // Therefore entries are removed if other plants of the same taype exists.
+            cropDataRestore.RemoveWhere(cropData => existingHarvestItems.Contains(cropData.Key));
+
+            foreach (var cropData in cropDataRestore)
+            {
+                string harvestItemId = cropData.Key;
+
+                // Restore old crop season
+                var crop = Game1.cropData.Values
+                    .Where(x => x.HarvestItemId == harvestItemId)
+                    .FirstOrDefault();
+
+                if (null != crop)
+                {
+                    crop.Seasons = cropData.Value;
+                }
+
+                // Remove old entries
+                harvestItemIdSeasonDictionary.Remove(harvestItemId);
+            }
+        }
+
+        private void onDayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
+        {
+            beginningOfDayCrops.Clear();
+            foreach (var location in Game1.locations)
+            {
+                if (location.IsOutdoors && !location.SeedsIgnoreSeasonsHere() && location is not IslandLocation)
+                {
+                    // Found an outdoor location where seeds don't ignore seasons. Find all the
+                    // crops here to cache necessary data for protecting them.
+                    foreach (var pair in location.terrainFeatures.Pairs)
                     {
-                        rules.Remove(item);
+                        var tileLocation = pair.Key;
+                        var terrainFeature = pair.Value;
+                        if (terrainFeature is HoeDirt)
+                        {
+                            var hoeDirt = terrainFeature as HoeDirt;
+                            var crop = hoeDirt.crop;
+                            if (crop != null) {
+                                // Found a crop. Construct a CropLocation key
+                                var cropLocation = new CropLocation
+                                {
+                                    LocationName = location.NameOrUniqueName,
+                                    TileX = (int) tileLocation.X,
+                                    TileY = (int) tileLocation.Y
+                                };
+
+                                CropData cropData;
+                                CropComparisonData cropComparisonData;
+
+                                // Now, we have to update the properties of the CropData entry
+                                // in the cropDictionary. Firstly, check if such a CropData entry exists
+                                // (it won't exist for auto-spawned crops, like spring onion, since they'll
+                                // never have passed the previous "newly planted test")
+                                if (!cropDictionary.TryGetValue(cropLocation, out cropData))
+                                {
+                                    // The crop was not planted by the player. However, we do want to
+                                    // record its comparison information so that we can check this evening
+                                    // if it has changed, which would indicate that it HAS been replaced
+                                    // by a player-planted crop.
+
+                                    var cgs = new CropGrowthStage
+                                    {
+                                        CurrentPhase = crop.currentPhase.Value,
+                                        DayOfCurrentPhase = crop.dayOfCurrentPhase.Value,
+                                        FullyGrown = crop.fullyGrown.Value,
+                                        PhaseDays = crop.phaseDays.ToList(),
+                                        OriginalRegrowAfterHarvest = crop.RegrowsAfterHarvest()
+                                    };
+
+                                    cropComparisonData = new CropComparisonData
+                                    {
+                                        CropGrowthStage = cgs,
+                                        RowInSpriteSheet = crop.rowInSpriteSheet.Value,
+                                        Dead = crop.dead.Value,
+                                        ForageCrop = crop.forageCrop.Value,
+                                        WhichForageCrop = crop.whichForageCrop.Value
+                                    };
+
+                                    beginningOfDayCrops[cropLocation] = cropComparisonData;
+
+                                    // Now move on to the next crop; we don't want to mess with this one.
+                                    continue;
+                                }
+
+                                // If exists out-of-season
+                                if (!cropData.OriginalSeasonsToGrowIn.Contains(location.GetSeason()))
+                                {
+                                    crop.GetData().RegrowDays = -1;
+
+                                    bool isFullyGrown = crop.fullyGrown.Value;
+                                    bool isCycleOver = crop.dayOfCurrentPhase.Value > 0;
+
+                                    if (isFullyGrown && isCycleOver)
+                                    {
+                                        crop.Kill();
+                                    }
+                                }
+
+                                // Update crop data in the crop dictionary
+                                cropDictionary[cropLocation] = cropData;
+
+                                // Lastly, now that the crop has been updated, construct the comparison data for later
+                                // so that we can check if this has been replaced by a newly planted crop in the evening.
+                                var cropGrowthStage = new CropGrowthStage
+                                {
+                                    CurrentPhase = crop.currentPhase.Value,
+                                    DayOfCurrentPhase = crop.dayOfCurrentPhase.Value,
+                                    FullyGrown = crop.fullyGrown.Value,
+                                    PhaseDays = crop.phaseDays.ToList(),
+                                    OriginalRegrowAfterHarvest = cropData.OriginalRegrowAfterHarvest
+                                };
+                                cropComparisonData = new CropComparisonData
+                                {
+                                    CropGrowthStage = cropGrowthStage,
+                                    RowInSpriteSheet = crop.rowInSpriteSheet.Value,
+                                    Dead = crop.dead.Value,
+                                    ForageCrop = crop.forageCrop.Value,
+                                    WhichForageCrop = crop.whichForageCrop.Value
+                                };
+
+                                beginningOfDayCrops[cropLocation] = cropComparisonData;
+                            }
+                        }
                     }
                 }
-#endif
-            }
-        }
-
-        private static void ResetSeason()
-        {
-            if (null == cropDataInfoList)
-            {
-                return;
-            }
-
-            foreach (var cropData in cropDataInfoList)
-            {
-                cropData.CropData.Seasons = cropData.Seasons;
-                cropData.CropData.RegrowDays = cropData.RegrowDays;
-            }
-
-            cropDataInfoList = null;
-        }
-
-        private static void onDayEnd(object sender, EventArgs e)
-        {
-            if (28 == Game1.Date.DayOfMonth)
-            {
-                SetAllSeasons();
-            }
-        }
-
-        private static void onDayStart(object sender, EventArgs e)
-        {
-            if (1 == Game1.Date.DayOfMonth)
-            {
-                ResetSeason();
             }
         }
     }
