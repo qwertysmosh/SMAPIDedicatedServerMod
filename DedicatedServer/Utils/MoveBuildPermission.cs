@@ -1,5 +1,6 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
+using System;
 using System.Collections.Generic;
 using static StardewValley.FarmerTeam;
 
@@ -7,6 +8,12 @@ namespace DedicatedServer.Utils
 {
     internal abstract class MoveBuildPermission
     {
+        private static void DebugLog(string message, LogLevel level)
+        {
+            var timestamp = DateTime.Now.ToString("MM-dd-yyyy HH:mm:ss");
+            DedicatedServer.monitor.Log($"[{timestamp}] {message}", level);
+        }
+
         private static readonly string moveBuildPermission =
             Game1.content.LoadString("Strings\\UI:GameMenu_MoveBuildingPermissions");
 
@@ -46,16 +53,16 @@ namespace DedicatedServer.Utils
             {
                 case "on":
                     buildPermission = RemoteBuildingPermissions.On;
-                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
+                    DebugLog($"Changed move permission to {RemoteBuildingPermissions.On}", LogLevel.Debug);
                     break;
                 case "owned":
                 case "ownedbuildings":
                     buildPermission = RemoteBuildingPermissions.OwnedBuildings;
-                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
+                    DebugLog($"Changed move permission to {RemoteBuildingPermissions.OwnedBuildings}", LogLevel.Debug);
                     break;
                 default:
                     buildPermission = RemoteBuildingPermissions.Off;
-                    MainController.monitor.Log($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
+                    DebugLog($"Changed move permission to {RemoteBuildingPermissions.Off}", LogLevel.Debug);
                     break;
             }
 
